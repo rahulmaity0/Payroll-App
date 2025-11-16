@@ -1,6 +1,15 @@
-# Payroll System - Data Models Documentation
+# Payroll System - Database Models Documentation
+
+**Last Updated:** November 16, 2025
 
 This document describes all the data models used in the Payroll Application. Frontend developers should use this as a reference for understanding the structure of data returned from API endpoints.
+
+**Important Notes:**
+- All `_id` fields are MongoDB ObjectIds (24-character hexadecimal string)
+- All dates are in ISO 8601 format (YYYY-MM-DDTHH:MM:SS.SSSZ)
+- All monetary values are in INR (Indian Rupees)
+- Fields marked with `(Ref: ModelName)` are references to other collections
+- `createdAt` and `updatedAt` are automatically managed by Mongoose timestamps
 
 ---
 
