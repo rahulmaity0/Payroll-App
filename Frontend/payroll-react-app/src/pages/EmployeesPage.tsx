@@ -185,8 +185,8 @@ export default function EmployeesPage() {
                       value={formState.employeeId || ''}
                       disabled
                       className="input-disabled"
-                      title="Employee ID"
-                      placeholder="Employee ID"
+                      title="Employee ID (Auto-generated)"
+                      placeholder="EMP001"
                     />
                   </div>
 
@@ -197,8 +197,8 @@ export default function EmployeesPage() {
                       value={formState.firstName || ''}
                       disabled
                       className="input-disabled"
-                      title="First Name"
-                      placeholder="First Name"
+                      title="First Name (Read-only)"
+                      placeholder="John"
                     />
                   </div>
 
@@ -209,12 +209,12 @@ export default function EmployeesPage() {
                       value={formState.lastName || ''}
                       disabled
                       className="input-disabled"
-                      title="Last Name"
-                      placeholder="Last Name"
+                      title="Last Name (Read-only)"
+                      placeholder="Doe"
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="form-group full-width">
                     <label>Personal Email</label>
                     <input
                       type="email"
@@ -224,13 +224,13 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      title="Personal Email"
-                      placeholder="Personal Email"
+                      title="Personal Email Address"
+                      placeholder="john.doe@personal.com"
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Phone</label>
+                    <label>Phone Number</label>
                     <input
                       type="tel"
                       value={formState.phone || ''}
@@ -238,6 +238,7 @@ export default function EmployeesPage() {
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
                       placeholder="9876543210"
+                      maxLength={10}
                     />
                   </div>
 
@@ -260,14 +261,15 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
+                      title="Date of Birth"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Job Information Section */}
+              {/* Professional Information Section */}
               <div className="form-section">
-                <h3>Job Information</h3>
+                <h3>Professional Information</h3>
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Designation</label>
@@ -279,7 +281,8 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      placeholder="Software Engineer"
+                      placeholder="Senior Software Engineer"
+                      title="Job Title"
                     />
                   </div>
 
@@ -294,6 +297,7 @@ export default function EmployeesPage() {
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
                       placeholder="Engineering"
+                      title="Department Name"
                     />
                   </div>
 
@@ -318,11 +322,12 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
+                      title="Date of Joining"
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Status</label>
+                    <label>Employment Status</label>
                     <select
                       value={formState.isActive ? 'active' : 'inactive'}
                       onChange={(e) =>
@@ -330,10 +335,10 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      title="Employment status"
+                      title="Current employment status"
                     >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
+                      <option value="active">✓ Active</option>
+                      <option value="inactive">✕ Inactive</option>
                     </select>
                   </div>
                 </div>
@@ -407,7 +412,7 @@ export default function EmployeesPage() {
 
               {/* Bank Details Section */}
               <div className="form-section">
-                <h3>Bank Details</h3>
+                <h3>Bank Account Details</h3>
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Bank Name</label>
@@ -419,7 +424,8 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      placeholder="Example Bank"
+                      placeholder="HDFC Bank"
+                      title="Bank Name"
                     />
                   </div>
 
@@ -433,7 +439,8 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      placeholder="1234567890"
+                      placeholder="12345678901234"
+                      title="Bank Account Number"
                     />
                   </div>
 
@@ -443,11 +450,13 @@ export default function EmployeesPage() {
                       type="text"
                       value={formState.bankDetails?.ifscCode || ''}
                       onChange={(e) =>
-                        handleNestedFieldChange('bankDetails', 'ifscCode', e.target.value)
+                        handleNestedFieldChange('bankDetails', 'ifscCode', e.target.value.toUpperCase())
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      placeholder="EXAM0001234"
+                      placeholder="HDFC0001234"
+                      title="IFSC Code (11 characters)"
+                      maxLength={11}
                     />
                   </div>
                 </div>
@@ -458,21 +467,23 @@ export default function EmployeesPage() {
                 <h3>Tax Information</h3>
                 <div className="form-grid">
                   <div className="form-group">
-                    <label>PAN</label>
+                    <label>PAN Number</label>
                     <input
                       type="text"
                       value={formState.taxInfo?.pan || ''}
                       onChange={(e) =>
-                        handleNestedFieldChange('taxInfo', 'pan', e.target.value)
+                        handleNestedFieldChange('taxInfo', 'pan', e.target.value.toUpperCase())
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
                       placeholder="ABCDE1234F"
+                      title="PAN (10 characters)"
+                      maxLength={10}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>UAN</label>
+                    <label>UAN Number (Optional)</label>
                     <input
                       type="text"
                       value={formState.taxInfo?.uan || ''}
@@ -481,7 +492,9 @@ export default function EmployeesPage() {
                       }
                       disabled={!editMode}
                       className={editMode ? '' : 'input-disabled'}
-                      placeholder="UAN Number"
+                      placeholder="123456789012"
+                      title="Universal Account Number (12 digits)"
+                      maxLength={12}
                     />
                   </div>
                 </div>
@@ -490,12 +503,21 @@ export default function EmployeesPage() {
 
             <div className="modal-footer">
               {!editMode ? (
-                <button className="btn btn-primary" onClick={() => setEditMode(true)}>
-                  Edit
-                </button>
+                <>
+                  <button className="btn btn-secondary" onClick={handleCloseModal}>
+                    Close
+                  </button>
+                  <button className="btn btn-primary" onClick={() => setEditMode(true)}>
+                    ✏️ Edit Details
+                  </button>
+                </>
               ) : (
                 <>
-                  <button className="btn btn-secondary" onClick={handleCancel}>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={handleCancel}
+                    disabled={savingLoading}
+                  >
                     Cancel
                   </button>
                   <button
@@ -503,7 +525,7 @@ export default function EmployeesPage() {
                     onClick={handleSave}
                     disabled={savingLoading}
                   >
-                    {savingLoading ? 'Saving...' : 'Save Changes'}
+                    {savingLoading ? '⏳ Saving...' : '✓ Save Changes'}
                   </button>
                 </>
               )}

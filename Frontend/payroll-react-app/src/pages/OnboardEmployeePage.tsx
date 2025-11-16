@@ -85,6 +85,23 @@ export default function OnboardEmployeePage() {
     pan: '',
   });
 
+  // Auto-generate company email based on first name and last name
+  const generatedEmail = useMemo(() => {
+    const firstName = (formData.firstName || '').toLowerCase().trim().replace(/\s+/g, '');
+    const lastName = (formData.lastName || '').toLowerCase().trim().replace(/\s+/g, '');
+    if (firstName && lastName) {
+      return `${firstName}${lastName}@employee.com`;
+    }
+    return '';
+  }, [formData.firstName, formData.lastName]);
+
+  // Sync generated email to formData
+  useEffect(() => {
+    if (generatedEmail) {
+      setFormData(prev => ({ ...prev, email: generatedEmail }));
+    }
+  }, [generatedEmail]);
+
   const [salaryData, setSalaryData] = useState<{earnings: SalaryComponent[]; deductions: SalaryComponent[]; employerContributions: SalaryComponent[]}>({
     earnings: [
       { name: 'Basic Salary', amount: 0 },
@@ -101,12 +118,16 @@ export default function OnboardEmployeePage() {
     ],
   });
 
-  // Toast system
-  const [toasts, setToasts] = useState<{ id: number; type: 'success' | 'error' | 'info'; message: string }[]>([]);
+  // CTC Lock Mode - determines whether CTC is fixed or components are fixed
+  const [ctcLockMode, setCtcLockMode] = useState<'unlocked' | 'lock-ctc' | 'lock-components'>('unlocked');
+  const [isAutoDistributing, setIsAutoDistributing] = useState(false); // Prevent infinite loops
+
+  // Toast system - only show latest toast, replace previous ones
+  const [toast, setToast] = useState<{ id: number; type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const pushToast = (type: 'success' | 'error' | 'info', message: string) => {
     const id = Date.now();
-    setToasts((t) => [...t, { id, type, message }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4000);
+    setToast({ id, type, message });
+    setTimeout(() => setToast(null), 4000);
   };
 
   // Derived salary totals
@@ -118,6 +139,9 @@ export default function OnboardEmployeePage() {
   const ctcNumber = parseInt(formData.annualCTC || '0');
   const ctcMismatch = ctcNumber > 0 ? Math.abs(ctcNumber - annualFromComponents) : 0;
   const ctcMismatchPercent = ctcNumber > 0 ? ((ctcMismatch / ctcNumber) * 100).toFixed(2) : '0';
+  
+  // Smart validation: Only show warning if mismatch is significant AND not in a locked mode that's being adjusted
+  const shouldShowCtcWarning = ctcNumber > 0 && ctcMismatch > ctcNumber * 0.02; // 2% threshold instead of 10%
 
   const handleBack = () => {
     navigate('/dashboard');
@@ -139,9 +163,10 @@ export default function OnboardEmployeePage() {
     }
 
     // Auto-distribute CTC when annualCTC changes
-    if (name === 'annualCTC' && value) {
+    if (name === 'annualCTC' && value && !isAutoDistributing) {
       const ctc = parseInt(value);
       if (ctc > 0) {
+        // Don't reset lock mode - preserve user's choice
         distributeCTC(ctc);
       }
     }
@@ -149,15 +174,18 @@ export default function OnboardEmployeePage() {
 
   // Auto-distribute CTC across salary components
   const distributeCTC = (annualCTC: number) => {
+    setIsAutoDistributing(true);
     const monthlyGross = annualCTC / 12;
-    // Distribution logic: Basic (40%), HRA (20%), Allowance (15%), Employer PF (12%), PF (12%), Insurance (0.5%), Prof Tax (0.5%)
-    const basic = Math.round(monthlyGross * 0.40);
+    // Distribution logic: Must add up to 100% of CTC
+    // Earnings + Employer Contributions = 100% (Basic 50%, HRA 20%, Allowance 18%, Employer PF 12%)
+    const basic = Math.round(monthlyGross * 0.50);
     const hra = Math.round(monthlyGross * 0.20);
-    const allowance = Math.round(monthlyGross * 0.15);
+    const allowance = Math.round(monthlyGross * 0.18);
     const employerPF = Math.round(monthlyGross * 0.12);
-    const pf = Math.round(monthlyGross * 0.12);
-    const insurance = Math.round(monthlyGross * 0.005);
-    const profTax = Math.round(monthlyGross * 0.005);
+    // Deductions are calculated as percentage of earnings
+    const pf = Math.round(basic * 0.12); // 12% of basic
+    const insurance = Math.round(basic * 0.01); // 1% of basic
+    const profTax = 200; // Fixed amount
 
     setSalaryData({
       earnings: [
@@ -174,6 +202,8 @@ export default function OnboardEmployeePage() {
         { name: 'Employer PF', amount: employerPF, isPercent: false, percentOf: 'Basic' },
       ],
     });
+    
+    setTimeout(() => setIsAutoDistributing(false), 100);
   };
 
   const handleSalaryComponentChange = (
@@ -182,6 +212,8 @@ export default function OnboardEmployeePage() {
     field: string,
     value: any
   ) => {
+    if (isAutoDistributing) return; // Prevent changes during auto-distribution
+    
     setSalaryData((prev) => {
       const updatedComponents = [...prev[type]];
       const component: any = { ...updatedComponents[index] };
@@ -199,17 +231,87 @@ export default function OnboardEmployeePage() {
       
       const newSalaryData = { ...prev, [type]: updatedComponents };
       
-      // Reverse sync: update CTC when components change
+      // Handle component changes based on lock mode
       if (field === 'amount') {
-        syncCTCFromComponents(newSalaryData);
+        if (ctcLockMode === 'lock-ctc') {
+          // CTC is locked - adjust other components
+          adjustComponentsToMatchCTC(newSalaryData, type, index);
+        } else if (ctcLockMode === 'lock-components') {
+          // Components are locked - do nothing, just update this component
+          // CTC will not auto-update
+        } else {
+          // Unlocked mode - update CTC to match components
+          syncCTCFromComponents(newSalaryData);
+        }
       }
       
       return newSalaryData;
     });
   };
 
+  // Adjust other components proportionally when one component changes and CTC is locked
+  const adjustComponentsToMatchCTC = (
+    newSalaryData: typeof salaryData,
+    changedType: 'earnings' | 'deductions' | 'employerContributions',
+    changedIndex: number
+  ) => {
+    const targetCTC = parseInt(formData.annualCTC || '0');
+    if (!targetCTC || targetCTC <= 0) {
+      syncCTCFromComponents(newSalaryData);
+      return;
+    }
+
+    const currentMonthlyTotal = 
+      newSalaryData.earnings.reduce((sum, c) => sum + (c.amount || 0), 0) +
+      newSalaryData.employerContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
+    
+    const currentAnnualTotal = currentMonthlyTotal * 12;
+    const difference = targetCTC - currentAnnualTotal;
+    
+    if (Math.abs(difference) < 10) {
+      // Close enough, don't adjust
+      return;
+    }
+
+    // Find components to adjust (earnings except the changed one)
+    const adjustableEarnings = newSalaryData.earnings
+      .map((e, idx) => ({ ...e, index: idx }))
+      .filter((_, idx) => changedType !== 'earnings' || idx !== changedIndex)
+      .filter(e => e.amount > 0);
+
+    if (adjustableEarnings.length === 0) {
+      pushToast('info', 'Cannot adjust components to match CTC. Updating CTC instead.');
+      syncCTCFromComponents(newSalaryData);
+      return;
+    }
+
+    // Distribute the difference proportionally
+    const totalAdjustable = adjustableEarnings.reduce((sum, e) => sum + e.amount, 0);
+    const monthlyDifference = difference / 12;
+
+    const updatedEarnings = [...newSalaryData.earnings];
+    adjustableEarnings.forEach(({ index, amount }) => {
+      const proportion = amount / totalAdjustable;
+      const adjustment = Math.round(monthlyDifference * proportion);
+      updatedEarnings[index] = {
+        ...updatedEarnings[index],
+        amount: Math.max(0, updatedEarnings[index].amount + adjustment)
+      };
+    });
+
+    setSalaryData(prev => ({
+      ...prev,
+      earnings: updatedEarnings
+    }));
+
+    pushToast('info', `Adjusted other components to maintain CTC of ₹${targetCTC.toLocaleString()}`);
+  };
+
   // Sync CTC field from salary components
   const syncCTCFromComponents = (data: typeof salaryData) => {
+    if (isAutoDistributing) return; // Don't sync during auto-distribution
+    
+    setIsAutoDistributing(true);
     const monthlyEarnings = data.earnings.reduce((sum, c) => sum + (c.amount || 0), 0);
     const monthlyEmployer = data.employerContributions.reduce((sum, c) => sum + (c.amount || 0), 0);
     const calculatedAnnualCTC = (monthlyEarnings + monthlyEmployer) * 12;
@@ -217,6 +319,7 @@ export default function OnboardEmployeePage() {
       ...prev,
       annualCTC: calculatedAnnualCTC.toString(),
     }));
+    setTimeout(() => setIsAutoDistributing(false), 100);
   };
 
   const addSalaryComponent = (type: 'earnings' | 'deductions' | 'employerContributions') => {
@@ -269,8 +372,10 @@ export default function OnboardEmployeePage() {
       pushToast('error', 'Add at least one deduction component (>0).');
       return;
     }
-    if (ctcNumber && annualFromComponents && Math.abs(ctcNumber - annualFromComponents) > ctcNumber * 0.1) {
-      pushToast('info', 'CTC differs >10% from component total – proceeding but check amounts.');
+    
+    // Only warn about CTC mismatch if it's significant (>2%) and not expected
+    if (shouldShowCtcWarning) {
+      pushToast('info', `CTC differs by ${ctcMismatchPercent}% from component total. Please verify amounts.`);
     }
 
     setLoading(true);
@@ -383,37 +488,25 @@ export default function OnboardEmployeePage() {
             </div>
           )}
 
-          {/* Salary / CTC Summary */}
-          <div className="salary-summary-panel">
-            <div><strong>Monthly Earnings:</strong> ₹{monthlyEarningsTotal.toLocaleString()}</div>
-            <div><strong>Monthly Employer Contrib:</strong> ₹{monthlyEmployerTotal.toLocaleString()}</div>
-            <div><strong>Monthly Deductions:</strong> ₹{monthlyDeductionsTotal.toLocaleString()}</div>
-            <div><strong>Approx Annual From Components:</strong> ₹{annualFromComponents.toLocaleString()}</div>
-            {ctcNumber > 0 && (
-              <div className={ctcMismatch > ctcNumber * 0.1 ? 'ctc-warning' : 'ctc-ok'}>
-                <strong>Declared CTC:</strong> ₹{ctcNumber.toLocaleString()} ({ctcMismatchPercent}% diff)
-              </div>
-            )}
-          </div>
-
           <form onSubmit={handleSubmit} className="onboarding-form">
             
             <div className="form-section">
               <h3>Account Information</h3>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Email (Login)*</label>
+                  <label>Company Email (Auto-generated)*</label>
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="employee@company.com"
-                    className={validationErrors.email ? 'input-error' : ''}
+                    value={generatedEmail || 'Enter first and last name to generate'}
+                    disabled
+                    className="input-disabled"
+                    placeholder="firstnamelastname@employee.com"
+                    title="Auto-generated from first and last name"
                   />
-                  {validationErrors.email && (
-                    <span className="field-error">{validationErrors.email}</span>
-                  )}
+                  <small style={{color: '#6b7280', fontSize: '12px', marginTop: '4px'}}>
+                    ℹ️ Generated automatically as: firstname + lastname + @employee.com
+                  </small>
                 </div>
                  {/* Password Field REMOVED */}
               </div>
@@ -486,6 +579,67 @@ export default function OnboardEmployeePage() {
 
             <div className="form-section">
               <h3>Job & Salary Information</h3>
+              
+              {/* CTC Lock Mode Toggle - Moved here */}
+              <div className="ctc-lock-mode-panel">
+                <div className="lock-mode-header">
+                  <strong>💡 Component Adjustment Mode:</strong>
+                  <span className="lock-mode-hint">Choose how components should adjust when you edit values below</span>
+                </div>
+                <div className="lock-mode-options">
+                  <label className={`lock-mode-option ${ctcLockMode === 'unlocked' ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="ctcLockMode"
+                      value="unlocked"
+                      checked={ctcLockMode === 'unlocked'}
+                      onChange={(e) => setCtcLockMode(e.target.value as any)}
+                    />
+                    <div className="option-content">
+                      <span className="option-icon">🔓</span>
+                      <div className="option-text">
+                        <strong>Auto-Adjust CTC</strong>
+                        <small>CTC updates when you change components (Default)</small>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <label className={`lock-mode-option ${ctcLockMode === 'lock-ctc' ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="ctcLockMode"
+                      value="lock-ctc"
+                      checked={ctcLockMode === 'lock-ctc'}
+                      onChange={(e) => setCtcLockMode(e.target.value as any)}
+                    />
+                    <div className="option-content">
+                      <span className="option-icon">🔒</span>
+                      <div className="option-text">
+                        <strong>Lock CTC, Adjust Components</strong>
+                        <small>Other components adjust to maintain fixed CTC</small>
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <label className={`lock-mode-option ${ctcLockMode === 'lock-components' ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="ctcLockMode"
+                      value="lock-components"
+                      checked={ctcLockMode === 'lock-components'}
+                      onChange={(e) => setCtcLockMode(e.target.value as any)}
+                    />
+                    <div className="option-content">
+                      <span className="option-icon">📌</span>
+                      <div className="option-text">
+                        <strong>Lock Components, Manual CTC</strong>
+                        <small>CTC stays as-is, components don't auto-adjust</small>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Designation*</label>
@@ -541,6 +695,13 @@ export default function OnboardEmployeePage() {
                     onChange={handleInputChange}
                     placeholder="800000"
                     className={validationErrors.annualCTC ? 'input-error' : ''}
+                    title={
+                      ctcLockMode === 'lock-ctc' 
+                        ? 'CTC is locked - components will adjust to match this value' 
+                        : ctcLockMode === 'lock-components'
+                        ? 'Manual mode - CTC will not auto-update from components'
+                        : 'Auto mode - CTC will update when you change components below'
+                    }
                   />
                   {validationErrors.annualCTC && (
                     <span className="field-error">{validationErrors.annualCTC}</span>
@@ -617,7 +778,24 @@ export default function OnboardEmployeePage() {
             
             <div className="form-section">
               <h3>Salary Structure - Monthly Earnings*</h3>
-              <p className="subtitle" style={{marginBottom: '16px', fontSize: '14px'}}>Define the monthly gross salary components. Must be greater than 0.</p>
+              <p className="subtitle" style={{marginBottom: '12px', fontSize: '14px'}}>
+                Define the monthly gross salary components. Must be greater than 0.
+                {ctcLockMode === 'lock-ctc' && (
+                  <span style={{display: 'block', marginTop: '6px', color: '#7c3aed', fontWeight: 600}}>
+                    🔒 CTC Locked: Other components will auto-adjust when you edit values
+                  </span>
+                )}
+                {ctcLockMode === 'lock-components' && (
+                  <span style={{display: 'block', marginTop: '6px', color: '#ea580c', fontWeight: 600}}>
+                    📌 Manual Mode: Components won't auto-adjust
+                  </span>
+                )}
+                {ctcLockMode === 'unlocked' && (
+                  <span style={{display: 'block', marginTop: '6px', color: '#059669', fontWeight: 600}}>
+                    🔓 Auto Mode: CTC will update when you edit components
+                  </span>
+                )}
+              </p>
               <div className="salary-components">
                 {salaryData.earnings.map((earning, index) => (
                   <div key={index} className="salary-component">
@@ -780,6 +958,23 @@ export default function OnboardEmployeePage() {
               </button>
             </div>
 
+            {/* Salary / CTC Summary - Moved to bottom after all components */}
+            <div className="form-section">
+              <h3>Salary Summary</h3>
+              <div className="salary-summary-panel">
+                <div><strong>Monthly Earnings:</strong> ₹{monthlyEarningsTotal.toLocaleString()}</div>
+                <div><strong>Monthly Employer Contrib:</strong> ₹{monthlyEmployerTotal.toLocaleString()}</div>
+                <div><strong>Monthly Deductions:</strong> ₹{monthlyDeductionsTotal.toLocaleString()}</div>
+                <div><strong>Approx Annual From Components:</strong> ₹{annualFromComponents.toLocaleString()}</div>
+                {ctcNumber > 0 && (
+                  <div className={shouldShowCtcWarning ? 'ctc-warning' : 'ctc-ok'}>
+                    <strong>Declared CTC:</strong> ₹{ctcNumber.toLocaleString()} 
+                    {shouldShowCtcWarning && <span> ({ctcMismatchPercent}% diff)</span>}
+                    {!shouldShowCtcWarning && <span> ✓ Synced</span>}
+                  </div>
+                )}
+              </div>
+            </div>
 
             <div className="form-actions">
               <button
@@ -802,9 +997,9 @@ export default function OnboardEmployeePage() {
         </div>
       </div>
     <div className="toast-container">
-      {toasts.map(t => (
-        <div key={t.id} className={`toast toast-${t.type}`}>{t.message}</div>
-      ))}
+      {toast && (
+        <div key={toast.id} className={`toast toast-${toast.type}`}>{toast.message}</div>
+      )}
     </div>
     {loading && (
       <div className="loading-overlay">
