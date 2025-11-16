@@ -48,6 +48,14 @@ interface IPayrollResult {
   skipped: number;
   failed: number;
   errors: string[];
+  warnings?: string[];
+}
+
+// Interface for payroll generation options
+interface IPayrollOptions {
+  month: number;
+  year: number;
+  force?: boolean; // Allow generation before month ends
 }
 
 // --- Employee Management ---
@@ -506,39 +514,74 @@ export const processPayrollUpload = async (
 // ==========================================================
 export const generatePayslips = async (
   month: number,
-  year: number
+  year: number,
+  options?: { force?: boolean }
 ): Promise<IPayrollResult> => {
+  // ========== VALIDATION PHASE ==========
+  
+  // 1. Validate month and year inputs
+  if (!month || !year || month < 1 || month > 12 || year < 2000 || year > 2100) {
+    throw new Error('Invalid month or year. Month must be 1-12, year must be between 2000-2100.');
+  }
+
+  // 2. Check if month has ended (unless force flag is set)
   const now = new Date();
   const firstDayOfNextMonth = new Date(year, month, 1); // JS Date month is 0-indexed
+  const lastDayOfMonth = new Date(year, month, 0); // Last day of the target month
 
-  if (now < firstDayOfNextMonth) {
+  if (now < firstDayOfNextMonth && !options?.force) {
     throw new Error(
-      `Payroll for ${month}/${year} can only be run on or after ${firstDayOfNextMonth.toLocaleDateString()}`
+      `Payroll for ${month}/${year} cannot be run before month ends (${lastDayOfMonth.toLocaleDateString()}). ` +
+      `Current date: ${now.toLocaleDateString()}. Use force=true to override (not recommended).`
     );
   }
 
-  const employees = await Employee.find({ isActive: true });
+  // 3. Fetch all active employees (exclude HR users - they don't get payslips)
+  const allEmployees = await Employee.find({ isActive: true });
+  
+  // Filter out HR-type employees (employeeId starts with 'HR')
+  const employees = allEmployees.filter(emp => !emp.employeeId.startsWith('HR'));
+  
+  if (employees.length === 0) {
+    throw new Error('No active employees found for payroll processing. (HR users are excluded from payroll)');
+  }
+
   const results: IPayrollResult = {
     processed: 0,
     success: 0,
     skipped: 0,
     failed: 0,
     errors: [],
+    warnings: [],
   };
 
+  // Add warning if running before month end
+  if (now < firstDayOfNextMonth && options?.force) {
+    results.warnings?.push(
+      `WARNING: Payroll generated before month end. Attendance data may be incomplete.`
+    );
+  }
+
+  // ========== PROCESSING PHASE ==========
+  // Process each employee independently (no transactions for better reliability)
+  
   for (const employee of employees) {
     results.processed++;
+    
     try {
+      // Check for existing payslip (idempotency)
       const existingPayslip = await Payslip.findOne({
         employee: employee._id,
         month,
         year,
       });
+      
       if (existingPayslip) {
         results.skipped++;
         continue;
       }
 
+      // Fetch salary and attendance data
       const salary = await Salary.findOne({ employee: employee._id });
       const attendance = await Attendance.findOne({
         employee: employee._id,
@@ -546,11 +589,22 @@ export const generatePayslips = async (
         year,
       });
 
-      if (!salary) throw new Error('Missing salary structure.');
-      if (!attendance)
-        throw new Error('Missing attendance data (run upload first).');
-      if (attendance.totalWorkingDays <= 0)
-        throw new Error('Total working days must be > 0.');
+      // Validate required data exists
+      if (!salary) {
+        throw new Error('Missing salary structure. Please configure salary first.');
+      }
+      
+      if (!attendance) {
+        throw new Error('Missing attendance data. Please upload attendance before generating payslips.');
+      }
+      
+      if (!attendance.totalWorkingDays || attendance.totalWorkingDays <= 0) {
+        throw new Error('Total working days must be greater than 0.');
+      }
+      
+      if (attendance.daysPresent < 0 || attendance.daysPresent > attendance.totalWorkingDays) {
+        throw new Error(`Invalid days present (${attendance.daysPresent}). Must be between 0 and ${attendance.totalWorkingDays}.`);
+      }
 
       const {
         daysPresent,
@@ -562,12 +616,33 @@ export const generatePayslips = async (
       const finalEarnings: IPayslipEarning[] = [];
       const finalDeductions: IPayslipDeduction[] = [];
 
-      // --- A. Calculate FIXED Earnings (Prorated for LOP) ---
+      // --- CHECK: Pro-rata for mid-month joiners ---
+      let proRataFactor = 1.0; // Default: full month
+      const joiningDate = new Date(employee.joiningDate);
+      const payrollMonthStart = new Date(year, month - 1, 1);
+      const payrollMonthEnd = new Date(year, month, 0);
+
+      // If employee joined during this payroll month, calculate pro-rata
+      if (joiningDate >= payrollMonthStart && joiningDate <= payrollMonthEnd) {
+        const daysInMonth = payrollMonthEnd.getDate();
+        const daysEmployed = daysInMonth - joiningDate.getDate() + 1;
+        proRataFactor = daysEmployed / daysInMonth;
+        
+        results.warnings?.push(
+          `Employee ${employee.employeeId} joined mid-month (${joiningDate.toLocaleDateString()}). ` +
+          `Salary pro-rated to ${(proRataFactor * 100).toFixed(1)}% (${daysEmployed}/${daysInMonth} days).`
+        );
+      }
+
+      // --- A. Calculate FIXED Earnings (Prorated for LOP and mid-month joiners) ---
       for (const earning of salary.earnings) {
-        const proratedAmount = (earning.amount / totalWorkingDays) * daysPresent;
+        // Apply both LOP proration and mid-month joiner proration
+        const lopProratedAmount = (earning.amount / totalWorkingDays) * daysPresent;
+        const finalAmount = lopProratedAmount * proRataFactor;
+        
         finalEarnings.push({
           name: earning.name,
-          amount: Math.round(proratedAmount),
+          amount: Math.round(finalAmount),
           type: 'fixed',
         });
       }
@@ -588,14 +663,16 @@ export const generatePayslips = async (
       for (const deduction of salary.deductions) {
         let deductionAmount = 0;
         if (deduction.isPercent) {
+          // Percentage-based deductions (e.g., PF = 12% of Basic)
           const basicEarning = finalEarnings.find(
             (e) => e.name === 'Basic' && e.type === 'fixed'
           );
           const basicAmount = basicEarning ? basicEarning.amount : 0;
           deductionAmount = basicAmount * ((deduction.amount || 0) / 100);
         } else {
-          // Prorate fixed deductions based on days paid as well
-          deductionAmount = ((deduction.amount || 0) / totalWorkingDays) * daysPresent;
+          // Fixed deductions: prorate for both LOP and mid-month joiners
+          const lopProratedAmount = ((deduction.amount || 0) / totalWorkingDays) * daysPresent;
+          deductionAmount = lopProratedAmount * proRataFactor;
         }
 
         finalDeductions.push({
@@ -619,6 +696,13 @@ export const generatePayslips = async (
       const totalDeductions = finalDeductions.reduce((acc, d) => acc + d.amount, 0);
       const netPay = grossEarnings - totalDeductions;
 
+      // Validate final amounts
+      if (netPay < 0) {
+        results.warnings?.push(
+          `Employee ${employee.employeeId}: Negative net pay (${netPay}). Deductions exceed earnings.`
+        );
+      }
+
       const newPayslip = new Payslip({
         employee: employee._id,
         month,
@@ -626,7 +710,7 @@ export const generatePayslips = async (
         payrollInfo: {
           totalWorkingDays: totalWorkingDays,
           daysPaid: daysPresent,
-          lopDays: attendance.leaveWithoutPay,
+          lopDays: attendance.leaveWithoutPay || 0,
         },
         earnings: finalEarnings,
         deductions: finalDeductions,
@@ -638,12 +722,18 @@ export const generatePayslips = async (
 
       await newPayslip.save();
       results.success++;
+      
     } catch (error) {
+      // Catch individual employee processing errors
       results.failed++;
       const message = (error as Error).message;
       results.errors.push(`Employee ${employee.employeeId}: ${message}`);
+      // Continue processing other employees
     }
   }
+
+  // Log summary
+  console.log(`Payroll generation complete. Success: ${results.success}, Failed: ${results.failed}, Skipped: ${results.skipped}`);
 
   return results;
 };

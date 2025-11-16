@@ -212,10 +212,19 @@ export const uploadPayroll = async (req: Request, res: Response) => {
 
 export const generatePayslips = async (req: Request, res: Response) => {
   try {
-    const { month, year } = req.body;
-    const result = await HRService.generatePayslips(month, year);
+    const { month, year, force } = req.body;
+    
+    // Validate inputs
+    if (!month || !year) {
+      return res.status(400).json({ 
+        message: 'Month and year are required fields.' 
+      });
+    }
+
+    const result = await HRService.generatePayslips(month, year, { force });
+    
     res.status(200).json({
-      message: `Payroll run for ${month}/${year} completed.`,
+      message: `Payroll run for ${month}/${year} completed successfully.`,
       ...result,
     });
   } catch (error) {

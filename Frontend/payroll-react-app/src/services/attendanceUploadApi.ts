@@ -9,30 +9,72 @@ type UploadParams = {
   month?: number;
 };
 
-export const uploadAttendanceFile = async (file: File, token: string, params: UploadParams = {}) => {
-  const { mode = 'daily', action = 'preview', dedupeStrategy = 'skip', delimiter, year, month } = params;
+export interface UploadResponse {
+  message: string;
+  mode: 'daily' | 'monthly';
+  action: 'preview' | 'append' | 'overwrite';
+  processed: number;
+  successCount: number;
+  failureCount: number;
+  skippedCount?: number;
+  errors?: Array<{
+    row: number;
+    employeeId?: string;
+    date?: string;
+    error: string;
+  }>;
+  issues?: any[];
+}
+
+export const uploadAttendanceFile = async (
+  file: File, 
+  token: string, 
+  params: UploadParams = {}
+): Promise<UploadResponse> => {
+  const { mode, action = 'preview', dedupeStrategy = 'skip', delimiter = ',', year, month } = params;
+  
+  // Build URL with query parameters
   const url = new URL(`${API_BASE_URL}/hr/attendance/upload`);
-  url.searchParams.set('mode', mode);
+  
+  // Only set mode if explicitly provided (allow auto-detection)
+  if (mode) url.searchParams.set('mode', mode);
+  
   url.searchParams.set('action', action);
   url.searchParams.set('dedupeStrategy', dedupeStrategy);
-  if (delimiter) url.searchParams.set('delimiter', delimiter);
+  
+  if (delimiter !== ',') url.searchParams.set('delimiter', delimiter);
   if (year) url.searchParams.set('year', String(year));
   if (month) url.searchParams.set('month', String(month));
 
-  const fd = new FormData();
-  fd.append('payrollFile', file, file.name);
+  // Create FormData with correct field name 'payrollFile' as per backend spec
+  const formData = new FormData();
+  formData.append('payrollFile', file, file.name);
 
-  const res = await fetch(url.toString(), {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: fd,
-  });
+  try {
+    const response = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Don't set Content-Type - browser will set it with boundary for multipart/form-data
+      },
+      body: formData,
+    });
 
-  const data = await res.json().catch(() => ({ message: 'Invalid JSON response' }));
-  if (!res.ok) throw new Error(data?.message || `Upload failed: ${res.status}`);
-  return data;
+    // Parse JSON response
+    const data = await response.json().catch(() => ({ 
+      message: 'Invalid JSON response from server' 
+    }));
+
+    // Handle error responses
+    if (!response.ok) {
+      throw new Error(data?.message || `Upload failed with status ${response.status}`);
+    }
+
+    return data as UploadResponse;
+  } catch (error) {
+    console.error('[AttendanceUploadAPI] Error:', error);
+    throw error;
+  }
 };
 
 export default { uploadAttendanceFile };

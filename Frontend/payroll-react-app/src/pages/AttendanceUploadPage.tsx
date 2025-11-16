@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import attendanceUploadApi from '../services/attendanceUploadApi';
+import { uploadAttendanceFile, UploadResponse } from '../services/attendanceUploadApi';
 import './AttendanceUploadPage.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,13 +9,13 @@ const AttendanceUploadPage: React.FC = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'daily' | 'monthly'>('daily');
+  const [mode, setMode] = useState<'daily' | 'monthly' | 'auto'>('auto');
   const [action, setAction] = useState<'preview' | 'append' | 'overwrite'>('preview');
   const [dedupeStrategy, setDedupeStrategy] = useState<'skip' | 'update' | 'error'>('skip');
   const [delimiter, setDelimiter] = useState(',');
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
-  const [previewResult, setPreviewResult] = useState<any | null>(null);
+  const [previewResult, setPreviewResult] = useState<UploadResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -27,12 +27,11 @@ const AttendanceUploadPage: React.FC = () => {
     setFileError(null);
     
     if (f) {
-      // Validate file format
-      const validFormats = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-      const isValidFormat = validFormats.includes(f.type) || f.name.endsWith('.csv') || f.name.endsWith('.xlsx');
+      // Validate file format - only CSV supported per spec
+      const isValidFormat = f.type === 'text/csv' || f.name.endsWith('.csv');
       
       if (!isValidFormat) {
-        setFileError('Please upload a CSV or XLSX file');
+        setFileError('Please upload a CSV file only');
         setFile(null);
         return;
       }
@@ -51,18 +50,44 @@ const AttendanceUploadPage: React.FC = () => {
     
     setPreviewResult(null);
     setError(null);
+    setSuccessMessage(null);
   };
 
   const handlePreview = async () => {
     setError(null);
+    setSuccessMessage(null);
     if (!file) return setError('Please select a file');
     if (!token) return setError('Not authenticated');
+    
     try {
       setLoading(true);
-      const res = await attendanceUploadApi.uploadAttendanceFile(file, token, { mode, action: 'preview', dedupeStrategy, delimiter });
+      const params: any = { 
+        action: 'preview', 
+        dedupeStrategy, 
+        delimiter 
+      };
+      
+      // Only set mode if not auto-detect
+      if (mode !== 'auto') {
+        params.mode = mode;
+      }
+      
+      if (mode === 'monthly') {
+        params.year = year;
+        params.month = month;
+      }
+      
+      const res = await uploadAttendanceFile(file, token, params);
       setPreviewResult(res);
+      
+      if (res.failureCount === 0 && res.successCount > 0) {
+        setSuccessMessage(`✓ Preview successful: ${res.successCount} records validated`);
+      } else if (res.failureCount > 0) {
+        setError(`Found ${res.failureCount} error(s) in ${res.processed} records`);
+      }
     } catch (err: any) {
       setError(err.message || 'Preview failed');
+      console.error('[AttendanceUpload] Preview error:', err);
     } finally {
       setLoading(false);
     }
@@ -73,29 +98,45 @@ const AttendanceUploadPage: React.FC = () => {
     setSuccessMessage(null);
     if (!file) return setError('Please select a file');
     if (!token) return setError('Not authenticated');
+    
     try {
       setLoading(true);
-      const params: any = { mode, action, dedupeStrategy, delimiter };
+      const params: any = { 
+        action, 
+        dedupeStrategy, 
+        delimiter 
+      };
+      
+      // Only set mode if not auto-detect
+      if (mode !== 'auto') {
+        params.mode = mode;
+      }
+      
       if (mode === 'monthly') {
         params.year = year;
         params.month = month;
       }
-      const res = await attendanceUploadApi.uploadAttendanceFile(file, token, params);
+      
+      const res = await uploadAttendanceFile(file, token, params);
       setPreviewResult(res);
+      
       // If successful writes, show success notification and navigate back
-      if (res && (res.successCount || res.recordsProcessed || res.processed)) {
-        setSuccessMessage(res.message || 'Upload successful');
-        setTimeout(() => navigate('/attendance'), 2000);
+      if (res && res.successCount > 0) {
+        setSuccessMessage(`✓ ${res.message || 'Upload successful'}: ${res.successCount} records saved`);
+        setTimeout(() => navigate('/attendance'), 2500);
+      } else if (res.failureCount === res.processed) {
+        setError('All records failed validation. Please fix errors and try again.');
       }
     } catch (err: any) {
       setError(err.message || 'Upload failed');
+      console.error('[AttendanceUpload] Commit error:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const downloadDailyTemplate = () => {
-    const csv = 'employeeId,email,date,status,inTime,outTime,hoursWorked,overtimeHours,leaveType,notes\nEMP001,alice@company.com,2025-10-01,present,09:15,18:00,8,0,,On-site\nEMP002,bob@company.com,2025-10-01,leave,,,,,sick,Medical leave';
+    const csv = 'employeeId,date,status,checkIn,checkOut,hoursWorked,overtimeHours,leaveType,notes\nEMP001,2024-11-16,P,09:00,18:00,8,0,,Regular shift\nEMP002,2024-11-16,L,,,0,0,SL,Sick leave';
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -105,7 +146,7 @@ const AttendanceUploadPage: React.FC = () => {
   };
 
   const downloadMonthlyTemplate = () => {
-    const csv = 'employeeId,month,year,totalWorkingDays,daysPresent,leaveWithoutPay,overtimeHours,variableEarnings\nEMP001,10,2025,22,20,2,5,"bonus:5000|commission:0"';
+    const csv = 'employeeId,month,year,totalWorkingDays,daysPresent,leaveWithoutPay,overtimeHours\nEMP001,11,2024,22,20,2,5\nEMP002,11,2024,22,19,0,3';
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -125,6 +166,7 @@ const AttendanceUploadPage: React.FC = () => {
         <div className="form-row">
           <label>Mode</label>
           <select value={mode} onChange={(e) => { setMode(e.target.value as any); setPreviewResult(null); }}>
+            <option value="auto">Auto-detect from CSV headers</option>
             <option value="daily">Daily (per-day rows)</option>
             <option value="monthly">Monthly (aggregate)</option>
           </select>
@@ -199,7 +241,8 @@ const AttendanceUploadPage: React.FC = () => {
           <div className="preview-result">
             <h3>Preview Result</h3>
             <div className="preview-summary">
-              <div>Processed: {previewResult.processed ?? previewResult.recordsProcessed ?? '-'}</div>
+              <div>Mode: {previewResult.mode || 'N/A'}</div>
+              <div>Processed: {previewResult.processed ?? '-'}</div>
               <div>Success: {previewResult.successCount ?? '-'}</div>
               <div>Failures: {previewResult.failureCount ?? 0}</div>
               {previewResult.skippedCount !== undefined && <div>Skipped: {previewResult.skippedCount}</div>}
@@ -212,8 +255,12 @@ const AttendanceUploadPage: React.FC = () => {
                     <tr><th>Row</th><th>Employee ID</th><th>Message</th></tr>
                   </thead>
                   <tbody>
-                    {previewResult.errors.slice(0, 10).map((e: any, i: number) => (
-                      <tr key={i}><td>{e.row ?? e.index ?? '-'}</td><td>{e.employeeId ?? e.field ?? '-'}</td><td>{e.error ?? e.message}</td></tr>
+                    {previewResult.errors.slice(0, 10).map((e, i: number) => (
+                      <tr key={i}>
+                        <td>{e.row ?? '-'}</td>
+                        <td>{e.employeeId ?? (e.date ? 'N/A' : '-')}</td>
+                        <td>{e.error}</td>
+                      </tr>
                     ))}
                   </tbody>
                 </table>

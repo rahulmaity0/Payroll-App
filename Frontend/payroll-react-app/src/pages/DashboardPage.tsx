@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import PayslipGenerationModal from '../components/Modals/PayslipGenerationModal';
 import './DashboardPage.css';
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { clearToken } = useAuth();
+  const [isPayslipModalOpen, setIsPayslipModalOpen] = useState(false);
 
   const handleOnboardClick = () => navigate('/onboard-employee');
   const handleViewEmployees = () => navigate('/employees-list');
@@ -54,8 +56,20 @@ const DashboardPage: React.FC = () => {
             <p>Upload CSV/XLSX attendance files, preview and commit to the system.</p>
             <div className="card-arrow">→</div>
           </div>
+
+          <div className="card" onClick={() => setIsPayslipModalOpen(true)}>
+            <div className="card-icon">💰</div>
+            <h2>Generate Payslips</h2>
+            <p>Generate monthly payslips for all employees with validations and reports.</p>
+            <div className="card-arrow">→</div>
+          </div>
         </div>
       </div>
+
+      <PayslipGenerationModal 
+        isOpen={isPayslipModalOpen} 
+        onClose={() => setIsPayslipModalOpen(false)} 
+      />
     </div>
   );
 };
