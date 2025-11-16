@@ -9,12 +9,21 @@
 .search-wrap{display:flex;align-items:center;border:1px solid #e6e9ef;background:#fff;border-radius:8px;overflow:hidden}
 .search-input{flex:1;padding:8px 10px;border:0;outline:none}
 .clear-btn{background:transparent;border:0;padding:8px 10px;cursor:pointer;color:#6b7280}
-.attendance-table-wrap{overflow:auto;background:#fff;border-radius:10px;padding:8px;border:1px solid #eef2f7;box-shadow:0 1px 2px rgba(16,24,40,0.03)}
+.attendance-table-wrap{overflow:auto;background:#fff;border-radius:10px;padding:8px;border:1px solid#eef2f7;box-shadow:0 1px 2px rgba(16,24,40,0.03)}
 .attendance-table{width:100%;border-collapse:collapse}
-.attendance-table th,.attendance-table td{padding:12px 14px;border-bottom:1px solid #f3f6f9;text-align:left}
+.attendance-table th,.attendance-table td{padding:12px 14px;border-bottom:1px solid #f3f6f9;text-align:left;font-size:13px}
 .attendance-table th{background:linear-gradient(90deg,#fbfdff,#f8fbff);color:#374151;font-weight:600}
 .attendance-table tbody tr:hover{background:#fbfdff}
-.attendance-table td button{padding:6px 10px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#111827;cursor:pointer}
+.attendance-table tbody tr.missing-attendance{background:#fef3f2}
+.attendance-table tbody tr.missing-attendance:hover{background:#fef3f2}
+.attendance-table td button{padding:6px 12px;border-radius:6px;border:1px solid #d1d5db;background:#fff;color:#111827;cursor:pointer;font-size:13px;transition:all 0.2s}
+.attendance-table td button:hover{background:#f3f4f6;border-color:#9ca3af}
+.attendance-table td button.create-btn{background:#10b981;color:#fff;border-color:#10b981}
+.attendance-table td button.create-btn:hover{background:#059669}
+.status-badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap;display:inline-block}
+.status-badge.complete{background:#d1fae5;color:#065f46}
+.status-badge.missing{background:#fee2e2;color:#991b1b}
+.error-alert{background:#fee2e2;color:#991b1b;padding:12px 16px;border-radius:8px;margin-bottom:16px;border:1px solid #fecaca}
 
 @media (max-width: 768px){
 	.attendance-controls{flex-direction:column}

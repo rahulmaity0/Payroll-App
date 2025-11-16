@@ -14,16 +14,10 @@ export interface UploadResponse {
   mode: 'daily' | 'monthly';
   action: 'preview' | 'append' | 'overwrite';
   processed: number;
-  successCount: number;
-  failureCount: number;
-  skippedCount?: number;
-  errors?: Array<{
-    row: number;
-    employeeId?: string;
-    date?: string;
-    error: string;
-  }>;
-  issues?: any[];
+  success: number;
+  failed: number;
+  skipped?: number;
+  errors?: string[];
 }
 
 export const uploadAttendanceFile = async (
@@ -34,7 +28,7 @@ export const uploadAttendanceFile = async (
   const { mode, action = 'preview', dedupeStrategy = 'skip', delimiter = ',', year, month } = params;
   
   // Build URL with query parameters
-  const url = new URL(`${API_BASE_URL}/hr/attendance/upload`);
+  const url = new URL(`${API_BASE_URL}/api/hr/attendance/upload`);
   
   // Only set mode if explicitly provided (allow auto-detection)
   if (mode) url.searchParams.set('mode', mode);
@@ -71,8 +65,15 @@ export const uploadAttendanceFile = async (
     }
 
     return data as UploadResponse;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[AttendanceUploadAPI] Error:', error);
+    console.error('[AttendanceUploadAPI] URL:', url.toString());
+    
+    // Provide more helpful error messages
+    if (error.message === 'Failed to fetch') {
+      throw new Error(`Cannot connect to server at ${API_BASE_URL}. Please ensure the backend is running.`);
+    }
+    
     throw error;
   }
 };

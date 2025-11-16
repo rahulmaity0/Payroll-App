@@ -9,7 +9,7 @@ const AttendanceUploadPage: React.FC = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'daily' | 'monthly' | 'auto'>('auto');
+  const [mode, setMode] = useState<'daily' | 'monthly' | 'auto'>('daily');
   const [action, setAction] = useState<'preview' | 'append' | 'overwrite'>('preview');
   const [dedupeStrategy, setDedupeStrategy] = useState<'skip' | 'update' | 'error'>('skip');
   const [delimiter, setDelimiter] = useState(',');
@@ -80,10 +80,10 @@ const AttendanceUploadPage: React.FC = () => {
       const res = await uploadAttendanceFile(file, token, params);
       setPreviewResult(res);
       
-      if (res.failureCount === 0 && res.successCount > 0) {
-        setSuccessMessage(`✓ Preview successful: ${res.successCount} records validated`);
-      } else if (res.failureCount > 0) {
-        setError(`Found ${res.failureCount} error(s) in ${res.processed} records`);
+      if (res.failed === 0 && res.success > 0) {
+        setSuccessMessage(`✓ Preview successful: ${res.success} records validated`);
+      } else if (res.failed > 0) {
+        setError(`Found ${res.failed} error(s) in ${res.processed} records`);
       }
     } catch (err: any) {
       setError(err.message || 'Preview failed');
@@ -121,10 +121,10 @@ const AttendanceUploadPage: React.FC = () => {
       setPreviewResult(res);
       
       // If successful writes, show success notification and navigate back
-      if (res && res.successCount > 0) {
-        setSuccessMessage(`✓ ${res.message || 'Upload successful'}: ${res.successCount} records saved`);
+      if (res && res.success > 0) {
+        setSuccessMessage(`✓ ${res.message || 'Upload successful'}: ${res.success} records saved`);
         setTimeout(() => navigate('/attendance'), 2500);
-      } else if (res.failureCount === res.processed) {
+      } else if (res.failed === res.processed) {
         setError('All records failed validation. Please fix errors and try again.');
       }
     } catch (err: any) {
@@ -136,7 +136,7 @@ const AttendanceUploadPage: React.FC = () => {
   };
 
   const downloadDailyTemplate = () => {
-    const csv = 'employeeId,date,status,checkIn,checkOut,hoursWorked,overtimeHours,leaveType,notes\nEMP001,2024-11-16,P,09:00,18:00,8,0,,Regular shift\nEMP002,2024-11-16,L,,,0,0,SL,Sick leave';
+    const csv = 'employeeid,date,status,checkin,checkout,hoursworked,overtimehours,notes\nEMP001,2025-11-16,P,09:00,18:00,8,0,Regular shift\nEMP002,2025-11-16,PL,,,0,0,Sick leave\nEMP003,2025-11-16,LOP,,,0,0,Leave without pay';
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -159,7 +159,7 @@ const AttendanceUploadPage: React.FC = () => {
     <div className="upload-container">
       <div className="upload-header">
         <h1>Upload Attendance</h1>
-        <p>Upload CSV/XLSX files. Preview the parsed rows before committing.</p>
+        <p>Upload CSV files. Preview the parsed rows before committing.</p>
       </div>
 
       <div className="upload-form">
@@ -221,7 +221,7 @@ const AttendanceUploadPage: React.FC = () => {
 
         <div className="form-row file-row">
           <label>File</label>
-          <input type="file" accept=".csv,.xlsx" onChange={handleFileChange} />
+          <input type="file" accept=".csv" onChange={handleFileChange} />
           {file && <span style={{fontSize: '12px', color: '#6b7280', marginTop: '4px'}}>✓ {file.name} ({(file.size / 1024).toFixed(2)} KB)</span>}
           {fileError && <div className="error">{fileError}</div>}
         </div>
@@ -243,27 +243,20 @@ const AttendanceUploadPage: React.FC = () => {
             <div className="preview-summary">
               <div>Mode: {previewResult.mode || 'N/A'}</div>
               <div>Processed: {previewResult.processed ?? '-'}</div>
-              <div>Success: {previewResult.successCount ?? '-'}</div>
-              <div>Failures: {previewResult.failureCount ?? 0}</div>
-              {previewResult.skippedCount !== undefined && <div>Skipped: {previewResult.skippedCount}</div>}
+              <div>Success: {previewResult.success ?? '-'}</div>
+              <div>Failures: {previewResult.failed ?? 0}</div>
+              {previewResult.skipped !== undefined && <div>Skipped: {previewResult.skipped}</div>}
             </div>
             {previewResult.errors && previewResult.errors.length > 0 && (
               <div className="preview-errors">
                 <h4>Errors {previewResult.errors.length > 10 ? `(showing first 10 of ${previewResult.errors.length})` : ''}</h4>
-                <table>
-                  <thead>
-                    <tr><th>Row</th><th>Employee ID</th><th>Message</th></tr>
-                  </thead>
-                  <tbody>
-                    {previewResult.errors.slice(0, 10).map((e, i: number) => (
-                      <tr key={i}>
-                        <td>{e.row ?? '-'}</td>
-                        <td>{e.employeeId ?? (e.date ? 'N/A' : '-')}</td>
-                        <td>{e.error}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <ul style={{listStyle: 'none', padding: 0}}>
+                  {previewResult.errors.slice(0, 10).map((error, i: number) => (
+                    <li key={i} style={{padding: '4px 0', borderBottom: '1px solid #e5e7eb'}}>
+                      {error}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>

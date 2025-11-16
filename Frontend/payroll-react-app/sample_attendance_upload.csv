@@ -1,0 +1,41 @@
+employeeid,date,status,checkin,checkout,hoursworked,overtimehours,notes
+EMP021,2025-11-01,P,09:00,18:00,8,0,Regular shift
+EMP021,2025-11-02,P,09:15,18:15,8,0,
+EMP021,2025-11-03,P,08:45,19:00,9,1,Overtime on weekend deployment
+EMP021,2025-11-04,P,09:00,18:30,8.5,0.5,Extended for meeting
+EMP021,2025-11-05,PL,,,0,0,Sick leave
+EMP021,2025-11-06,P,09:30,18:00,7.5,0,Late check-in
+EMP021,2025-11-07,P,09:00,18:00,8,0,
+EMP021,2025-11-08,LOP,,,0,0,Unauthorized absence
+EMP021,2025-11-09,H,,,0,0,Public holiday
+EMP021,2025-11-10,WO,,,0,0,Weekly off
+EMP022,2025-11-01,P,08:30,17:30,8,0,Early bird
+EMP022,2025-11-02,P,09:00,18:00,8,0,
+EMP022,2025-11-03,A,,,0,0,Absent without notice
+EMP022,2025-11-04,P,10:00,19:30,8.5,0.5,Late arrival compensated
+EMP022,2025-11-05,P,09:00,18:00,8,0,
+EMP022,2025-11-06,PL,,,0,0,Planned vacation
+EMP022,2025-11-07,PL,,,0,0,Planned vacation
+EMP022,2025-11-08,P,09:00,20:00,10,2,Critical bug fix overtime
+EMP022,2025-11-09,H,,,0,0,Public holiday
+EMP022,2025-11-10,WO,,,0,0,Weekly off
+EMP023,2025-11-01,P,09:00,18:00,8,0,
+EMP023,2025-11-02,P,09:00,18:00,8,0,
+EMP023,2025-11-03,P,09:00,18:00,8,0,
+EMP023,2025-11-04,LOP,,,0,0,Leave without pay
+EMP023,2025-11-05,LOP,,,0,0,Leave without pay
+EMP023,2025-11-06,P,09:00,13:00,4,0,Half day work
+EMP023,2025-11-07,P,09:00,18:00,8,0,
+EMP023,2025-11-08,P,09:00,18:00,8,0,
+EMP023,2025-11-09,H,,,0,0,Public holiday
+EMP023,2025-11-10,WO,,,0,0,Weekly off
+EMP024,2025-11-01,P,09:00,18:00,8,0,
+EMP024,2025-11-02,P,09:00,21:00,11,3,Major project deadline
+EMP024,2025-11-03,PL,,,0,0,Compensatory off
+EMP024,2025-11-04,P,09:00,18:00,8,0,
+EMP024,2025-11-05,P,09:00,18:00,8,0,
+EMP024,2025-11-06,P,09:00,18:00,8,0,
+EMP024,2025-11-07,A,,,0,0,Unplanned absence
+EMP024,2025-11-08,P,09:00,18:00,8,0,Back to work
+EMP024,2025-11-09,H,,,0,0,Public holiday
+EMP024,2025-11-10,WO,,,0,0,Weekly off
