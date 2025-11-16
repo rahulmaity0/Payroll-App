@@ -1,0 +1,48 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import OnboardEmployeePage from './pages/OnboardEmployeePage';
+import EmployeesPage from './pages/EmployeesPage';
+import EmployeesListPage from './pages/EmployeesListPage';
+import AttendanceSummaryPage from './pages/AttendanceSummaryPage';
+import EmployeeAttendancePage from './pages/EmployeeAttendancePage';
+import AttendanceUploadPage from './pages/AttendanceUploadPage';
+import { useAuth } from './context/AuthContext';
+
+// ProtectedRoute component - redirects to login if not authenticated
+const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? element : <Navigate to="/login" replace />;
+};
+
+function App() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute element={<DashboardPage />} />} />
+        <Route path="/onboard-employee" element={<ProtectedRoute element={<OnboardEmployeePage />} />} />
+        <Route path="/employees" element={<ProtectedRoute element={<EmployeesPage />} />} />
+        <Route path="/employees-list" element={<ProtectedRoute element={<EmployeesListPage />} />} />
+        <Route path="/attendance/upload" element={<ProtectedRoute element={<AttendanceUploadPage />} />} />
+        <Route path="/attendance/:id" element={<ProtectedRoute element={<EmployeeAttendancePage />} />} />
+        <Route path="/attendance" element={<ProtectedRoute element={<AttendanceSummaryPage />} />} />
+
+        {/* Root redirect - goes to dashboard if authenticated, otherwise to login */}
+        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+
+        {/* Catch-all - redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

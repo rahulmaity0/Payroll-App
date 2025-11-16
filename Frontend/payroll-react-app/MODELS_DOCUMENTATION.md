@@ -1,0 +1,875 @@
+# Payroll System - Data Models Documentation
+
+This document describes all the data models used in the Payroll Application. Frontend developers should use this as a reference for understanding the structure of data returned from API endpoints.
+
+---
+
+## Table of Contents
+
+1. [User Model](#1-user-model)
+2. [Employee Model](#2-employee-model)
+3. [Salary Model](#3-salary-model)
+4. [Attendance Model](#4-attendance-model)
+5. [Payslip Model](#5-payslip-model)
+6. [Relationship Diagram](#relationship-diagram)
+7. [Data Type Reference](#data-type-reference)
+8. [Validation Rules](#validation-rules)
+
+---
+
+## 1. User Model
+
+**Collection Name:** `users`
+
+**Purpose:** Stores authentication credentials and login information for employees and HR staff.
+
+### Fields:
+
+| Field | Type | Required | Unique | Description |
+|-------|------|----------|--------|-------------|
+| `_id` | ObjectId | Auto | Yes | MongoDB document ID |
+| `email` | String | Yes | Yes | User's email address (case-insensitive) |
+| `password` | String | Yes | No | Hashed password (bcrypt, min 6 chars) |
+| `role` | String | Yes | No | Either `"employee"` or `"hr"` |
+| `employee` | ObjectId (Ref: Employee) | Yes | Yes | Reference to the Employee document |
+| `createdAt` | Date | Auto | No | Document creation timestamp |
+| `updatedAt` | Date | Auto | No | Document last update timestamp |
+
+### Example JSON:
+
+```json
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "email": "tejas@gmail.com",
+  "password": "$2a$10$u9XNH8YdEu...",
+  "role": "hr",
+  "employee": "507f1f77bcf86cd799439012",
+  "createdAt": "2024-01-15T10:00:00.000Z",
+  "updatedAt": "2024-01-20T15:30:00.000Z"
+}
+```
+
+### Methods:
+
+- **`matchPassword(enteredPassword: string): Promise<boolean>`**
+  - Compares entered password with stored hashed password
+  - Returns `true` if passwords match, `false` otherwise
+
+### Constraints:
+
+- Email must be unique and valid
+- Password is automatically hashed before storage (cannot retrieve original)
+- Each employee can have only one user account
+- Role must be either "employee" or "hr"
+
+---
+
+## 2. Employee Model
+
+**Collection Name:** `employee_details`
+
+**Purpose:** Stores personal and professional information about employees.
+
+### Main Fields:
+
+| Field | Type | Required | Unique | Description |
+|-------|------|----------|--------|-------------|
+| `_id` | ObjectId | Auto | Yes | MongoDB document ID |
+| `employeeId` | String | Yes | Yes | Unique employee ID (e.g., "EMP001") |
+| `firstName` | String | Yes | No | Employee's first name |
+| `lastName` | String | Yes | No | Employee's last name |
+| `personalEmail` | String | Yes | No | Personal email address |
+| `designation` | String | Yes | No | Job title (e.g., "Senior Developer") |
+| `department` | String | No | No | Department name |
+| `joiningDate` | Date | Yes | No | Employee's joining date |
+| `dob` | Date | No | No | Date of birth |
+| `phone` | String | No | No | Contact phone number |
+| `isActive` | Boolean | No | No | Whether employee is active (default: `true`) |
+| `createdAt` | Date | Auto | No | Document creation timestamp |
+| `updatedAt` | Date | Auto | No | Document last update timestamp |
+
+### Nested Objects:
+
+#### Address (Optional):
+```json
+{
+  "street": "123 Main Street",
+  "city": "Bangalore",
+  "state": "Karnataka",
+  "zip": "560001"
+}
+```
+
+#### Bank Details (Optional):
+```json
+{
+  "bankName": "HDFC Bank",
+  "accountNumber": "1234567890",
+  "ifscCode": "HDFC0001234"
+}
+```
+
+#### Tax Info (Optional):
+```json
+{
+  "pan": "ABCDE1234F",
+  "uan": "101234567890"
+}
+```
+
+### Complete Example JSON:
+
+```json
+{
+  "_id": "507f1f77bcf86cd799439012",
+  "employeeId": "EMP001",
+  "firstName": "Tejas",
+  "lastName": "Kumar",
+  "personalEmail": "tejas@gmail.com",
+  "designation": "Senior Software Engineer",
+  "department": "Engineering",
+  "joiningDate": "2024-01-15T00:00:00.000Z",
+  "dob": "1995-05-20T00:00:00.000Z",
+  "phone": "9876543210",
+  "address": {
+    "street": "123 Main Street",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "zip": "560001"
+  },
+  "bankDetails": {
+    "bankName": "HDFC Bank",
+    "accountNumber": "1234567890",
+    "ifscCode": "HDFC0001234"
+  },
+  "taxInfo": {
+    "pan": "ABCDE1234F",
+    "uan": "101234567890"
+  },
+  "isActive": true,
+  "createdAt": "2024-01-15T10:00:00.000Z",
+  "updatedAt": "2024-01-20T15:30:00.000Z"
+}
+```
+
+### Constraints:
+
+- Employee ID must be unique
+- First name and last name are required and trimmed
+- Phone number should follow standard format (validation on frontend recommended)
+- Bank account number should be numeric
+- PAN format: 10 characters (alphanumeric)
+- UAN format: 12 digits
+
+---
+
+## 3. Salary Model
+
+**Collection Name:** `salary_details`
+
+**Purpose:** Defines the salary structure and components (earnings, deductions) for each employee.
+
+### Main Fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `_id` | ObjectId | Auto | MongoDB document ID |
+| `employee` | ObjectId (Ref: Employee) | Yes | Reference to the Employee document |
+| `annualCTC` | Number | Yes | Annual Cost to Company (in INR) |
+| `effectiveDate` | Date | No | Date from which salary structure is effective |
+| `earnings` | Array[Earning] | Yes | Array of earning components |
+| `deductions` | Array[Deduction] | Yes | Array of deduction components |
+| `employerContributions` | Array[EmployerContribution] | No | Array of employer contribution components |
+| `createdAt` | Date | Auto | Document creation timestamp |
+| `updatedAt` | Date | Auto | Document last update timestamp |
+
+### Nested Objects:
+
+#### Earning:
+```json
+{
+  "name": "Basic Salary",
+  "amount": 50000
+}
+```
+
+#### Deduction:
+```json
+{
+  "name": "Provident Fund",
+  "amount": 1800,
+  "isPercent": false,
+  "percentOf": "Basic"
+}
+```
+- If `isPercent` is `true`, `amount` field is ignored and calculated as percentage of `percentOf` field
+- Common `percentOf` values: "Basic", "Gross"
+
+#### Employer Contribution:
+```json
+{
+  "name": "EPF",
+  "amount": 1800,
+  "isPercent": false,
+  "percentOf": "Basic"
+}
+```
+
+### Complete Example JSON:
+
+```json
+{
+  "_id": "507f1f77bcf86cd799439020",
+  "employee": "507f1f77bcf86cd799439012",
+  "annualCTC": 1200000,
+  "effectiveDate": "2024-01-15T00:00:00.000Z",
+  "earnings": [
+    {
+      "name": "Basic Salary",
+      "amount": 50000
+    },
+    {
+      "name": "HRA",
+      "amount": 15000
+    },
+    {
+      "name": "DA",
+      "amount": 10000
+    }
+  ],
+  "deductions": [
+    {
+      "name": "Provident Fund",
+      "amount": 1800,
+      "isPercent": false,
+      "percentOf": "Basic"
+    },
+    {
+      "name": "ESI",
+      "amount": 850,
+      "isPercent": false,
+      "percentOf": "Basic"
+    },
+    {
+      "name": "Income Tax",
+      "amount": 5000,
+      "isPercent": false,
+      "percentOf": "Gross"
+    }
+  ],
+  "employerContributions": [
+    {
+      "name": "EPF",
+      "amount": 1800,
+      "isPercent": false,
+      "percentOf": "Basic"
+    }
+  ],
+  "createdAt": "2024-01-15T10:00:00.000Z",
+  "updatedAt": "2024-01-20T15:30:00.000Z"
+}
+```
+
+### Constraints:
+
+- One employee can have only one salary record (unique constraint)
+- Annual CTC must be a positive number
+- Earnings and deductions arrays must not be empty
+- Component names must be non-empty strings
+- Amounts must be positive numbers
+
+### Calculation Example:
+
+For monthly payslip with AnnualCTC = 1,200,000:
+- Monthly Basic = 50,000
+- Monthly HRA = 15,000
+- Monthly DA = 10,000
+- **Monthly Gross = 75,000**
+- PF (fixed) = 1,800
+- ESI (fixed) = 850
+- Income Tax = calculated based on gross
+- **Total Deductions = varies**
+- **Monthly Net = Gross - Deductions**
+
+---
+
+## 4. Attendance Model
+
+**Collection Name:** `attendance_details`
+
+**Purpose:** Tracks attendance and variable earnings/deductions for each employee per month.
+
+### Main Fields:
+
+| Field | Type | Required | Unique (Within) | Description |
+|-------|------|----------|-----------------|-------------|
+| `_id` | ObjectId | Auto | Yes | MongoDB document ID |
+| `employee` | ObjectId (Ref: Employee) | Yes | employee+month+year | Reference to Employee |
+| `month` | Number | Yes | employee+month+year | Month number (1-12) |
+| `year` | Number | Yes | employee+month+year | Year (e.g., 2024) |
+| `totalWorkingDays` | Number | Yes | No | Total working days in month |
+| `daysPresent` | Number | Yes | No | Days the employee was present |
+| `leaveWithoutPay` | Number | No | No | Leave without pay days (default: 0) |
+| `overtimeHours` | Number | No | No | Total overtime hours (default: 0) |
+| `variableEarnings` | Array[VariableEarning] | No | No | Month-specific earnings |
+| `variableDeductions` | Array[VariableDeduction] | No | No | Month-specific deductions |
+| `createdAt` | Date | Auto | No | Document creation timestamp |
+| `updatedAt` | Date | Auto | No | Document last update timestamp |
+
+### Nested Objects:
+
+#### Variable Earning:
+```json
+{
+  "name": "Overtime Bonus",
+  "amount": 5000
+}
+```
+
+#### Variable Deduction:
+```json
+{
+  "name": "Meal Deduction",
+  "amount": 1000
+}
+```
+
+### Complete Example JSON:
+
+```json
+{
+  "_id": "507f1f77bcf86cd799439014",
+  "employee": "507f1f77bcf86cd799439012",
+  "month": 1,
+  "year": 2024,
+  "totalWorkingDays": 22,
+  "daysPresent": 20,
+  "leaveWithoutPay": 2,
+  "overtimeHours": 8,
+  "variableEarnings": [
+    {
+      "name": "Overtime Bonus",
+      "amount": 2000
+    },
+    {
+      "name": "Performance Bonus",
+      "amount": 5000
+    }
+  ],
+  "variableDeductions": [
+    {
+      "name": "Meal Deduction",
+      "amount": 1000
+    }
+  ],
+  "createdAt": "2024-02-01T10:00:00.000Z",
+  "updatedAt": "2024-02-15T14:30:00.000Z"
+}
+```
+
+### Constraints:
+
+- Unique combination: one record per (employee, month, year)
+- Month must be between 1 and 12
+- Year must be valid (typically >= 2000)
+- Days present cannot exceed total working days
+- All day counts must be non-negative
+
+### Calculation Logic:
+
+When a payslip is generated:
+1. Fixed earnings are prorated based on days present: `(fixedEarning / totalWorkingDays) * daysPresent`
+2. Variable earnings from this record are added as-is
+3. Fixed deductions are prorated similarly
+4. Variable deductions from this record are added as-is
+
+---
+
+## 5. Payslip Model
+
+**Collection Name:** `payslips`
+
+**Purpose:** Generated monthly payslips containing calculated earnings and deductions for each employee.
+
+### Main Fields:
+
+| Field | Type | Required | Unique (Within) | Description |
+|-------|------|----------|-----------------|-------------|
+| `_id` | ObjectId | Auto | Yes | MongoDB document ID |
+| `employee` | ObjectId (Ref: Employee) | Yes | employee+month+year | Reference to Employee |
+| `month` | Number | Yes | employee+month+year | Month number (1-12) |
+| `year` | Number | Yes | employee+month+year | Year (e.g., 2024) |
+| `generatedOn` | Date | No | No | Date when payslip was generated |
+| `payrollInfo` | PayrollInfo | Yes | No | Payroll details object |
+| `earnings` | Array[PayslipEarning] | Yes | No | All earnings with amounts |
+| `deductions` | Array[PayslipDeduction] | Yes | No | All deductions with amounts |
+| `grossEarnings` | Number | Yes | No | Total earnings (sum of earnings) |
+| `totalDeductions` | Number | Yes | No | Total deductions (sum of deductions) |
+| `netPay` | Number | Yes | No | Net pay (gross - deductions) |
+| `status` | String | No | No | Status: "pending", "paid", or "generated" |
+| `paymentDate` | Date | No | No | Date when payment was made |
+| `createdAt` | Date | Auto | No | Document creation timestamp |
+| `updatedAt` | Date | Auto | No | Document last update timestamp |
+
+### Nested Objects:
+
+#### PayrollInfo:
+```json
+{
+  "totalWorkingDays": 22,
+  "daysPaid": 20,
+  "lopDays": 2
+}
+```
+
+#### Payslip Earning:
+```json
+{
+  "name": "Basic Salary",
+  "amount": 45454.55,
+  "type": "fixed"
+}
+```
+- `type` can be: `"fixed"`, `"variable"`, or `"reimbursement"`
+
+#### Payslip Deduction:
+```json
+{
+  "name": "Provident Fund",
+  "amount": 1636.36,
+  "type": "statutory"
+}
+```
+- `type` can be: `"statutory"`, `"tax"`, `"lop"`, or `"other"`
+
+### Complete Example JSON:
+
+```json
+{
+  "_id": "507f1f77bcf86cd799439022",
+  "employee": "507f1f77bcf86cd799439012",
+  "month": 1,
+  "year": 2024,
+  "generatedOn": "2024-02-01T10:00:00.000Z",
+  "payrollInfo": {
+    "totalWorkingDays": 22,
+    "daysPaid": 20,
+    "lopDays": 2
+  },
+  "earnings": [
+    {
+      "name": "Basic Salary",
+      "amount": 45454.55,
+      "type": "fixed"
+    },
+    {
+      "name": "HRA",
+      "amount": 13636.36,
+      "type": "fixed"
+    },
+    {
+      "name": "DA",
+      "amount": 9090.91,
+      "type": "fixed"
+    },
+    {
+      "name": "Overtime Bonus",
+      "amount": 2000,
+      "type": "variable"
+    },
+    {
+      "name": "Travel Reimbursement",
+      "amount": 5000,
+      "type": "reimbursement"
+    }
+  ],
+  "deductions": [
+    {
+      "name": "Provident Fund",
+      "amount": 1636.36,
+      "type": "statutory"
+    },
+    {
+      "name": "ESI",
+      "amount": 772.73,
+      "type": "statutory"
+    },
+    {
+      "name": "Income Tax",
+      "amount": 4545.45,
+      "type": "tax"
+    },
+    {
+      "name": "LOP Deduction",
+      "amount": 4545.45,
+      "type": "lop"
+    }
+  ],
+  "grossEarnings": 75181.82,
+  "totalDeductions": 11500,
+  "netPay": 63681.82,
+  "status": "generated",
+  "paymentDate": null,
+  "createdAt": "2024-02-01T10:00:00.000Z",
+  "updatedAt": "2024-02-01T10:00:00.000Z"
+}
+```
+
+### Constraints:
+
+- Unique combination: one payslip per (employee, month, year)
+- Gross earnings = sum of all earning amounts
+- Total deductions = sum of all deduction amounts
+- Net pay = gross earnings - total deductions
+- Status must be one of: "pending", "paid", "generated"
+- All amounts must be non-negative
+
+### Status Meanings:
+
+- **"generated"**: Payslip has been calculated and generated
+- **"pending"**: Payslip generated but payment not yet processed
+- **"paid"**: Payment has been processed and distributed
+
+---
+
+## Relationship Diagram
+
+```
+┌─────────────┐
+│   User      │
+├─────────────┤
+│ _id (PK)    │
+│ email       │ ──→ (unique, login)
+│ password    │
+│ role        │
+│ employee_id │ ──┐
+└─────────────┘   │
+                  │ (1:1 relationship)
+                  │
+                  ├─→ ┌──────────────┐
+                  │   │  Employee    │
+                  │   ├──────────────┤
+                  │   │ _id (PK)     │
+                  │   │ employeeId   │ ──→ (unique)
+                  │   │ firstName    │
+                  │   │ lastName     │
+                  │   │ designation  │
+                  │   │ joiningDate  │
+                  │   │ ...details   │
+                  └──→└──────────────┘
+                         ↓ (1:1)
+                  ┌──────────────┐
+                  │   Salary     │
+                  ├──────────────┤
+                  │ _id (PK)     │
+                  │ employee_id  │
+                  │ annualCTC    │
+                  │ earnings[]   │
+                  │ deductions[] │
+                  └──────────────┘
+
+┌──────────────┐
+│  Employee    │
+├──────────────┤
+│ _id (PK)     │
+│ employeeId   │
+└──────────────┘
+      ↓ (1:N)
+      ├─→ ┌──────────────┐
+      │   │ Attendance   │
+      │   ├──────────────┤
+      │   │ _id (PK)     │
+      │   │ employee_id  │
+      │   │ month        │
+      │   │ year         │
+      │   │ daysPresent  │
+      │   │ ...          │
+      │   └──────────────┘
+      │
+      └─→ ┌──────────────┐
+          │   Payslip    │
+          ├──────────────┤
+          │ _id (PK)     │
+          │ employee_id  │
+          │ month        │
+          │ year         │
+          │ earnings[]   │
+          │ deductions[] │
+          │ netPay       │
+          └──────────────┘
+```
+
+---
+
+## Data Type Reference
+
+### Basic Types:
+
+| Type | Example | Notes |
+|------|---------|-------|
+| String | `"John"`, `"EMP001"` | UTF-8 encoded text |
+| Number | `50000`, `1.5` | Integer or decimal |
+| Boolean | `true`, `false` | Logical value |
+| Date | `"2024-01-15T00:00:00.000Z"` | ISO 8601 format (UTC) |
+| ObjectId | `"507f1f77bcf86cd799439012"` | MongoDB 24-char hex string |
+
+### Date Format:
+
+All dates in API responses are in ISO 8601 format with UTC timezone:
+```
+YYYY-MM-DDTHH:mm:ss.SSSZ
+
+Example: 2024-01-15T10:30:45.123Z
+```
+
+### Currency:
+
+All monetary values are in **Indian Rupees (INR)** and are typically whole numbers (no decimals) unless they represent prorated amounts.
+
+---
+
+## Validation Rules
+
+### User Model:
+
+```
+email:
+  - Required
+  - Must be valid email format
+  - Must be unique (case-insensitive)
+  - Trimmed of whitespace
+
+password:
+  - Required
+  - Minimum 6 characters
+  - Automatically hashed (bcrypt) before storage
+  - Cannot be retrieved (one-way hash)
+
+role:
+  - Required
+  - Must be "employee" or "hr"
+
+employee:
+  - Required
+  - Must reference valid Employee document
+  - One user per employee (unique)
+```
+
+### Employee Model:
+
+```
+employeeId:
+  - Required
+  - Must be unique
+  - Trimmed, no extra whitespace
+
+firstName, lastName:
+  - Required
+  - Trimmed, no extra whitespace
+
+personalEmail:
+  - Required
+  - Should be valid email format
+  - Trimmed
+
+designation:
+  - Required
+  - Non-empty string
+
+department:
+  - Optional
+  - Non-empty string if provided
+
+joiningDate:
+  - Required
+  - Valid date
+
+phone:
+  - Optional
+  - Should be 10 digits (validation on frontend)
+
+address.zip:
+  - Optional
+  - Should be 6 digits for Indian postal codes
+
+bankDetails.ifscCode:
+  - Optional
+  - Should be 11 characters (Indian IFSC format)
+
+taxInfo.pan:
+  - Optional
+  - Should be 10 characters (Indian PAN format)
+
+isActive:
+  - Optional
+  - Boolean (default: true)
+```
+
+### Salary Model:
+
+```
+employee:
+  - Required
+  - Must reference valid Employee document
+  - Unique (one salary per employee)
+
+annualCTC:
+  - Required
+  - Must be positive number
+  - Typically >= 100,000 (INR)
+
+earnings[]:
+  - Required (must have at least one)
+  - name: non-empty string
+  - amount: positive number
+
+deductions[]:
+  - Required (must have at least one)
+  - name: non-empty string
+  - amount: positive number (if isPercent=false)
+  - isPercent: boolean
+  - percentOf: reference field name (usually "Basic" or "Gross")
+
+employerContributions[]:
+  - Optional
+  - Same validation as deductions
+```
+
+### Attendance Model:
+
+```
+employee:
+  - Required
+  - Must reference valid Employee document
+
+month:
+  - Required
+  - Integer between 1-12
+
+year:
+  - Required
+  - Valid year (typically >= 2000)
+
+totalWorkingDays:
+  - Required
+  - Positive integer
+  - Typically 20-22
+
+daysPresent:
+  - Required
+  - Non-negative integer
+  - Must be <= totalWorkingDays
+
+leaveWithoutPay:
+  - Optional (default: 0)
+  - Non-negative integer
+
+overtimeHours:
+  - Optional (default: 0)
+  - Non-negative number
+
+variableEarnings[], variableDeductions[]:
+  - Optional
+  - name: non-empty string
+  - amount: positive number
+
+Unique Constraint:
+  - One record per (employee, month, year)
+```
+
+### Payslip Model:
+
+```
+employee:
+  - Required
+  - Must reference valid Employee document
+
+month, year:
+  - Required
+  - Same validation as Attendance
+
+earnings[], deductions[]:
+  - Required
+  - Must contain at least one item each
+  - name: non-empty string
+  - amount: non-negative number
+  - type: valid enum value
+
+grossEarnings, totalDeductions, netPay:
+  - Required
+  - Non-negative numbers
+  - Calculated automatically
+
+status:
+  - Optional (default: "generated")
+  - Must be "pending", "paid", or "generated"
+
+paymentDate:
+  - Optional
+  - Valid date if provided
+  - Only required if status="paid"
+
+Unique Constraint:
+  - One payslip per (employee, month, year)
+```
+
+---
+
+## Common Use Cases
+
+### 1. Display Employee Profile
+
+Fetch Employee model to show:
+- Personal details
+- Contact information
+- Address
+- Bank details
+- Tax information
+
+### 2. View Salary Structure
+
+Fetch Salary model to show:
+- Annual CTC breakdown
+- Fixed components (earnings & deductions)
+- Calculate monthly figures
+
+### 3. Track Attendance
+
+Fetch Attendance model to show:
+- Days present/absent
+- Overtime hours
+- Variable earnings/deductions for the month
+
+### 4. View Payslip
+
+Fetch Payslip model to show:
+- Detailed earnings breakdown
+- Detailed deductions breakdown
+- Final net pay
+- Payment status
+
+### 5. Generate Reports
+
+Combine multiple models:
+- Employee + Attendance + Payslip for monthly reports
+- Employee + Salary for compensation reports
+- Multiple Payslips for annual reports
+
+---
+
+## Notes for Frontend Developers
+
+1. **Date Handling**: Always convert ISO 8601 dates to local timezone for display
+2. **Currency Display**: Format monetary values with 2 decimal places
+3. **Null Fields**: Optional fields may be null or omitted in API responses
+4. **Pagination**: Not all list endpoints support pagination yet
+5. **Calculations**: Do not recalculate totals on frontend; use values from server
+6. **Error Handling**: Check response status code and error messages
+7. **Authentication**: Include JWT token in Authorization header for all requests
+8. **Field Updates**: Only update fields documented in API endpoint specification
+
+---
+
+## Support
+
+For questions about models or data structure, contact the backend team or refer to `API_DOCUMENTATION.md` for endpoint details.

@@ -1,0 +1,29 @@
+.employee-attendance-container{padding:28px 24px;background:#f6f8fa;min-height:calc(100vh - 80px)}
+.attendance-top{display:flex;align-items:center;gap:20px;justify-content:space-between;margin-bottom:12px}
+.attendance-top h2{margin:0;font-size:20px;color:#111827}
+.year-select input{padding:6px 10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff}
+.calendar-wrap{background:#fff;padding:12px;border-radius:10px;border:1px solid #eef2f7;box-shadow:0 1px 6px rgba(16,24,40,0.04)}
+.months-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.month-card{background:#fff;border:1px solid #eee;padding:10px;border-radius:8px}
+.mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.day-box{width:100%;padding-top:70%;border-radius:4px}
+.day-box.present{background:#e6ffed;border:1px solid #34d399}
+.day-box.leave{background:#fff7e6;border:1px solid #f6c85f}
+.day-box.absent{background:#fff1f2;border:1px solid #f87171}
+.month-legend{display:flex;gap:12px;margin-top:8px;font-size:13px;color:#374151}
+.legend{margin-top:14px;display:flex;align-items:center;gap:12px}
+.legend-box{display:inline-block;width:14px;height:14px;border-radius:3px;margin-left:6px}
+.legend-box.present{background:#34d399}.legend-box.leave{background:#f6c85f}.legend-box.absent{background:#f87171}.legend-box.holiday{background:#60a5fa}
+.no-data{color:#6b7280;padding:8px}
+
+/* FullCalendar specific tweaks */
+.fc .fc-daygrid-day{border-radius:6px}
+.fc .fc-daygrid-day-frame{padding:6px}
+.fc .fc-daygrid-event{border-radius:4px}
+
+@media (max-width: 900px){
+	.months-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width: 580px){
+	.months-grid{grid-template-columns:repeat(1,1fr)}
+}

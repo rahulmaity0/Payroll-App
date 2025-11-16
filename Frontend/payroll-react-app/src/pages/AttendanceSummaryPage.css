@@ -1,0 +1,22 @@
+.attendance-summary-container{padding:28px 24px;background:#f6f8fa;min-height:calc(100vh - 80px)}
+.attendance-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.attendance-header h1{margin:0;font-size:20px;color:#1f2937}
+.attendance-controls{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.control-item{display:flex;flex-direction:column;min-width:200px}
+.control-item label{font-size:12px;color:#4b5563;margin-bottom:6px}
+.control-item input,.control-item select{padding:8px 10px;border:1px solid #e6e9ef;border-radius:8px;background:#fff}
+.search-item{flex:1;min-width:260px}
+.search-wrap{display:flex;align-items:center;border:1px solid #e6e9ef;background:#fff;border-radius:8px;overflow:hidden}
+.search-input{flex:1;padding:8px 10px;border:0;outline:none}
+.clear-btn{background:transparent;border:0;padding:8px 10px;cursor:pointer;color:#6b7280}
+.attendance-table-wrap{overflow:auto;background:#fff;border-radius:10px;padding:8px;border:1px solid #eef2f7;box-shadow:0 1px 2px rgba(16,24,40,0.03)}
+.attendance-table{width:100%;border-collapse:collapse}
+.attendance-table th,.attendance-table td{padding:12px 14px;border-bottom:1px solid #f3f6f9;text-align:left}
+.attendance-table th{background:linear-gradient(90deg,#fbfdff,#f8fbff);color:#374151;font-weight:600}
+.attendance-table tbody tr:hover{background:#fbfdff}
+.attendance-table td button{padding:6px 10px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#111827;cursor:pointer}
+
+@media (max-width: 768px){
+	.attendance-controls{flex-direction:column}
+	.control-item{width:100%}
+}

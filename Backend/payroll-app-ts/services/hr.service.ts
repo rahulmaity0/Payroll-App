@@ -1,0 +1,702 @@
+// services/hr.service.ts
+import Employee, { IEmployee } from '../models/employee.model';
+import User, { IUser } from '../models/user.model';
+import Salary, { ISalary } from '../models/salary.model';
+import Attendance, {
+  IAttendance,
+  IVariableEarning,
+  IVariableDeduction,
+} from '../models/attendance.model';
+import Payslip, {
+  IPayslip,
+  IPayslipEarning,
+  IPayslipDeduction,
+} from '../models/payslip.model';
+import fs from 'fs';
+import PDFDocument from 'pdfkit';
+import { Types } from 'mongoose';
+
+// Special import for CommonJS modules with no default export or types
+import csv = require('csv-parser');
+
+// --- Type Definitions ---
+
+// Interface for onboarding data from req.body
+interface IOnboardData extends Partial<IEmployee> {
+  email: string;
+  password: string;
+  annualCTC?: number;
+}
+
+// Interface for the CSV row data
+interface ICsvRow {
+  employeeId: string;
+  month: string;
+  year: string;
+  totalDays: string;
+  daysPresent: string;
+  lop: string;
+  overtimeHours?: string;
+  variableEarnings?: string;
+  variableDeductions?: string;
+}
+
+// Interface for the payroll generation result
+interface IPayrollResult {
+  processed: number;
+  success: number;
+  skipped: number;
+  failed: number;
+  errors: string[];
+}
+
+// --- Employee Management ---
+
+export const onboardEmployee = async (
+  data: IOnboardData
+): Promise<{ employee: IEmployee; user: IUser }> => {
+  const {
+    email,
+    password, // Ignore password from request
+    firstName,
+    lastName,
+    designation,
+    joiningDate,
+    personalEmail,
+    annualCTC,
+    ...otherDetails
+  } = data;
+
+  // 1. Check for duplicate user email
+  const existingUser = await User.findOne({ email });
+  if (existingUser) throw new Error('User with this email already exists');
+
+  // 2. Generate new employeeId with prefix EMP and next sequence
+  let newEmployeeId = 'EMP001';
+  try {
+    // Try aggregation to compute max numeric suffix
+    const agg = await Employee.aggregate([
+      { $match: { employeeId: { $regex: '^EMP' } } },
+      { $project: { numStr: { $substr: ['$employeeId', 3, { $subtract: [{ $strLenCP: '$employeeId' }, 3] }] } } },
+      { $project: { num: { $toInt: '$numStr' } } },
+      { $group: { _id: null, max: { $max: '$num' } } }
+    ]);
+
+    if (agg && agg.length && typeof agg[0].max === 'number') {
+      const next = agg[0].max + 1;
+      newEmployeeId = 'EMP' + String(next).padStart(3, '0');
+    }
+  } catch (err) {
+    // Fallback: scan existing employeeIds if aggregation isn't supported
+    const docs = await Employee.find({ employeeId: { $regex: '^EMP\\d+$' } }).select('employeeId');
+    const nums = docs.map((d) => {
+      const m = d.employeeId.match(/^EMP0*(\d+)$/);
+      return m ? parseInt(m[1], 10) : 0;
+    });
+    const max = nums.length ? Math.max(...nums) : 0;
+    newEmployeeId = 'EMP' + String(max + 1).padStart(3, '0');
+  }
+
+  // 3. Ensure generated employeeId is unique (very rare race condition)
+  const existingEmp = await Employee.findOne({ employeeId: newEmployeeId });
+  if (existingEmp) {
+    // If collision, increment until unique
+    let counter = 1;
+    let candidate: string;
+    do {
+      candidate = 'EMP' + String(counter + 1000).slice(1); // ensure padding if needed
+      counter++;
+    } while (await Employee.findOne({ employeeId: candidate }));
+    newEmployeeId = candidate;
+  }
+
+  // 4. Create Employee
+  const newEmployee = new Employee({
+    employeeId: newEmployeeId,
+    firstName,
+    lastName,
+    designation,
+    joiningDate,
+    personalEmail: personalEmail || email,
+    ...otherDetails,
+  });
+  await newEmployee.save();
+
+  // 5. Create User (Login) with default password
+  const newUser = new User({
+    email,
+    password: 'password', // Default password - HR ignores any password in request
+    role: 'employee',
+    employee: newEmployee._id,
+  });
+  await newUser.save();
+
+  // 4. Create Salary Structure (if CTC is provided)
+  if (annualCTC) {
+    const monthlyGross = annualCTC / 12;
+    const basic = Math.round(monthlyGross * 0.5);
+    const hra = Math.round(monthlyGross * 0.25);
+    const special = monthlyGross - basic - hra;
+
+    const newSalary = new Salary({
+      employee: newEmployee._id,
+      annualCTC,
+      earnings: [
+        { name: 'Basic', amount: basic },
+        { name: 'HRA', amount: hra },
+        { name: 'Special Allowance', amount: special },
+      ],
+      deductions: [
+        { name: 'Provident Fund', amount: 1800, isPercent: false },
+        { name: 'Professional Tax', amount: 200, isPercent: false },
+      ],
+    });
+    await newSalary.save();
+  }
+
+  return { employee: newEmployee, user: newUser };
+};
+
+export const getAllEmployees = async (): Promise<IEmployee[]> => {
+  return await Employee.find({ isActive: true }).select('-__v');
+};
+
+export const getEmployeeById = async (id: string): Promise<IEmployee> => {
+  const employee = await Employee.findById(id);
+  if (!employee) throw new Error('Employee not found');
+  return employee;
+};
+
+export const updateEmployeeProfile = async (
+  id: string,
+  data: Partial<IEmployee>
+): Promise<IEmployee> => {
+  const updated = await Employee.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updated) throw new Error('Employee not found');
+  return updated;
+};
+
+// --- Salary Management ---
+
+export const getSalaryDetails = async (
+  employeeId: string
+): Promise<ISalary> => {
+  const salary = await Salary.findOne({ employee: employeeId });
+  if (!salary) throw new Error('Salary details not found for this employee');
+  return salary;
+};
+
+export const updateSalaryDetails = async (
+  employeeId: string,
+  data: Partial<ISalary>
+): Promise<ISalary> => {
+  const salary = await Salary.findOneAndUpdate(
+    { employee: employeeId },
+    { ...data, employee: employeeId },
+    { new: true, upsert: true, runValidators: true }
+  );
+  if (!salary) {
+    throw new Error('Could not create or update salary details.');
+  }
+  return salary;
+};
+
+// --- Attendance Management ---
+
+export const getEmployeeAttendance = async (
+  employeeId: string
+): Promise<IAttendance[]> => {
+  return await Attendance.find({ employee: employeeId }).sort({
+    year: -1,
+    month: -1,
+  });
+};
+
+export const createAttendanceRecord = async (
+  data: Partial<IAttendance>
+): Promise<IAttendance> => {
+  const exists = await Attendance.findOne({
+    employee: data.employee,
+    month: data.month,
+    year: data.year,
+  });
+  if (exists) throw new Error('Attendance record already exists for this month');
+
+  const attendance = new Attendance(data);
+  return await attendance.save();
+};
+
+export const updateAttendanceRecord = async (
+  id: string,
+  data: Partial<IAttendance>
+): Promise<IAttendance> => {
+  const updated = await Attendance.findByIdAndUpdate(id, data, { new: true });
+  if (!updated) throw new Error('Attendance record not found');
+  return updated;
+};
+
+// ==========================================================
+// --- REVAMPED: Bulk Upload Logic ---
+// ==========================================================
+export const processPayrollUpload = async (
+  filePath: string,
+  options?: {
+    mode?: 'daily' | 'monthly';
+    action?: 'preview' | 'append' | 'overwrite';
+    dedupeStrategy?: 'skip' | 'update' | 'error';
+    year?: number;
+    month?: number;
+  }
+): Promise<{
+  message: string;
+  mode?: string;
+  action?: string;
+  processed: number;
+  success: number;
+  skipped: number;
+  failed: number;
+  errors: string[];
+}> => {
+  const results: any[] = [];
+  const errors: string[] = [];
+
+  // Helper function to safely parse JSON from CSV
+  const parseJsonColumn = (
+    jsonString: string | undefined,
+    rowIdentifier: string
+  ): any[] | null => {
+    if (!jsonString || jsonString.trim() === '[]' || jsonString.trim() === '') {
+      return [];
+    }
+    try {
+      const validJsonString = jsonString.replace(/""/g, '"');
+      return JSON.parse(validJsonString);
+    } catch (e) {
+      const message = (e as Error).message;
+      errors.push(`Invalid JSON format in row for ${rowIdentifier}: ${message}`);
+      return null;
+    }
+  };
+
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on('data', (data: any) => results.push(data))
+      .on('end', async () => {
+        const mode = options?.mode
+          ? options.mode
+          : // auto-detect: if first row has 'date' -> daily, else monthly
+            (results[0] && Object.keys(results[0]).some((k) => k.toLowerCase() === 'date') ? 'daily' : 'monthly');
+
+        const action = options?.action || 'preview';
+        const dedupe = options?.dedupeStrategy || 'skip';
+
+        let processed = 0;
+        let success = 0;
+        let skipped = 0;
+        let failed = 0;
+
+        // Helper to parse variable columns (works for monthly)
+        const parseVar = (val: any, id: string) => parseJsonColumn(val, id);
+
+        // If overwrite for monthly, and not preview, we can delete existing records per row before upsert
+
+        for (let i = 0; i < results.length; i++) {
+          const row = results[i];
+          processed++;
+          const rowNum = i + 2; // header is row 1
+
+          try {
+            // Normalize keys
+            const r: { [k: string]: any } = {};
+            for (const key of Object.keys(row)) {
+              r[key.trim().toLowerCase()] = row[key];
+            }
+
+            // Determine employee by employeeId or email
+            const empKey = r['employeeid'] || r['employee_id'] || r['emp_id'] || r['email'];
+            let employee = null as any;
+            if (!empKey) {
+              errors.push(`Row ${rowNum}: Missing employeeId or email`);
+              failed++;
+              continue;
+            }
+
+            if (empKey && empKey.toString().includes('@')) {
+              employee = await Employee.findOne({ personalEmail: empKey.toString() }) || await Employee.findOne({ email: empKey.toString() });
+            } else {
+              employee = await Employee.findOne({ employeeId: empKey.toString() });
+            }
+
+            if (!employee) {
+              errors.push(`Row ${rowNum}: Employee ${empKey} not found`);
+              failed++;
+              continue;
+            }
+
+            if (mode === 'monthly') {
+              const monthVal = options?.month || parseInt(r['month']);
+              const yearVal = options?.year || parseInt(r['year']);
+              const totalWorkingDays = parseInt(r['totalworkingdays'] || r['totaldays'] || r['total_days']);
+              const daysPresent = parseInt(r['dayspresent'] || r['days_present']);
+              const lop = parseInt(r['leavewithoutpay'] || r['lwp'] || r['lop'] || '0');
+              const overtimeHours = parseFloat(r['overtimehours'] || r['overtime'] || '0');
+
+              if (!monthVal || !yearVal || isNaN(totalWorkingDays) || isNaN(daysPresent)) {
+                errors.push(`Row ${rowNum}: Missing or invalid month/year/workingDays/daysPresent`);
+                failed++;
+                continue;
+              }
+
+              const varEarnings = parseVar(r['variableearnings'] || r['variable_earnings'], employee.employeeId);
+              const varDeductions = parseVar(r['variabledeductions'] || r['variable_deductions'], employee.employeeId);
+
+              if (varEarnings === null || varDeductions === null) {
+                failed++;
+                continue;
+              }
+
+              const attendanceData: Partial<IAttendance> = {
+                employee: employee._id as any,
+                month: monthVal,
+                year: yearVal,
+                totalWorkingDays: totalWorkingDays,
+                daysPresent: daysPresent,
+                leaveWithoutPay: lop || 0,
+                overtimeHours: overtimeHours || 0,
+                variableEarnings: varEarnings as IVariableEarning[],
+                variableDeductions: varDeductions as IVariableDeduction[],
+              };
+
+              // Preview mode: don't write
+              if (action === 'preview') {
+                success++;
+                continue;
+              }
+
+              // Overwrite: remove existing record first
+              if (action === 'overwrite') {
+                await Attendance.findOneAndDelete({ employee: employee._id, month: attendanceData.month, year: attendanceData.year });
+              }
+
+              // Append with dedupe strategies
+              const existing = await Attendance.findOne({ employee: employee._id, month: attendanceData.month, year: attendanceData.year });
+              if (existing) {
+                if (dedupe === 'skip') {
+                  skipped++;
+                  continue;
+                } else if (dedupe === 'error') {
+                  errors.push(`Row ${rowNum}: Attendance exists for employee ${employee.employeeId} month ${attendanceData.month}/${attendanceData.year}`);
+                  failed++;
+                  continue;
+                } else if (dedupe === 'update') {
+                  await Attendance.findByIdAndUpdate(existing._id, attendanceData, { new: true, runValidators: true });
+                  success++;
+                  continue;
+                }
+              }
+
+              // Default: upsert
+              await Attendance.findOneAndUpdate({ employee: employee._id, month: attendanceData.month, year: attendanceData.year }, attendanceData, { upsert: true, new: true, runValidators: true });
+              success++;
+            } else {
+              // daily mode
+              const dateStr = r['date'];
+              const status = (r['status'] || '').toString().toLowerCase();
+              if (!dateStr || !status) {
+                errors.push(`Row ${rowNum}: Missing date or status for daily record`);
+                failed++;
+                continue;
+              }
+
+              // Build daily attendance object (we'll store as aggregated monthly record by default)
+              // For now, convert daily to monthly summary per incoming row: create or update Attendance doc for that month
+              const d = new Date(dateStr);
+              if (isNaN(d.getTime())) {
+                errors.push(`Row ${rowNum}: Invalid date ${dateStr}`);
+                failed++;
+                continue;
+              }
+              const monthVal = d.getMonth() + 1;
+              const yearVal = d.getFullYear();
+
+              // Determine existing attendance to update daily counts
+              const existing = await Attendance.findOne({ employee: employee._id, month: monthVal, year: yearVal });
+
+              if (action === 'preview') {
+                success++;
+                continue;
+              }
+
+              // Simplified daily ingestion: increment totals or create record
+              const hoursWorked = parseFloat(r['hoursworked'] || r['hours_worked'] || '0') || 0;
+              const overtime = parseFloat(r['overtimehours'] || '0') || 0;
+
+              if (existing) {
+                if (action === 'overwrite') {
+                  // reset and then apply (for simplicity we will replace this month's record)
+                  await Attendance.findByIdAndDelete(existing._id);
+                } else if (dedupe === 'skip') {
+                  skipped++;
+                  continue;
+                }
+              }
+
+              // If no existing or after delete, create or update aggregates
+              const toUpsert: Partial<IAttendance> = {
+                employee: employee._id as any,
+                month: monthVal,
+                year: yearVal,
+                totalWorkingDays: existing ? existing.totalWorkingDays : 0,
+                daysPresent: existing ? existing.daysPresent : 0,
+                leaveWithoutPay: existing ? existing.leaveWithoutPay : 0,
+                overtimeHours: (existing ? existing.overtimeHours : 0) + overtime,
+                variableEarnings: existing ? existing.variableEarnings : [],
+                variableDeductions: existing ? existing.variableDeductions : [],
+              };
+
+              // Update counts based on status
+              if (status === 'present') {
+                toUpsert.daysPresent = (toUpsert.daysPresent || 0) + 1;
+              } else if (status === 'leave' || status === 'absent') {
+                // leaveWithoutPay not incremented by default unless specified
+              } else if (status === 'halfday') {
+                toUpsert.daysPresent = (toUpsert.daysPresent || 0) + 0.5 as any;
+              }
+
+              // Persist
+              await Attendance.findOneAndUpdate({ employee: employee._id, month: monthVal, year: yearVal }, toUpsert, { upsert: true, new: true, runValidators: true });
+              success++;
+            }
+          } catch (err) {
+            const message = (err as Error).message;
+            errors.push(`Row ${rowNum}: Error processing: ${message}`);
+            failed++;
+          }
+        }
+
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          // ignore
+        }
+
+        resolve({
+          message: 'Processing complete',
+          mode: options?.mode,
+          action: options?.action || 'preview',
+          processed,
+          success,
+          skipped,
+          failed,
+          errors,
+        });
+      })
+      .on('error', (error) => {
+        reject(error);
+      });
+  });
+};
+
+// ==========================================================
+// --- REVAMPED: Payroll Generation Service ---
+// ==========================================================
+export const generatePayslips = async (
+  month: number,
+  year: number
+): Promise<IPayrollResult> => {
+  const now = new Date();
+  const firstDayOfNextMonth = new Date(year, month, 1); // JS Date month is 0-indexed
+
+  if (now < firstDayOfNextMonth) {
+    throw new Error(
+      `Payroll for ${month}/${year} can only be run on or after ${firstDayOfNextMonth.toLocaleDateString()}`
+    );
+  }
+
+  const employees = await Employee.find({ isActive: true });
+  const results: IPayrollResult = {
+    processed: 0,
+    success: 0,
+    skipped: 0,
+    failed: 0,
+    errors: [],
+  };
+
+  for (const employee of employees) {
+    results.processed++;
+    try {
+      const existingPayslip = await Payslip.findOne({
+        employee: employee._id,
+        month,
+        year,
+      });
+      if (existingPayslip) {
+        results.skipped++;
+        continue;
+      }
+
+      const salary = await Salary.findOne({ employee: employee._id });
+      const attendance = await Attendance.findOne({
+        employee: employee._id,
+        month,
+        year,
+      });
+
+      if (!salary) throw new Error('Missing salary structure.');
+      if (!attendance)
+        throw new Error('Missing attendance data (run upload first).');
+      if (attendance.totalWorkingDays <= 0)
+        throw new Error('Total working days must be > 0.');
+
+      const {
+        daysPresent,
+        totalWorkingDays,
+        variableEarnings,
+        variableDeductions,
+      } = attendance;
+      
+      const finalEarnings: IPayslipEarning[] = [];
+      const finalDeductions: IPayslipDeduction[] = [];
+
+      // --- A. Calculate FIXED Earnings (Prorated for LOP) ---
+      for (const earning of salary.earnings) {
+        const proratedAmount = (earning.amount / totalWorkingDays) * daysPresent;
+        finalEarnings.push({
+          name: earning.name,
+          amount: Math.round(proratedAmount),
+          type: 'fixed',
+        });
+      }
+
+      // --- B. Add VARIABLE Earnings (from attendance file) ---
+      for (const varEarning of variableEarnings) {
+        const type = varEarning.name.toLowerCase().includes('reimbursement')
+          ? 'reimbursement'
+          : 'variable';
+        finalEarnings.push({
+          name: varEarning.name,
+          amount: Math.round(varEarning.amount),
+          type: type,
+        });
+      }
+
+      // --- C. Calculate FIXED Deductions ---
+      for (const deduction of salary.deductions) {
+        let deductionAmount = 0;
+        if (deduction.isPercent) {
+          const basicEarning = finalEarnings.find(
+            (e) => e.name === 'Basic' && e.type === 'fixed'
+          );
+          const basicAmount = basicEarning ? basicEarning.amount : 0;
+          deductionAmount = basicAmount * ((deduction.amount || 0) / 100);
+        } else {
+          // Prorate fixed deductions based on days paid as well
+          deductionAmount = ((deduction.amount || 0) / totalWorkingDays) * daysPresent;
+        }
+
+        finalDeductions.push({
+          name: deduction.name,
+          amount: Math.round(deductionAmount),
+          type: 'statutory',
+        });
+      }
+
+      // --- D. Add VARIABLE Deductions (from attendance file) ---
+      for (const varDeduction of variableDeductions) {
+        finalDeductions.push({
+          name: varDeduction.name,
+          amount: Math.round(varDeduction.amount),
+          type: 'other',
+        });
+      }
+
+      // --- E. Final Totals ---
+      const grossEarnings = finalEarnings.reduce((acc, e) => acc + e.amount, 0);
+      const totalDeductions = finalDeductions.reduce((acc, d) => acc + d.amount, 0);
+      const netPay = grossEarnings - totalDeductions;
+
+      const newPayslip = new Payslip({
+        employee: employee._id,
+        month,
+        year,
+        payrollInfo: {
+          totalWorkingDays: totalWorkingDays,
+          daysPaid: daysPresent,
+          lopDays: attendance.leaveWithoutPay,
+        },
+        earnings: finalEarnings,
+        deductions: finalDeductions,
+        grossEarnings: Math.round(grossEarnings),
+        totalDeductions: Math.round(totalDeductions),
+        netPay: Math.round(netPay),
+        status: 'generated',
+      });
+
+      await newPayslip.save();
+      results.success++;
+    } catch (error) {
+      results.failed++;
+      const message = (error as Error).message;
+      results.errors.push(`Employee ${employee.employeeId}: ${message}`);
+    }
+  }
+
+  return results;
+};
+
+// --- HR Payslip Download Service ---
+export const downloadEmployeePayslip = async (
+  payslipId: string
+): Promise<any> => {
+  const payslip = await Payslip.findById(payslipId).populate<{
+    employee: IEmployee;
+  }>('employee');
+
+  if (!payslip) {
+    throw new Error('Payslip not found');
+  }
+
+  const doc = new PDFDocument();
+  doc.fontSize(20).text('Payslip', { align: 'center' });
+  doc.fontSize(12);
+  doc.moveDown();
+  doc.text(
+    `Employee: ${payslip.employee.firstName} ${payslip.employee.lastName} (ID: ${payslip.employee.employeeId})`
+  );
+  doc.text(`Month: ${payslip.month}/${payslip.year}`);
+  doc.moveDown();
+  doc.text('--- Earnings ---');
+  payslip.earnings.forEach((e) =>
+    doc.text(`${e.name}: ${e.amount.toFixed(2)}`)
+  );
+  doc.moveDown();
+  doc.text('--- Deductions ---');
+  payslip.deductions.forEach((d) =>
+    doc.text(`${d.name}: ${d.amount.toFixed(2)}`)
+  );
+  doc.moveDown();
+  doc.fontSize(16).text(`Gross Earnings: ${payslip.grossEarnings.toFixed(2)}`);
+  doc.fontSize(16).text(`Total Deductions: ${payslip.totalDeductions.toFixed(2)}`);
+  doc.fontSize(16).text(`Net Pay: ${payslip.netPay.toFixed(2)}`);
+
+  return doc;
+};
+
+// --- HR Password Reset Service ---
+export const resetUserPassword = async (
+  userId: string,
+  newPassword: string
+): Promise<void> => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  user.password = newPassword;
+  await user.save();
+};
