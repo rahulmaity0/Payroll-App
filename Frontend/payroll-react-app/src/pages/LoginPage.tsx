@@ -24,7 +24,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { setToken } = useAuth();
+  const { setToken, setRole } = useAuth();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -55,11 +55,21 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           console.log('JWT token stored successfully');
         }
 
+        // Store role in auth context
+        if (data.role) {
+          setRole(data.role);
+        }
+
         if (onLoginSuccess) {
           onLoginSuccess(data);
         }
 
-        navigate('/dashboard');
+        // Route based on user role
+        if (data.role === 'employee') {
+          navigate('/employee-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       console.error('Login error:', err);

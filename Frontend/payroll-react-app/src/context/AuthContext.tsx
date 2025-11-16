@@ -2,8 +2,10 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface AuthContextType {
   token: string | null;
+  role: 'employee' | 'hr' | null;
   isAuthenticated: boolean;
   setToken: (token: string | null) => void;
+  setRole: (role: 'employee' | 'hr' | null) => void;
   clearToken: () => void;
   getAuthHeader: () => Record<string, string>;
 }
@@ -15,6 +17,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return localStorage.getItem('jwtToken');
   });
 
+  const [role, setRoleState] = useState<'employee' | 'hr' | null>(() => {
+    const storedRole = localStorage.getItem('userRole');
+    return (storedRole === 'employee' || storedRole === 'hr') ? storedRole : null;
+  });
+
   const setToken = (newToken: string | null) => {
     setTokenState(newToken);
     if (newToken) {
@@ -24,8 +31,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const setRole = (newRole: 'employee' | 'hr' | null) => {
+    setRoleState(newRole);
+    if (newRole) {
+      localStorage.setItem('userRole', newRole);
+    } else {
+      localStorage.removeItem('userRole');
+    }
+  };
+
   const clearToken = () => {
     setToken(null);
+    setRole(null);
   };
 
   const getAuthHeader = (): Record<string, string> => {
@@ -40,7 +57,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const isAuthenticated = !!token;
 
   return (
-    <AuthContext.Provider value={{ token, isAuthenticated, setToken, clearToken, getAuthHeader }}>
+    <AuthContext.Provider value={{ token, role, isAuthenticated, setToken, setRole, clearToken, getAuthHeader }}>
       {children}
     </AuthContext.Provider>
   );

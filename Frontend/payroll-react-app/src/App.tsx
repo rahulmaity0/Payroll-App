@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import EmployeeDashboardPage from './pages/EmployeeDashboardPage';
 import OnboardEmployeePage from './pages/OnboardEmployeePage';
 import EmployeesPage from './pages/EmployeesPage';
 import EmployeesListPage from './pages/EmployeesListPage';
@@ -18,7 +19,7 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) 
 };
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, role } = useAuth();
 
   return (
     <Router>
@@ -28,6 +29,7 @@ function App() {
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute element={<DashboardPage />} />} />
+        <Route path="/employee-dashboard" element={<ProtectedRoute element={<EmployeeDashboardPage />} />} />
         <Route path="/onboard-employee" element={<ProtectedRoute element={<OnboardEmployeePage />} />} />
         <Route path="/employees" element={<ProtectedRoute element={<EmployeesPage />} />} />
         <Route path="/employees-list" element={<ProtectedRoute element={<EmployeesListPage />} />} />
@@ -35,8 +37,22 @@ function App() {
         <Route path="/attendance/:id" element={<ProtectedRoute element={<EmployeeAttendancePage />} />} />
         <Route path="/attendance" element={<ProtectedRoute element={<AttendanceSummaryPage />} />} />
 
-        {/* Root redirect - goes to dashboard if authenticated, otherwise to login */}
-        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+        {/* Root redirect - goes to appropriate dashboard based on role if authenticated, otherwise to login */}
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to={
+                isAuthenticated
+                  ? role === 'employee'
+                    ? '/employee-dashboard'
+                    : '/dashboard'
+                  : '/login'
+              }
+              replace
+            />
+          }
+        />
 
         {/* Catch-all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
