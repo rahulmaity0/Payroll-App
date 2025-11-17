@@ -3,7 +3,7 @@
  * Implements payslip generation UI per PAYSLIP_GENERATION_API_REFERENCE.md v2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { generatePayslips } from '../../services/payslipApi';
 import { GeneratePayslipResponse } from '../../types/payslip';
@@ -36,12 +36,27 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({
   const [result, setResult] = useState<GeneratePayslipResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const monthNames = [
+  const monthNames = useMemo(() => [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  ], []);
 
-  const handleGenerate = async () => {
+  const resetModal = () => {
+    setMonth(defaultMonth);
+    setYear(defaultYear);
+    setForce(false);
+    setResult(null);
+    setError(null);
+  };
+
+  const handleClose = useCallback(() => {
+    if (!loading) {
+      resetModal();
+      onClose();
+    }
+  }, [loading, onClose]);
+
+  const handleGenerate = useCallback(async () => {
     setError(null);
     setResult(null);
 
@@ -71,22 +86,7 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetModal = () => {
-    setMonth(defaultMonth);
-    setYear(defaultYear);
-    setForce(false);
-    setResult(null);
-    setError(null);
-  };
-
-  const handleClose = () => {
-    if (!loading) {
-      resetModal();
-      onClose();
-    }
-  };
+  }, [token, month, year, force, onSuccess, handleClose]);
 
   if (!isOpen) return null;
 

@@ -1,100 +1,153 @@
-/* Employees Page Styles */
+/* Modern Employees Page Styles */
 
 .employees-page-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 24px;
+  background: var(--primary-gradient);
+  padding: var(--spacing-xl);
+  position: relative;
+}
+
+.employees-page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 .employees-page-header {
   max-width: 1200px;
-  margin: 0 auto 40px;
+  margin: 0 auto var(--spacing-2xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 1;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .employees-page-header h1 {
-  font-size: 32px;
+  font-size: var(--font-size-4xl);
   color: white;
   margin: 0;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .reload-btn {
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid white;
-  color: white;
-  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: none;
+  color: var(--primary-color);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
 }
 
 .reload-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .reload-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .controls-container {
   max-width: 1200px;
-  margin: 0 auto 20px;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  margin: 0 auto var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background: white;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-lg);
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .filter-group, .sort-group {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-md);
   align-items: center;
 }
 
 .sort-group span {
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--gray-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .controls-container select, .sort-group button {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 14px;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--gray-300);
+  background: white;
+  color: var(--gray-900);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.controls-container select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
 .controls-container select option {
-  background: #333;
-  color: white;
+  background: white;
+  color: var(--gray-900);
 }
 
 .sort-group button {
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-weight: var(--font-weight-semibold);
 }
 
 .sort-group button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  border-color: var(--primary-color);
+  background: var(--gray-50);
+  color: var(--primary-color);
 }
 
 .sort-group button.active {
-  background: #fff;
-  color: #667eea;
-  font-weight: 600;
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
 }
 
 .employees-table-container {

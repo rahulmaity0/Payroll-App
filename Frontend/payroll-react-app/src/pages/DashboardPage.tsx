@@ -16,67 +16,105 @@ const DashboardPage: React.FC = () => {
     navigate('/login');
   };
 
+  const cards = [
+    {
+      id: 1,
+      icon: '👥',
+      title: 'Onboard Employee',
+      description: 'Create a new employee record and send onboarding details.',
+      onClick: handleOnboardClick,
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    },
+    {
+      id: 2,
+      icon: '📋',
+      title: 'View All Employees',
+      description: 'Browse, view and edit employee details.',
+      onClick: handleViewEmployees,
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    },
+    {
+      id: 3,
+      icon: '📅',
+      title: 'Show Attendance',
+      description: 'View attendance summary, filter by department or search employee records.',
+      onClick: () => navigate('/attendance'),
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    },
+    {
+      id: 4,
+      icon: '📤',
+      title: 'Upload Attendance',
+      description: 'Bulk upload attendance records via Excel file.',
+      onClick: () => navigate('/upload-attendance'),
+      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    },
+    {
+      id: 5,
+      icon: '💰',
+      title: 'Generate Payslips',
+      description: 'Generate monthly payslips for all employees.',
+      onClick: () => setIsPayslipModalOpen(true),
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    },
+    {
+      id: 6,
+      icon: '📊',
+      title: 'View Payslips',
+      description: 'View all generated payslips and download PDFs.',
+      onClick: () => navigate('/hr/employee-payslips'),
+      gradient: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+    },
+  ];
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>HR Dashboard</h1>
-        <div>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
+        <div className="header-content">
+          <h1 className="page-title">HR Dashboard 💼</h1>
+          <p className="page-subtitle">Manage your workforce efficiently</p>
         </div>
+        <button className="btn btn-secondary logout-btn" onClick={handleLogout}>
+          <span>🚪</span> Logout
+        </button>
       </div>
 
       <div className="dashboard-content">
         <div className="cards-grid">
-          <div className="card" onClick={handleOnboardClick}>
-            <div className="card-icon">�</div>
-            <h2>Onboard Employee</h2>
-            <p>Create a new employee record and send onboarding details.</p>
-            <div className="card-arrow">→</div>
-          </div>
-
-          <div className="card" onClick={handleViewEmployees}>
-            <div className="card-icon">📋</div>
-            <h2>View All Employees</h2>
-            <p>Browse, view and edit employee details.</p>
-            <div className="card-arrow">→</div>
-          </div>
-
-          <div className="card" onClick={() => navigate('/attendance')}>
-            <div className="card-icon">📅</div>
-            <h2>Show Attendance</h2>
-            <p>View attendance summary, filter by department or search employee records.</p>
-            <div className="card-arrow">→</div>
-          </div>
-
-          <div className="card" onClick={() => navigate('/attendance/upload')}>
-            <div className="card-icon">⬆️</div>
-            <h2>Upload Attendance</h2>
-            <p>Upload CSV/XLSX attendance files, preview and commit to the system.</p>
-            <div className="card-arrow">→</div>
-          </div>
-
-          <div className="card" onClick={() => setIsPayslipModalOpen(true)}>
-            <div className="card-icon">💰</div>
-            <h2>Generate Payslips</h2>
-            <p>Generate monthly payslips for all employees with validations and reports.</p>
-            <div className="card-arrow">→</div>
-          </div>
-
-          <div className="card" onClick={() => navigate('/hr/employee-payslips')}>
-            <div className="card-icon">📊</div>
-            <h2>View Employee Payslips</h2>
-            <p>Search employees and view detailed payslip breakdowns with charts and analytics.</p>
-            <div className="card-arrow">→</div>
-          </div>
+          {cards.map((card) => (
+            <div
+              key={card.id}
+              className="card card-interactive"
+              onClick={card.onClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && card.onClick()}
+            >
+              <div className="card-icon-wrapper">
+                <span className="card-icon">{card.icon}</span>
+              </div>
+              <h2 className="card-title">{card.title}</h2>
+              <p className="card-description">{card.description}</p>
+              <div className="card-footer">
+                <span className="card-action">
+                  View Details <span className="arrow">→</span>
+                </span>
+              </div>
+              <div className="card-gradient" style={{ background: card.gradient }}></div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <PayslipGenerationModal 
-        isOpen={isPayslipModalOpen} 
-        onClose={() => setIsPayslipModalOpen(false)} 
-      />
+      {isPayslipModalOpen && (
+        <PayslipGenerationModal
+          isOpen={isPayslipModalOpen}
+          onClose={() => setIsPayslipModalOpen(false)}
+          onSuccess={() => {
+            setIsPayslipModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

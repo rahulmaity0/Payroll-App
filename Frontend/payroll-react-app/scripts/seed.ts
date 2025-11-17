@@ -5,8 +5,8 @@ import type { OnboardEmployeeRequest } from '../src/types/onboarding';
 
 // --- CONFIGURATION ---
 // IMPORTANT: Replace this with a valid HR Admin JWT token
-const HR_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MWExMDBhNjBkNDk1ZmU1ZjFmZDZjNSIsInJvbGUiOiJociIsImlhdCI6MTc2MzMxNjEzMiwiZXhwIjoxNzYzNDAyNTMyfQ.M1JCzN6nqUB7RpTbA3xdjHr-Mb8hOqarpiKs-u1i7Sc';
-const API_BASE_URL = 'http://localhost:5000'; 
+const HR_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MWIyZTFjNDRjY2U0YWZlZTliOGI3NCIsInJvbGUiOiJociIsImlhdCI6MTc2MzM5NzQwOCwiZXhwIjoxNzYzNDgzODA4fQ.Ab6pPPKv2H0D2h50tB7OzmE6rM4sJnXssyJOxUYixPU';
+const API_BASE_URL = 'https://payroll-app-backend-mf93.onrender.com'; 
 const NUMBER_OF_EMPLOYEES = 25;
 
 // --- HELPER FUNCTIONS ---

@@ -5,6 +5,7 @@ import { downloadEmployeePayslip } from '../services/payslipApi';
 import { Payslip } from '../types/payslip';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
+import { API_BASE_URL } from '../apiConfig';
 import './PayslipDetailPage.css';
 
 // Register Chart.js components
@@ -38,7 +39,7 @@ const PayslipDetailPage: React.FC = () => {
       setError(null);
 
       // First fetch employee details
-      const empResponse = await fetch(`http://localhost:5000/api/hr/employees/${employeeId}`, {
+      const empResponse = await fetch(`${API_BASE_URL}/api/hr/employees/${employeeId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -51,7 +52,7 @@ const PayslipDetailPage: React.FC = () => {
 
       // Fetch payslips using HR endpoint
       const payslipsResponse = await fetch(
-        `http://localhost:5000/api/hr/employees/${employeeId}/payslips?year=${year}`,
+        `${API_BASE_URL}/api/hr/employees/${employeeId}/payslips?year=${year}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -72,7 +73,7 @@ const PayslipDetailPage: React.FC = () => {
 
       // Fetch full payslip details using HR download endpoint
       const detailsResponse = await fetch(
-        `http://localhost:5000/api/hr/payslips/${matchingPayslip._id}/download`,
+        `${API_BASE_URL}/api/hr/payslips/${matchingPayslip._id}/download`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

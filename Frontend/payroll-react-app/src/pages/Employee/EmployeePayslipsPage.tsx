@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import employeeApi, { Payslip } from '../../services/employeeApi';
@@ -51,25 +51,25 @@ const EmployeePayslipsPage: React.FC = () => {
     }
   };
 
-  const handleViewDetails = (payslipId: string) => {
+  const handleViewDetails = useCallback((payslipId: string) => {
     navigate(`/employee/payslips/${payslipId}`);
-  };
+  }, [navigate]);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(amount);
-  };
+  }, []);
 
-  const getMonthName = (month: number) => {
+  const getMonthName = useCallback((month: number) => {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'];
     return monthNames[month - 1] || '';
-  };
+  }, []);
 
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+  const years = useMemo(() => Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i), []);
 
   if (loading) {
     return (

@@ -31,6 +31,10 @@ const AttendanceSummaryPage: React.FC = () => {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [error, setError] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof SummaryRow; direction: 'asc' | 'desc' }>({
+    key: 'employeeId',
+    direction: 'asc'
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -106,6 +110,38 @@ const AttendanceSummaryPage: React.FC = () => {
     setFiltered(res);
   }, [departmentFilter, search, employees]);
 
+  const handleSort = (key: keyof SummaryRow) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const sortedAndFiltered = useMemo(() => {
+    const sorted = [...filtered].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      
+      if (aValue === undefined || aValue === null) return 1;
+      if (bValue === undefined || bValue === null) return -1;
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' 
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+      
+      return 0;
+    });
+    return sorted;
+  }, [filtered, sortConfig]);
+
   const handleView = (id: string) => {
     navigate(`/attendance/${id}`);
   };
@@ -114,8 +150,8 @@ const AttendanceSummaryPage: React.FC = () => {
     <div className="attendance-summary-container">
       <div className="attendance-header">
         <h1>Attendance Summary</h1>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <select value={month} onChange={(e) => setMonth(parseInt(e.target.value))}>
+        <div className="date-selector">
+          <select className="month-select" value={month} onChange={(e) => setMonth(parseInt(e.target.value))}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>
                 {new Date(2025, m - 1).toLocaleString('default', { month: 'long' })}
@@ -123,12 +159,12 @@ const AttendanceSummaryPage: React.FC = () => {
             ))}
           </select>
           <input
+            className="year-input"
             type="number"
             value={year}
             onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
             min={2000}
             max={2100}
-            style={{ width: '80px' }}
           />
         </div>
       </div>
@@ -161,27 +197,27 @@ const AttendanceSummaryPage: React.FC = () => {
           <table className="attendance-table">
             <thead>
               <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Designation</th>
-                <th>Department</th>
-                <th>Working Days</th>
-                <th>Days Present</th>
-                <th>LOP Days</th>
-                <th>Overtime Hrs</th>
+                <th className={`sortable ${sortConfig.key === 'employeeId' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('employeeId')}>Employee ID</th>
+                <th className={`sortable ${sortConfig.key === 'name' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('name')}>Name</th>
+                <th className={`sortable ${sortConfig.key === 'designation' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('designation')}>Designation</th>
+                <th className={`sortable ${sortConfig.key === 'department' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('department')}>Department</th>
+                <th className={`sortable ${sortConfig.key === 'totalWorkingDays' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('totalWorkingDays')}>Working Days</th>
+                <th className={`sortable ${sortConfig.key === 'daysPresent' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('daysPresent')}>Days Present</th>
+                <th className={`sortable ${sortConfig.key === 'leaveWithoutPay' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('leaveWithoutPay')}>LOP Days</th>
+                <th className={`sortable ${sortConfig.key === 'overtimeHours' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('overtimeHours')}>Overtime Hrs</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {sortedAndFiltered.length === 0 ? (
                 <tr>
                   <td colSpan={10} style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                     No employees found
                   </td>
                 </tr>
               ) : (
-                filtered.map((r) => (
+                sortedAndFiltered.map((r) => (
                   <tr key={r._id} className={!r.hasAttendance ? 'missing-attendance' : ''}>
                     <td>{r.employeeId}</td>
                     <td>{r.name}</td>

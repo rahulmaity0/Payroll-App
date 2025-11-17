@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAllEmployeesPayslips } from '../services/payslipApi';
@@ -24,6 +24,10 @@ const EmployeePayslipPage: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Employee; direction: 'asc' | 'desc' }>({
+    key: 'employeeId',
+    direction: 'asc'
+  });
 
   useEffect(() => {
     fetchEmployees();
@@ -35,7 +39,7 @@ const EmployeePayslipPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, employees]);
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     if (!token) return;
 
     try {
@@ -53,15 +57,15 @@ const EmployeePayslipPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
-  const filterEmployees = () => {
+  const filterEmployees = useCallback(() => {
     if (!searchTerm.trim()) {
       setFilteredEmployees(employees);
       return;
     }
 
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
     const filtered = employees.filter(
       (emp) =>
         emp.employeeId.toLowerCase().includes(term) ||
@@ -72,7 +76,39 @@ const EmployeePayslipPage: React.FC = () => {
         (emp.department && emp.department.toLowerCase().includes(term))
     );
     setFilteredEmployees(filtered);
+  }, [searchTerm, employees]);
+
+  const handleSort = (key: keyof Employee) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
   };
+
+  const sortedAndFilteredEmployees = useMemo(() => {
+    const sorted = [...filteredEmployees].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      
+      if (aValue === undefined || aValue === null) return 1;
+      if (bValue === undefined || bValue === null) return -1;
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+        return sortConfig.direction === 'asc'
+          ? (aValue === bValue ? 0 : aValue ? -1 : 1)
+          : (aValue === bValue ? 0 : aValue ? 1 : -1);
+      }
+      
+      return 0;
+    });
+    return sorted;
+  }, [filteredEmployees, sortConfig]);
 
   const handleViewPayslip = (employeeId: string) => {
     navigate(`/hr/payslips/${employeeId}?month=${selectedMonth}&year=${selectedYear}`);
@@ -115,123 +151,115 @@ const EmployeePayslipPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="payslip-content">
-        <div className="filters-section">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="Search by name, ID, designation, or department..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            <span className="search-icon">🔍</span>
-          </div>
-
-          <div className="date-filters">
-            <div className="filter-group">
-              <label>Month:</label>
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="filter-select"
-              >
-                {months.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label>Year:</label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="filter-select"
-              >
-                {years.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+      <div className="payslip-controls">
+        <div className="search-filter">
+          <input
+            type="text"
+            placeholder="Search by name, ID, designation, or department..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {loading && (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Loading employees...</p>
-          </div>
-        )}
+        <div className="filter-item">
+          <label>Month</label>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          >
+            {months.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {error && (
-          <div className="error-state">
-            <p>❌ {error}</p>
-            <button onClick={fetchEmployees}>Retry</button>
-          </div>
-        )}
-
-        {!loading && !error && filteredEmployees.length === 0 && (
-          <div className="empty-state">
-            <p>No employees found matching your search.</p>
-          </div>
-        )}
-
-        {!loading && !error && filteredEmployees.length > 0 && (
-          <div className="employees-table-container">
-            <table className="employees-table">
-              <thead>
-                <tr>
-                  <th>Employee ID</th>
-                  <th>Name</th>
-                  <th>Designation</th>
-                  <th>Department</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEmployees.map((emp) => (
-                  <tr key={emp._id}>
-                    <td className="emp-id">{emp.employeeId}</td>
-                    <td className="emp-name">
-                      {emp.firstName} {emp.lastName}
-                    </td>
-                    <td>{emp.designation}</td>
-                    <td>{emp.department || '-'}</td>
-                    <td>
-                      <span className={`status-badge ${emp.isActive ? 'active' : 'inactive'}`}>
-                        {emp.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className="view-btn"
-                        onClick={() => handleViewPayslip(emp._id)}
-                        disabled={!emp.isActive}
-                      >
-                        View Payslip
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {!loading && !error && filteredEmployees.length > 0 && (
-          <div className="table-footer">
-            <p>
-              Showing {filteredEmployees.length} of {employees.length} employees
-            </p>
-          </div>
-        )}
+        <div className="filter-item">
+          <label>Year</label>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {loading && (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading employees...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="error-state">
+          <p>❌ {error}</p>
+          <button onClick={fetchEmployees}>Retry</button>
+        </div>
+      )}
+
+      {!loading && !error && filteredEmployees.length === 0 && (
+        <div className="empty-state">
+          <p>No employees found matching your search.</p>
+        </div>
+      )}
+
+      {!loading && !error && sortedAndFilteredEmployees.length > 0 && (
+        <div className="payslips-table-container">
+          <table className="payslips-table">
+            <thead>
+              <tr>
+                <th className={`sortable ${sortConfig.key === 'employeeId' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('employeeId')}>Employee ID</th>
+                <th className={`sortable ${sortConfig.key === 'firstName' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('firstName')}>Name</th>
+                <th className={`sortable ${sortConfig.key === 'designation' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('designation')}>Designation</th>
+                <th className={`sortable ${sortConfig.key === 'department' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('department')}>Department</th>
+                <th className={`sortable ${sortConfig.key === 'isActive' ? `sorted-${sortConfig.direction}` : ''}`} onClick={() => handleSort('isActive')}>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedAndFilteredEmployees.map((emp) => (
+                <tr key={emp._id}>
+                  <td className="payslip-id">{emp.employeeId}</td>
+                  <td>
+                    {emp.firstName} {emp.lastName}
+                  </td>
+                  <td>{emp.designation}</td>
+                  <td>{emp.department || '-'}</td>
+                  <td>
+                    <span className={`status-badge ${emp.isActive ? 'active' : 'inactive'}`}>
+                      {emp.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      className="view-btn"
+                      onClick={() => handleViewPayslip(emp._id)}
+                      disabled={!emp.isActive}
+                    >
+                      View Payslip
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!loading && !error && filteredEmployees.length > 0 && (
+        <div className="table-footer">
+          <p>
+            Showing {filteredEmployees.length} of {employees.length} employees
+          </p>
+        </div>
+      )}
     </div>
   );
 };

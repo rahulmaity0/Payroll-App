@@ -24,12 +24,61 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { setToken, setRole } = useAuth();
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (emailError && validateEmail(value)) {
+      setEmailError('');
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (passwordError && value.length >= 6) {
+      setPasswordError('');
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    
+    // Reset errors
     setError('');
+    setEmailError('');
+    setPasswordError('');
+    
+    // Validate form
+    let hasError = false;
+    if (!email) {
+      setEmailError('Email is required');
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
+    }
+    
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      hasError = true;
+    }
+    
+    if (hasError) return;
+    
+    setLoading(true);
 
     try {
       const controller = new AbortController();
@@ -86,37 +135,76 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>Login</h1>
+        <div className="login-header">
+          <div className="logo-icon">💼</div>
+          <h1>Payroll System</h1>
+          <p className="subtitle">Sign in to your account</p>
+        </div>
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label>Email</label>
+            <label htmlFor="email" className="label">Email Address</label>
             <input
+              id="email"
               type="email"
+              className={`input ${emailError ? 'input-error' : ''}`}
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              onChange={handleEmailChange}
+              disabled={loading}
+              autoComplete="email"
             />
+            {emailError && <span className="error-text">{emailError}</span>}
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <label htmlFor="password" className="label">Password</label>
+            <div className="password-input-wrapper">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                className={`input ${passwordError ? 'input-error' : ''}`}
+                placeholder="Enter your password"
+                value={password}
+                onChange={handlePasswordChange}
+                disabled={loading}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
+            {passwordError && <span className="error-text">{passwordError}</span>}
           </div>
 
-          {error && <p className="error-message">{error}</p>}
+          {error && (
+            <div className="error-alert">
+              <span className="error-icon">⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
 
-          <button type="submit" disabled={loading} className="login-btn">
-            {loading ? 'Logging in...' : 'Login'}
+          <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
+            {loading ? (
+              <>
+                <span className="spinner"></span>
+                Signing in...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </button>
         </form>
+
+        <div className="login-footer">
+          <p className="footer-text">Secure login powered by JWT authentication</p>
+        </div>
       </div>
     </div>
   );
