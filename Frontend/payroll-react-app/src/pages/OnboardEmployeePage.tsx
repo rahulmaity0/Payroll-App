@@ -83,6 +83,7 @@ export default function OnboardEmployeePage() {
     accountNumber: '',
     ifscCode: '',
     pan: '',
+    uan: '',
   });
 
   // Auto-generate company email based on first name and last name
@@ -404,6 +405,7 @@ export default function OnboardEmployeePage() {
         },
         taxInfo: {
           pan: formData.pan,
+          ...(formData.uan && { uan: formData.uan }),
         },
         // Add the full salary structure
         earnings: validEarnings,
@@ -770,6 +772,17 @@ export default function OnboardEmployeePage() {
                   {validationErrors.pan && (
                     <span className="field-error">{validationErrors.pan}</span>
                   )}
+                </div>
+                <div className="form-group">
+                  <label>UAN (Optional)</label>
+                  <input
+                    type="text"
+                    name="uan"
+                    value={formData.uan || ''}
+                    onChange={handleInputChange}
+                    placeholder="123456789012"
+                    maxLength={12}
+                  />
                 </div>
               </div>
             </div>

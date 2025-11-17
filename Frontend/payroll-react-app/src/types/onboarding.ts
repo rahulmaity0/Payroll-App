@@ -60,6 +60,10 @@ export interface EmployeeData {
   _id: string;
   createdAt: string;
   updatedAt: string;
+  // Add salary structure to the main employee data type
+  earnings?: SalaryComponent[];
+  deductions?: SalaryComponent[];
+  employerContributions?: SalaryComponent[];
 }
 
 export interface UserData {
@@ -94,6 +98,7 @@ export interface OnboardingFormData {
   accountNumber: string;
   ifscCode: string;
   pan: string;
+  uan?: string;
 }
 
 export {};

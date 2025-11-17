@@ -14,9 +14,9 @@ const createAdminUser = async (): Promise<void> => {
 
   try {
     // --- !! CUSTOMIZE YOUR HR ADMIN DETAILS HERE !! ---
-    const adminEmail = 'tejas@gmail.com';
+    const adminEmail = 'ashwinjenu2002@gmail.com';
     const adminPassword = '123456';
-    const adminEmployeeId = 'HR002';
+    const adminEmployeeId = 'HR001';
 
     // Check if user already exists
     const userExists = await User.findOne({ email: adminEmail });
@@ -74,3 +74,6 @@ const createAdminUser = async (): Promise<void> => {
 
 // Run the script
 createAdminUser();
+
+
+// npx ts-node createHR.ts

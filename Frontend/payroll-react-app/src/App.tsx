@@ -5,7 +5,6 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import EmployeeDashboardPage from './pages/EmployeeDashboardPage';
 import OnboardEmployeePage from './pages/OnboardEmployeePage';
-import EmployeesPage from './pages/EmployeesPage';
 import EmployeesListPage from './pages/EmployeesListPage';
 import AttendanceSummaryPage from './pages/AttendanceSummaryPage';
 import EmployeeAttendancePage from './pages/EmployeeAttendancePage';
@@ -31,7 +30,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute element={<DashboardPage />} />} />
         <Route path="/employee-dashboard" element={<ProtectedRoute element={<EmployeeDashboardPage />} />} />
         <Route path="/onboard-employee" element={<ProtectedRoute element={<OnboardEmployeePage />} />} />
-        <Route path="/employees" element={<ProtectedRoute element={<EmployeesPage />} />} />
+        <Route path="/employees" element={<ProtectedRoute element={<EmployeesListPage />} />} />
         <Route path="/employees-list" element={<ProtectedRoute element={<EmployeesListPage />} />} />
         <Route path="/attendance/upload" element={<ProtectedRoute element={<AttendanceUploadPage />} />} />
         <Route path="/attendance/:id" element={<ProtectedRoute element={<EmployeeAttendancePage />} />} />
