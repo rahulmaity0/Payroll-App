@@ -16,10 +16,16 @@ import {
   getEmployeeAttendance,
   createAttendanceRecord,
   updateAttendanceRecord,
+  deleteAttendanceRecord,
+  getAttendanceSummary,
   uploadPayroll,
   generatePayslips,
   downloadPayslipForEmployee,
-  resetUserPassword, // Make sure to import this
+  resetUserPassword,
+  getDailyAttendance,
+  setDailyAttendance,
+  updateDailyAttendance,
+  deleteDailyAttendance,
 } from '../controllers/hr.controller';
 
 // Setup multer for file uploads
@@ -132,6 +138,66 @@ router.put(
   handleValidationErrors,
   updateAttendanceRecord
 );
+
+router.delete(
+  '/attendance/:attId',
+  [param('attId').isMongoId().withMessage('Invalid Attendance Record ID')],
+  handleValidationErrors,
+  deleteAttendanceRecord
+);
+
+router.get('/attendance/summary', getAttendanceSummary);
+
+// ==========================================================
+// --- DAILY ATTENDANCE ROUTES ---
+// ==========================================================
+
+router.get(
+  '/employees/:employeeId/attendance/daily',
+  [param('employeeId').isMongoId().withMessage('Invalid Employee ID')],
+  handleValidationErrors,
+  getDailyAttendance
+);
+
+router.post(
+  '/attendance/daily',
+  [
+    body('employee').isMongoId().withMessage('Invalid Employee ID'),
+    body('date').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be YYYY-MM-DD format'),
+    body('status').isIn(['P', 'A', 'LOP', 'PL', 'H', 'WO']).withMessage('Invalid status'),
+    body('checkIn').optional().matches(/^\d{2}:\d{2}$/).withMessage('Check-in must be HH:mm format'),
+    body('checkOut').optional().matches(/^\d{2}:\d{2}$/).withMessage('Check-out must be HH:mm format'),
+    body('hoursWorked').optional().isFloat({ min: 0, max: 24 }).withMessage('Hours worked must be 0-24'),
+    body('overtimeHours').optional().isFloat({ min: 0 }).withMessage('Overtime hours must be >= 0'),
+  ],
+  handleValidationErrors,
+  setDailyAttendance
+);
+
+router.put(
+  '/attendance/daily/:recordId',
+  [
+    param('recordId').isMongoId().withMessage('Invalid Record ID'),
+    body('status').optional().isIn(['P', 'A', 'LOP', 'PL', 'H', 'WO']).withMessage('Invalid status'),
+    body('checkIn').optional().matches(/^\d{2}:\d{2}$/).withMessage('Check-in must be HH:mm format'),
+    body('checkOut').optional().matches(/^\d{2}:\d{2}$/).withMessage('Check-out must be HH:mm format'),
+    body('hoursWorked').optional().isFloat({ min: 0, max: 24 }).withMessage('Hours worked must be 0-24'),
+    body('overtimeHours').optional().isFloat({ min: 0 }).withMessage('Overtime hours must be >= 0'),
+  ],
+  handleValidationErrors,
+  updateDailyAttendance
+);
+
+router.delete(
+  '/attendance/daily/:recordId',
+  [param('recordId').isMongoId().withMessage('Invalid Record ID')],
+  handleValidationErrors,
+  deleteDailyAttendance
+);
+
+// ==========================================================
+// --- END DAILY ATTENDANCE ROUTES ---
+// ==========================================================
 
 // --- Payroll & Password Routes ---
 router.post(

@@ -78,7 +78,11 @@ export const updateSalaryDetails = async (req: Request, res: Response) => {
 // --- Attendance Controllers ---
 export const getEmployeeAttendance = async (req: Request, res: Response) => {
   try {
-    const attendance = await HRService.getEmployeeAttendance(req.params.id);
+    const filters: any = {};
+    if (req.query.year) filters.year = parseInt(req.query.year as string);
+    if (req.query.month) filters.month = parseInt(req.query.month as string);
+    
+    const attendance = await HRService.getEmployeeAttendance(req.params.id, filters);
     res.status(200).json(attendance);
   } catch (error) {
     const message = (error as Error).message;
@@ -115,6 +119,33 @@ export const updateAttendanceRecord = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteAttendanceRecord = async (req: Request, res: Response) => {
+  try {
+    const result = await HRService.deleteAttendanceRecord(req.params.attId);
+    res.status(200).json(result);
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(404).json({ message });
+  }
+};
+
+export const getAttendanceSummary = async (req: Request, res: Response) => {
+  try {
+    const month = parseInt(req.query.month as string);
+    const year = parseInt(req.query.year as string);
+    
+    if (!month || !year) {
+      return res.status(400).json({ message: 'Month and year are required query parameters' });
+    }
+    
+    const summary = await HRService.getAttendanceSummary(month, year);
+    res.status(200).json(summary);
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(500).json({ message });
+  }
+};
+
 // --- Payroll Controllers ---
 export const uploadPayroll = async (req: Request, res: Response) => {
   try {
@@ -138,24 +169,46 @@ export const uploadPayroll = async (req: Request, res: Response) => {
         const stream = fs.createReadStream(filePath, { encoding: 'utf8' });
         const rl = readline.createInterface({ input: stream });
 
-        const onLine = (line: string) => {
-          if (line && line.trim()) {
+        let resolved = false;
+
+        rl.on('line', (line: string) => {
+          if (!resolved && line && line.trim()) {
+            resolved = true;
             rl.close();
             stream.destroy();
             resolve(line);
           }
-        };
+        });
 
-        rl.on('line', onLine);
-        rl.on('close', () => resolve(''));
+        rl.on('close', () => {
+          if (!resolved) {
+            resolve('');
+          }
+        });
+
         rl.on('error', (err) => {
-          stream.destroy();
-          reject(err);
+          if (!resolved) {
+            resolved = true;
+            stream.destroy();
+            reject(err);
+          }
         });
       });
 
     const headerLine = await readFirstNonEmptyLine();
     const headers = headerLine ? headerLine.split(delimiter).map((h) => h.trim().toLowerCase()) : [];
+
+    // DEBUG: Log file details and parsed headers
+    console.log('[UPLOAD DEBUG] File received:', {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+      path: req.file.path
+    });
+    console.log('[UPLOAD DEBUG] Query params:', { mode, action, dedupeStrategy, delimiter });
+    console.log('[UPLOAD DEBUG] Header line:', JSON.stringify(headerLine));
+    console.log('[UPLOAD DEBUG] Parsed headers:', headers);
 
     // Basic required headers
     const requiredDaily = ['employeeid', 'date'];
@@ -178,18 +231,23 @@ export const uploadPayroll = async (req: Request, res: Response) => {
 
     // If mode provided, ensure headers match expectations
     const finalMode = modeOpt || detectedMode;
+    console.log('[UPLOAD DEBUG] Mode detection:', { modeOpt, detectedMode, finalMode });
+    
     if (finalMode === 'daily') {
       const missing = requiredDaily.filter((h) => !headers.includes(h));
+      console.log('[UPLOAD DEBUG] Daily mode validation:', { requiredDaily, headers, missing });
       if (missing.length) {
         return res.status(400).json({ message: `CSV missing required daily headers: ${missing.join(', ')}` });
       }
     } else if (finalMode === 'monthly') {
       const missing = requiredMonthly.filter((h) => !headers.includes(h));
+      console.log('[UPLOAD DEBUG] Monthly mode validation:', { requiredMonthly, headers, missing });
       if (missing.length) {
         return res.status(400).json({ message: `CSV missing required monthly headers: ${missing.join(', ')}` });
       }
     } else {
       // If we couldn't detect mode, ask client to provide mode or include standard headers
+      console.log('[UPLOAD DEBUG] Could not detect mode. Headers:', headers);
       return res.status(400).json({ message: 'Unable to detect CSV format. Provide `mode=daily|monthly` or include standard headers (e.g., employeeId,date or employeeId,month,year).' });
     }
 
@@ -264,6 +322,68 @@ export const resetUserPassword = async (req: Request, res: Response) => {
     await HRService.resetUserPassword(userId, newPassword);
 
     res.status(200).json({ message: 'User password reset successfully' });
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(404).json({ message });
+  }
+};
+
+// ==========================================================
+// --- DAILY ATTENDANCE CONTROLLERS ---
+// ==========================================================
+
+export const getDailyAttendance = async (req: Request, res: Response) => {
+  try {
+    const employeeId = req.params.employeeId;
+    const year = req.query.year ? parseInt(req.query.year as string) : undefined;
+    const month = req.query.month ? parseInt(req.query.month as string) : undefined;
+
+    const records = await HRService.getDailyAttendance(employeeId, year, month);
+    res.status(200).json(records);
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(500).json({ message });
+  }
+};
+
+export const setDailyAttendance = async (req: Request, res: Response) => {
+  try {
+    const record = await HRService.setDailyAttendance(req.body);
+    
+    // Return 201 for new records, 200 for updates
+    // Note: findOneAndUpdate with upsert doesn't easily tell us if it was created or updated
+    // For simplicity, returning 201 (frontend doesn't need to distinguish)
+    res.status(201).json({
+      message: 'Daily attendance record saved successfully',
+      data: record,
+    });
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(400).json({ message });
+  }
+};
+
+export const updateDailyAttendance = async (req: Request, res: Response) => {
+  try {
+    const recordId = req.params.recordId;
+    const updated = await HRService.updateDailyAttendance(recordId, req.body);
+    
+    res.status(200).json({
+      message: 'Daily attendance record updated successfully',
+      data: updated,
+    });
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(404).json({ message });
+  }
+};
+
+export const deleteDailyAttendance = async (req: Request, res: Response) => {
+  try {
+    const recordId = req.params.recordId;
+    const result = await HRService.deleteDailyAttendance(recordId);
+    
+    res.status(200).json(result);
   } catch (error) {
     const message = (error as Error).message;
     res.status(404).json({ message });

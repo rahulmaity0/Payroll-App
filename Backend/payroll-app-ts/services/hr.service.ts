@@ -7,6 +7,7 @@ import Attendance, {
   IVariableEarning,
   IVariableDeduction,
 } from '../models/attendance.model';
+import DailyAttendance, { IDailyAttendance } from '../models/dailyAttendance.model';
 import Payslip, {
   IPayslip,
   IPayslipEarning,
@@ -215,9 +216,15 @@ export const updateSalaryDetails = async (
 // --- Attendance Management ---
 
 export const getEmployeeAttendance = async (
-  employeeId: string
+  employeeId: string,
+  filters?: { year?: number; month?: number }
 ): Promise<IAttendance[]> => {
-  return await Attendance.find({ employee: employeeId }).sort({
+  const query: any = { employee: employeeId };
+  
+  if (filters?.year) query.year = filters.year;
+  if (filters?.month) query.month = filters.month;
+  
+  return await Attendance.find(query).sort({
     year: -1,
     month: -1,
   });
@@ -244,6 +251,184 @@ export const updateAttendanceRecord = async (
   const updated = await Attendance.findByIdAndUpdate(id, data, { new: true });
   if (!updated) throw new Error('Attendance record not found');
   return updated;
+};
+
+export const deleteAttendanceRecord = async (
+  id: string
+): Promise<{ message: string }> => {
+  const deleted = await Attendance.findByIdAndDelete(id);
+  if (!deleted) throw new Error('Attendance record not found');
+  return { message: 'Attendance record deleted successfully' };
+};
+
+export const getAttendanceSummary = async (
+  month: number,
+  year: number
+): Promise<any[]> => {
+  // Aggregate from DailyAttendance collection
+  const monthStr = String(month).padStart(2, '0');
+  const startDate = `${year}-${monthStr}-01`;
+  const endDate = `${year}-${monthStr}-31`;
+
+  const summary = await DailyAttendance.aggregate([
+    {
+      $match: {
+        date: { $gte: startDate, $lte: endDate }
+      }
+    },
+    {
+      $group: {
+        _id: '$employee',
+        totalWorkingDays: { $sum: 1 },
+        daysPresent: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'P'] }, 1, 0]
+          }
+        },
+        leaveWithoutPay: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'LOP'] }, 1, 0]
+          }
+        },
+        paidLeave: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'PL'] }, 1, 0]
+          }
+        },
+        absent: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'A'] }, 1, 0]
+          }
+        },
+        holidays: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'H'] }, 1, 0]
+          }
+        },
+        weekOffs: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'WO'] }, 1, 0]
+          }
+        },
+        overtimeHours: { $sum: { $ifNull: ['$overtimeHours', 0] } }
+      }
+    },
+    {
+      $lookup: {
+        from: 'employee_details',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'employee'
+      }
+    },
+    {
+      $unwind: '$employee'
+    },
+    {
+      $project: {
+        _id: 1,
+        employee: {
+          _id: '$employee._id',
+          employeeId: '$employee.employeeId',
+          firstName: '$employee.firstName',
+          lastName: '$employee.lastName',
+          designation: '$employee.designation'
+        },
+        month: month,
+        year: year,
+        totalWorkingDays: 1,
+        daysPresent: 1,
+        leaveWithoutPay: 1,
+        paidLeave: 1,
+        absent: 1,
+        holidays: 1,
+        weekOffs: 1,
+        overtimeHours: 1
+      }
+    },
+    {
+      $sort: { 'employee.employeeId': 1 }
+    }
+  ]);
+
+  return summary;
+};
+
+// ==========================================================
+// --- DAILY ATTENDANCE SERVICES ---
+// ==========================================================
+
+export const getDailyAttendance = async (
+  employeeId: string,
+  year?: number,
+  month?: number
+): Promise<IDailyAttendance[]> => {
+  // Build query
+  let query: any = { employee: employeeId };
+
+  // Add date range filter if year/month provided
+  if (year && month) {
+    const monthStr = String(month).padStart(2, '0');
+    const startDate = `${year}-${monthStr}-01`;
+    const endDate = `${year}-${monthStr}-31`;
+    query.date = { $gte: startDate, $lte: endDate };
+  } else if (year) {
+    query.date = { $gte: `${year}-01-01`, $lte: `${year}-12-31` };
+  }
+
+  return await DailyAttendance.find(query).sort({ date: 1 });
+};
+
+export const setDailyAttendance = async (
+  data: Partial<IDailyAttendance>
+): Promise<IDailyAttendance> => {
+  const { employee, date, status, checkIn, checkOut, hoursWorked, overtimeHours, notes } = data;
+
+  // Validate required fields
+  if (!employee || !date || !status) {
+    throw new Error('Employee, date, and status are required');
+  }
+
+  // Upsert: Update if exists, create if not
+  const record = await DailyAttendance.findOneAndUpdate(
+    { employee, date }, // Filter: find by employee+date
+    { employee, date, status, checkIn, checkOut, hoursWorked, overtimeHours, notes }, // Update data
+    {
+      upsert: true, // Create if doesn't exist
+      new: true, // Return updated document
+      runValidators: true, // Run schema validators
+    }
+  );
+
+  return record;
+};
+
+export const updateDailyAttendance = async (
+  recordId: string,
+  data: Partial<IDailyAttendance>
+): Promise<IDailyAttendance> => {
+  const updated = await DailyAttendance.findByIdAndUpdate(recordId, data, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updated) {
+    throw new Error('Daily attendance record not found');
+  }
+
+  return updated;
+};
+
+export const deleteDailyAttendance = async (
+  recordId: string
+): Promise<{ message: string }> => {
+  const record = await DailyAttendance.findByIdAndDelete(recordId);
+
+  if (!record) {
+    throw new Error('Daily attendance record not found');
+  }
+
+  return { message: 'Daily attendance record deleted successfully' };
 };
 
 // ==========================================================
@@ -411,72 +596,78 @@ export const processPayrollUpload = async (
               await Attendance.findOneAndUpdate({ employee: employee._id, month: attendanceData.month, year: attendanceData.year }, attendanceData, { upsert: true, new: true, runValidators: true });
               success++;
             } else {
-              // daily mode
+              // daily mode - write to DailyAttendance collection
               const dateStr = r['date'];
-              const status = (r['status'] || '').toString().toLowerCase();
-              if (!dateStr || !status) {
-                errors.push(`Row ${rowNum}: Missing date or status for daily record`);
+              let statusVal = (r['status'] || 'P').toString().toUpperCase();
+              
+              if (!dateStr) {
+                errors.push(`Row ${rowNum}: Missing date for daily record`);
                 failed++;
                 continue;
               }
 
-              // Build daily attendance object (we'll store as aggregated monthly record by default)
-              // For now, convert daily to monthly summary per incoming row: create or update Attendance doc for that month
-              const d = new Date(dateStr);
-              if (isNaN(d.getTime())) {
-                errors.push(`Row ${rowNum}: Invalid date ${dateStr}`);
+              // Validate date format
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                errors.push(`Row ${rowNum}: Invalid date format '${dateStr}'. Must be YYYY-MM-DD`);
                 failed++;
                 continue;
               }
-              const monthVal = d.getMonth() + 1;
-              const yearVal = d.getFullYear();
 
-              // Determine existing attendance to update daily counts
-              const existing = await Attendance.findOne({ employee: employee._id, month: monthVal, year: yearVal });
+              // Validate status
+              const validStatuses = ['P', 'A', 'LOP', 'PL', 'H', 'WO'];
+              if (!validStatuses.includes(statusVal)) {
+                errors.push(`Row ${rowNum}: Invalid status '${statusVal}'. Must be one of: ${validStatuses.join(', ')}`);
+                failed++;
+                continue;
+              }
 
               if (action === 'preview') {
                 success++;
                 continue;
               }
 
-              // Simplified daily ingestion: increment totals or create record
-              const hoursWorked = parseFloat(r['hoursworked'] || r['hours_worked'] || '0') || 0;
-              const overtime = parseFloat(r['overtimehours'] || '0') || 0;
+              // Parse optional fields
+              const checkIn = r['checkin'] || r['check_in'] || undefined;
+              const checkOut = r['checkout'] || r['check_out'] || undefined;
+              const hoursWorked = parseFloat(r['hoursworked'] || r['hours_worked'] || '0') || undefined;
+              const overtimeHours = parseFloat(r['overtimehours'] || r['overtime_hours'] || r['overtime'] || '0') || undefined;
+              const notes = r['notes'] || undefined;
 
-              if (existing) {
-                if (action === 'overwrite') {
-                  // reset and then apply (for simplicity we will replace this month's record)
-                  await Attendance.findByIdAndDelete(existing._id);
-                } else if (dedupe === 'skip') {
-                  skipped++;
-                  continue;
+              const dailyData: Partial<IDailyAttendance> = {
+                employee: employee._id as any,
+                date: dateStr,
+                status: statusVal as any,
+                checkIn,
+                checkOut,
+                hoursWorked,
+                overtimeHours,
+                notes,
+              };
+
+              // Handle overwrite/dedupe
+              if (action === 'overwrite') {
+                await DailyAttendance.findOneAndDelete({ employee: employee._id, date: dateStr });
+              } else {
+                const existing = await DailyAttendance.findOne({ employee: employee._id, date: dateStr });
+                if (existing) {
+                  if (dedupe === 'skip') {
+                    skipped++;
+                    continue;
+                  } else if (dedupe === 'error') {
+                    errors.push(`Row ${rowNum}: Daily attendance already exists for employee ${employee.employeeId} on ${dateStr}`);
+                    failed++;
+                    continue;
+                  }
+                  // dedupe === 'update' falls through to upsert
                 }
               }
 
-              // If no existing or after delete, create or update aggregates
-              const toUpsert: Partial<IAttendance> = {
-                employee: employee._id as any,
-                month: monthVal,
-                year: yearVal,
-                totalWorkingDays: existing ? existing.totalWorkingDays : 0,
-                daysPresent: existing ? existing.daysPresent : 0,
-                leaveWithoutPay: existing ? existing.leaveWithoutPay : 0,
-                overtimeHours: (existing ? existing.overtimeHours : 0) + overtime,
-                variableEarnings: existing ? existing.variableEarnings : [],
-                variableDeductions: existing ? existing.variableDeductions : [],
-              };
-
-              // Update counts based on status
-              if (status === 'present') {
-                toUpsert.daysPresent = (toUpsert.daysPresent || 0) + 1;
-              } else if (status === 'leave' || status === 'absent') {
-                // leaveWithoutPay not incremented by default unless specified
-              } else if (status === 'halfday') {
-                toUpsert.daysPresent = (toUpsert.daysPresent || 0) + 0.5 as any;
-              }
-
-              // Persist
-              await Attendance.findOneAndUpdate({ employee: employee._id, month: monthVal, year: yearVal }, toUpsert, { upsert: true, new: true, runValidators: true });
+              // Upsert to DailyAttendance collection
+              await DailyAttendance.findOneAndUpdate(
+                { employee: employee._id, date: dateStr },
+                dailyData,
+                { upsert: true, new: true, runValidators: true }
+              );
               success++;
             }
           } catch (err) {

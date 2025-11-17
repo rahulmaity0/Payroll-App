@@ -2,7 +2,7 @@
 
 **Base URL:** `http://localhost:5000/api`
 
-**Last Updated:** November 16, 2025
+**Last Updated:** November 17, 2025
 
 ---
 
@@ -653,136 +653,242 @@ All HR endpoints require `role: "hr"`.
 
 ---
 
-### 4.7 Get Employee Attendance
+### 4.7 Get Daily Attendance Records
 - **Method:** `GET`
-- **Endpoint:** `/hr/employees/:id/attendance`
+- **Endpoint:** `/hr/employees/:employeeId/attendance/daily`
 - **Access:** Private (HR only)
+- **Description:** Fetch daily attendance records for a specific employee with optional date filtering
 
-**Response (200):**
+**URL Parameters:**
+```
+:employeeId = Employee MongoDB ObjectId
+```
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| year | number | No | Filter by year (e.g., 2025) |
+| month | number | No | Filter by month (1-12) |
+
+**Example Requests:**
+```
+# Get all daily records for employee
+GET /api/hr/employees/507f1f77bcf86cd799439012/attendance/daily
+
+# Get records for specific month
+GET /api/hr/employees/507f1f77bcf86cd799439012/attendance/daily?year=2025&month=11
+
+# Get records for entire year
+GET /api/hr/employees/507f1f77bcf86cd799439012/attendance/daily?year=2025
+```
+
+**Response (200 OK):**
 ```json
 [
   {
-    "_id": "507f1f77bcf86cd799439014",
+    "_id": "673abc123def456789012345",
     "employee": "507f1f77bcf86cd799439012",
-    "month": 1,
-    "year": 2024,
-    "totalWorkingDays": 22,
-    "daysPresent": 20,
-    "leaveWithoutPay": 2,
-    "overtimeHours": 8,
-    "variableEarnings": [
-      {
-        "name": "Overtime Bonus",
-        "amount": 2000
-      }
-    ],
-    "variableDeductions": []
+    "date": "2025-11-17",
+    "status": "P",
+    "checkIn": "09:00",
+    "checkOut": "18:00",
+    "hoursWorked": 8,
+    "overtimeHours": 0,
+    "notes": "Regular shift",
+    "createdAt": "2025-11-17T09:05:00.000Z",
+    "updatedAt": "2025-11-17T09:05:00.000Z"
+  },
+  {
+    "_id": "673abc123def456789012346",
+    "employee": "507f1f77bcf86cd799439012",
+    "date": "2025-11-18",
+    "status": "PL",
+    "notes": "Sick leave",
+    "createdAt": "2025-11-18T08:30:00.000Z",
+    "updatedAt": "2025-11-18T08:30:00.000Z"
   }
 ]
 ```
 
+**Status Codes:**
+| Code | Label | Description |
+|------|-------|-------------|
+| `P` | Present | Employee was present and worked |
+| `A` | Absent | Employee was absent without leave |
+| `LOP` | Leave Without Pay | Unpaid leave/absence |
+| `PL` | Paid Leave | Vacation, sick leave, or other paid time off |
+| `H` | Holiday | Company/public holiday |
+| `WO` | Week Off | Regular weekly off day |
+
+**Error Responses:**
+- `401`: Unauthorized (invalid/missing token)
+- `403`: Forbidden (not HR role)
+- `404`: Employee not found
+- `500`: Internal server error
+
 ---
 
-### 4.8 Create Attendance Record
+### 4.8 Create/Update Daily Attendance (UPSERT)
 - **Method:** `POST`
-- **Endpoint:** `/hr/attendance`
+- **Endpoint:** `/hr/attendance/daily`
 - **Access:** Private (HR only)
+- **Description:** Create new daily attendance record OR update existing if same employee+date already exists
 
 **Request Body:**
 ```json
 {
   "employee": "507f1f77bcf86cd799439012",
-  "month": 2,
-  "year": 2024,
-  "totalWorkingDays": 20,
-  "daysPresent": 18,
-  "leaveWithoutPay": 2,
-  "overtimeHours": 5,
-  "variableEarnings": [
-    {
-      "name": "Overtime Bonus",
-      "amount": 1500
-    }
-  ],
-  "variableDeductions": []
+  "date": "2025-11-17",
+  "status": "P",
+  "checkIn": "09:00",
+  "checkOut": "18:00",
+  "hoursWorked": 8,
+  "overtimeHours": 0,
+  "notes": "Regular shift"
 }
 ```
 
-**Response (201 - Created):**
+**Field Details:**
+| Field | Type | Required | Format/Values | Description |
+|-------|------|----------|---------------|-------------|
+| employee | string | Yes | MongoDB ObjectId | Employee reference |
+| date | string | Yes | YYYY-MM-DD | Date in ISO format |
+| status | string | Yes | P/A/LOP/PL/H/WO | Attendance status |
+| checkIn | string | No | HH:mm | Check-in time (24-hour) |
+| checkOut | string | No | HH:mm | Check-out time (24-hour) |
+| hoursWorked | number | No | 0-24 | Total hours worked (decimal) |
+| overtimeHours | number | No | ≥0 | Overtime hours (decimal) |
+| notes | string | No | max 500 chars | Free text notes |
+
+**Response (201 Created):**
 ```json
 {
-  "_id": "507f1f77bcf86cd799439021",
-  "employee": "507f1f77bcf86cd799439012",
-  "month": 2,
-  "year": 2024,
-  "totalWorkingDays": 20,
-  "daysPresent": 18,
-  "leaveWithoutPay": 2,
-  "overtimeHours": 5,
-  "variableEarnings": [...],
-  "variableDeductions": [],
-  "createdAt": "2024-02-15T10:00:00.000Z",
-  "updatedAt": "2024-02-15T10:00:00.000Z"
+  "message": "Daily attendance record saved successfully",
+  "data": {
+    "_id": "673abc123def456789012345",
+    "employee": "507f1f77bcf86cd799439012",
+    "date": "2025-11-17",
+    "status": "P",
+    "checkIn": "09:00",
+    "checkOut": "18:00",
+    "hoursWorked": 8,
+    "overtimeHours": 0,
+    "notes": "Regular shift",
+    "createdAt": "2025-11-17T09:05:00.000Z",
+    "updatedAt": "2025-11-17T09:05:00.000Z"
+  }
 }
 ```
 
-**Response (400 - Duplicate):**
+**UPSERT Behavior:**
+- If record with same `employee` + `date` exists → **Updates** existing record
+- If no matching record exists → **Creates** new record
+- Unique constraint prevents duplicate (employee, date) combinations
+- Safe to call multiple times with same data (idempotent)
+
+**Error Responses:**
+- `400`: Invalid data (e.g., invalid status, wrong date format, missing required fields)
+- `401`: Unauthorized
+- `403`: Forbidden (not HR role)
+- `404`: Employee not found
+
+**Validation Errors:**
 ```json
 {
-  "message": "Attendance record already exists for this month."
+  "message": "Date must be YYYY-MM-DD format"
+}
+```
+```json
+{
+  "message": "Invalid status"
+}
+```
+```json
+{
+  "message": "Check-in must be HH:mm format"
 }
 ```
 
 ---
 
-### 4.9 Update Attendance Record
+### 4.9 Update Daily Attendance by ID
 - **Method:** `PUT`
-- **Endpoint:** `/hr/attendance/:attId`
+- **Endpoint:** `/hr/attendance/daily/:recordId`
 - **Access:** Private (HR only)
+- **Description:** Update specific fields of an existing daily attendance record
 
 **URL Parameters:**
 ```
-:attId = Attendance Record MongoDB ObjectId
+:recordId = Daily Attendance Record MongoDB ObjectId
 ```
 
-**Request Body (All fields optional):**
+**Request Body (all fields optional):**
 ```json
 {
-  "totalWorkingDays": 22,
-  "daysPresent": 21,
-  "leaveWithoutPay": 1,
-  "overtimeHours": 10,
-  "variableEarnings": [
-    {
-      "name": "Overtime Bonus",
-      "amount": 3000
-    }
-  ]
+  "status": "PL",
+  "notes": "Approved sick leave"
 }
 ```
 
-**Response (200):**
+**Response (200 OK):**
 ```json
 {
-  "_id": "507f1f77bcf86cd799439021",
-  "employee": "507f1f77bcf86cd799439012",
-  "month": 2,
-  "year": 2024,
-  "totalWorkingDays": 22,
-  "daysPresent": 21,
-  "leaveWithoutPay": 1,
-  "overtimeHours": 10,
-  "updatedAt": "2024-02-20T14:30:00.000Z"
+  "message": "Daily attendance record updated successfully",
+  "data": {
+    "_id": "673abc123def456789012345",
+    "employee": "507f1f77bcf86cd799439012",
+    "date": "2025-11-17",
+    "status": "PL",
+    "notes": "Approved sick leave",
+    "updatedAt": "2025-11-17T11:00:00.000Z"
+  }
 }
 ```
+
+**Error Responses:**
+- `400`: Invalid data
+- `401`: Unauthorized
+- `403`: Forbidden
+- `404`: Record not found
 
 ---
 
-### 4.10 Upload Attendance (CSV)
+### 4.10 Delete Daily Attendance
+- **Method:** `DELETE`
+- **Endpoint:** `/hr/attendance/daily/:recordId`
+- **Access:** Private (HR only)
+- **Description:** Delete a specific daily attendance record
+
+**URL Parameters:**
+```
+:recordId = Daily Attendance Record MongoDB ObjectId
+```
+
+**Example Request:**
+```
+DELETE /api/hr/attendance/daily/673abc123def456789012345
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Daily attendance record deleted successfully"
+}
+```
+
+**Error Responses:**
+- `401`: Unauthorized
+- `403`: Forbidden (not HR role)
+- `404`: Record not found
+
+---
+
+### 4.11 Upload Attendance (CSV)
 - **Method:** `POST`
 - **Endpoint:** `/hr/upload/payroll` OR `/hr/attendance/upload`
 - **Access:** Private (HR only)
-- **Description:** Bulk upload attendance via CSV file
+- **Description:** Bulk upload attendance via CSV file. Supports both **daily** and **monthly** modes.
 
 **Request Headers:**
 ```json
@@ -809,56 +915,188 @@ payrollFile: <CSV file>
 
 **CSV Format Examples:**
 
-Monthly format:
+**Monthly format** (writes to `Attendance` collection):
 ```csv
 employeeId,month,year,totalWorkingDays,daysPresent,leaveWithoutPay,overtimeHours
 EMP001,2,2024,22,20,2,8
 EMP002,2,2024,22,21,1,0
 ```
 
-Daily format:
+**Daily format** (writes to `DailyAttendance` collection):
 ```csv
-employeeId,date,status,checkIn,checkOut
-EMP001,2024-02-01,P,09:30,18:30
-EMP001,2024-02-02,P,09:25,18:20
-EMP002,2024-02-01,LOP,,
+employeeId,date,status,checkIn,checkOut,hoursWorked,overtimeHours,notes
+EMP001,2025-11-17,P,09:00,18:00,8,0,Regular shift
+EMP001,2025-11-18,P,09:15,18:15,8,0,
+EMP002,2025-11-17,LOP,,,0,0,Absent without leave
+EMP002,2025-11-18,PL,,,0,0,Sick leave approved
 ```
+
+**Daily CSV Required Fields:**
+- `employeeId`: Employee ID (e.g., EMP001)
+- `date`: Date in YYYY-MM-DD format
+- `status`: One of P, A, LOP, PL, H, WO
+
+**Daily CSV Optional Fields:**
+- `checkIn`: Check-in time in HH:mm format (e.g., 09:00)
+- `checkOut`: Check-out time in HH:mm format (e.g., 18:00)
+- `hoursWorked`: Decimal hours (e.g., 8, 8.5)
+- `overtimeHours`: Decimal hours (e.g., 0, 2.5)
+- `notes`: Text notes (max 500 characters)
+
+**Mode Auto-Detection:**
+- If CSV contains `date` column → **daily mode**
+- If CSV contains `month` and `year` columns → **monthly mode**
+
+**Data Destination:**
+- **Daily mode**: Writes to `DailyAttendance` collection (individual day records)
+- **Monthly mode**: Writes to `Attendance` collection (monthly aggregates)
 
 **Response (200 - Preview):**
 ```json
 {
-  "message": "Preview processed",
-  "recordsProcessed": 3,
-  "successCount": 3,
-  "failureCount": 0,
-  "mode": "monthly",
+  "message": "Processing complete",
+  "mode": "daily",
   "action": "preview",
-  "issues": []
+  "processed": 4,
+  "success": 4,
+  "skipped": 0,
+  "failed": 0,
+  "errors": []
 }
 ```
 
-**Response (201 - Write):**
+**Response (201 - Write Success):**
 ```json
 {
-  "message": "Payroll data processed successfully",
-  "recordsProcessed": 3,
-  "successCount": 3,
-  "failureCount": 0,
-  "mode": "monthly",
-  "action": "append"
+  "message": "Processing complete",
+  "mode": "daily",
+  "action": "append",
+  "processed": 4,
+  "success": 3,
+  "skipped": 1,
+  "failed": 0,
+  "errors": []
 }
 ```
 
-**Response (400 - Missing Headers):**
+**Response (400 - Validation Errors):**
 ```json
 {
-  "message": "CSV missing required monthly headers: month, year"
+  "message": "Processing complete",
+  "mode": "daily",
+  "action": "append",
+  "processed": 4,
+  "success": 2,
+  "skipped": 0,
+  "failed": 2,
+  "errors": [
+    "Row 3: Invalid date format '2025-11-32'. Must be YYYY-MM-DD",
+    "Row 4: Invalid status 'X'. Must be one of: P, A, LOP, PL, H, WO"
+  ]
 }
 ```
 
 ---
 
-### 4.11 Generate Payslips
+### 4.12 Get Attendance Summary
+- **Method:** `GET`
+- **Endpoint:** `/hr/attendance/summary?month=X&year=Y`
+- **Access:** Private (HR only)
+- **Description:** Get attendance summary for all employees for a specific month. **Aggregates data from DailyAttendance collection.**
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| month | number | Yes | Month (1-12) |
+| year | number | Yes | Year (e.g., 2025) |
+
+**Example Request:**
+```
+GET /api/hr/attendance/summary?month=11&year=2025
+Authorization: Bearer <token>
+```
+
+**How It Works:**
+- Fetches all daily attendance records for the specified month from `DailyAttendance` collection
+- Groups by employee and calculates:
+  - **totalWorkingDays**: Total number of days with any attendance record
+  - **daysPresent**: Count of days with status = 'P'
+  - **leaveWithoutPay**: Count of days with status = 'LOP'
+  - **paidLeave**: Count of days with status = 'PL'
+  - **absent**: Count of days with status = 'A'
+  - **holidays**: Count of days with status = 'H'
+  - **weekOffs**: Count of days with status = 'WO'
+  - **overtimeHours**: Sum of all overtime hours
+
+**Response (200 OK):**
+```json
+[
+  {
+    "_id": "507f1f77bcf86cd799439012",
+    "employee": {
+      "_id": "507f1f77bcf86cd799439012",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 11,
+    "year": 2025,
+    "totalWorkingDays": 22,
+    "daysPresent": 18,
+    "leaveWithoutPay": 2,
+    "paidLeave": 1,
+    "absent": 1,
+    "holidays": 0,
+    "weekOffs": 0,
+    "overtimeHours": 8.5
+  },
+  {
+    "_id": "507f1f77bcf86cd799439013",
+    "employee": {
+      "_id": "507f1f77bcf86cd799439013",
+      "employeeId": "EMP002",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "designation": "Senior Developer"
+    },
+    "month": 11,
+    "year": 2025,
+    "totalWorkingDays": 20,
+    "daysPresent": 19,
+    "leaveWithoutPay": 0,
+    "paidLeave": 1,
+    "absent": 0,
+    "holidays": 0,
+    "weekOffs": 0,
+    "overtimeHours": 0
+  }
+]
+```
+
+**Response (400 - Missing Parameters):**
+```json
+{
+  "message": "Month and year are required query parameters"
+}
+```
+
+**Response (200 - No Data):**
+```json
+[]
+```
+
+**Use Case:**
+- View monthly attendance summary for all employees
+- Calculate payroll based on attendance
+- Generate attendance reports
+- Monitor employee attendance patterns
+
+**Note:** This endpoint automatically aggregates from daily records, so you don't need to manually maintain monthly summaries.
+
+---
+
+### 4.13 Generate Payslips
 - **Method:** `POST`
 - **Endpoint:** `/hr/payroll/generate`
 - **Access:** Private (HR only)
@@ -1018,7 +1256,7 @@ If first run fails for 2 employees (missing data), fix their data and re-run. Th
 
 ---
 
-### 4.12 Download Employee Payslip (PDF)
+### 4.14 Download Employee Payslip (PDF)
 - **Method:** `GET`
 - **Endpoint:** `/hr/payslips/:id/download`
 - **Access:** Private (HR only)
@@ -1034,7 +1272,7 @@ If first run fails for 2 employees (missing data), fix their data and re-run. Th
 
 ---
 
-### 4.13 Reset User Password
+### 4.15 Reset User Password
 - **Method:** `PUT`
 - **Endpoint:** `/hr/users/:id/reset-password`
 - **Access:** Private (HR only)

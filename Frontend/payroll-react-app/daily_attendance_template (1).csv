@@ -1,0 +1,5 @@
+employeeid,date,status,checkin,checkout,hoursworked,overtimehours,notes
+EMP001,2025-11-17,P,09:00,18:00,8,0,Regular shift
+EMP002,2025-11-17,PL,,,0,0,Sick leave
+EMP003,2025-11-17,LOP,,,0,0,Leave without pay
+EMP001,2025-11-18,P,09:15,18:15,8,0,
