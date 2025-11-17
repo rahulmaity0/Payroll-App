@@ -1,5 +1,6 @@
 /**
  * Payslip Type Definitions
+ * Based on PAYSLIP_GENERATION_API_REFERENCE.md v2.0
  */
 
 export interface GeneratePayslipRequest {
@@ -15,5 +16,35 @@ export interface GeneratePayslipResponse {
   skipped: number;
   failed: number;
   errors: string[];
-  warnings: string[];
+  warnings?: string[];  // Optional per spec
+}
+
+export interface Payslip {
+  _id: string;
+  employee: string;
+  month: number;
+  year: number;
+  generatedOn: string;
+  payrollInfo: {
+    totalWorkingDays: number;
+    daysPaid: number;
+    lopDays: number;
+  };
+  earnings: Array<{
+    name: string;
+    amount: number;
+    type: 'fixed' | 'variable' | 'reimbursement';
+  }>;
+  deductions: Array<{
+    name: string;
+    amount: number;
+    type: 'statutory' | 'tax' | 'lop' | 'other';
+  }>;
+  grossEarnings: number;
+  totalDeductions: number;
+  netPay: number;
+  status: 'pending' | 'paid' | 'generated';
+  paymentDate?: string;
+  createdAt: string;
+  updatedAt: string;
 }

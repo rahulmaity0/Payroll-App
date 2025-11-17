@@ -1,6 +1,6 @@
 /**
  * PayslipGenerationModal Component
- * Modal for generating payslips with validations
+ * Implements payslip generation UI per PAYSLIP_GENERATION_API_REFERENCE.md v2.0
  */
 
 import React, { useState } from 'react';
@@ -12,14 +12,25 @@ import './PayslipGenerationModal.css';
 interface PayslipGenerationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen, onClose }) => {
+const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ 
+  isOpen, 
+  onClose,
+  onSuccess 
+}) => {
   const { token } = useAuth();
   const currentDate = new Date();
   
-  const [month, setMonth] = useState<number>(currentDate.getMonth() + 1);
-  const [year, setYear] = useState<number>(currentDate.getFullYear());
+  // Default to previous month (most common use case)
+  const defaultMonth = currentDate.getMonth() === 0 ? 12 : currentDate.getMonth();
+  const defaultYear = currentDate.getMonth() === 0 
+    ? currentDate.getFullYear() - 1 
+    : currentDate.getFullYear();
+  
+  const [month, setMonth] = useState<number>(defaultMonth);
+  const [year, setYear] = useState<number>(defaultYear);
   const [force, setForce] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<GeneratePayslipResponse | null>(null);
@@ -30,25 +41,9 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  const validateInputs = (): string | null => {
-    if (month < 1 || month > 12) {
-      return 'Invalid month. Must be between 1 and 12.';
-    }
-    if (year < 2000 || year > 2100) {
-      return 'Invalid year. Must be between 2000 and 2100.';
-    }
-    return null;
-  };
-
   const handleGenerate = async () => {
     setError(null);
     setResult(null);
-
-    const validationError = validateInputs();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
 
     if (!token) {
       setError('Not authenticated. Please login again.');
@@ -60,47 +55,66 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
       const response = await generatePayslips({ month, year, force }, token);
       setResult(response);
       
-      // Auto-close on complete success
-      if (response.success > 0 && response.failed === 0) {
+      // Call success callback if provided
+      if (onSuccess && response.success > 0) {
+        onSuccess();
+      }
+      
+      // Auto-close after 3 seconds on complete success
+      if (response.success > 0 && response.failed === 0 && !response.warnings?.length) {
         setTimeout(() => {
-          onClose();
-          resetModal();
+          handleClose();
         }, 3000);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to generate payslips');
-      console.error('[PayslipModal] Error:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const resetModal = () => {
-    setMonth(currentDate.getMonth() + 1);
-    setYear(currentDate.getFullYear());
+    setMonth(defaultMonth);
+    setYear(defaultYear);
     setForce(false);
     setResult(null);
     setError(null);
   };
 
   const handleClose = () => {
-    resetModal();
-    onClose();
+    if (!loading) {
+      resetModal();
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
+
+  const hasErrors = result && result.failed > 0;
+  const hasWarnings = result && result.warnings && result.warnings.length > 0;
+  const isCompleteSuccess = result && result.success > 0 && !hasErrors && !hasWarnings;
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Generate Payslips</h2>
-          <button className="modal-close" onClick={handleClose}>×</button>
+          <h2>Generate Monthly Payslips</h2>
+          <button 
+            className="modal-close" 
+            onClick={handleClose}
+            disabled={loading}
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
 
         <div className="modal-body">
+          {/* Month Selection */}
           <div className="form-group">
-            <label htmlFor="month">Month</label>
+            <label htmlFor="month">
+              Month <span className="required">*</span>
+            </label>
             <select
               id="month"
               value={month}
@@ -115,19 +129,29 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
             </select>
           </div>
 
+          {/* Year Selection */}
           <div className="form-group">
-            <label htmlFor="year">Year</label>
+            <label htmlFor="year">
+              Year <span className="required">*</span>
+            </label>
             <input
               id="year"
               type="number"
               value={year}
-              onChange={(e) => setYear(parseInt(e.target.value) || currentDate.getFullYear())}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val)) setYear(val);
+              }}
               min={2000}
               max={2100}
               disabled={loading}
             />
+            <p className="help-text">
+              Must be between 2000 and 2100
+            </p>
           </div>
 
+          {/* Force Flag */}
           <div className="form-group checkbox-group">
             <label>
               <input
@@ -139,58 +163,69 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
               <span>Force generate (allow before month end)</span>
             </label>
             {force && (
-              <p className="warning-text">
-                ⚠️ Warning: Generating payslips before month end may result in incomplete attendance data.
-              </p>
+              <div className="warning-box">
+                <strong>⚠️ Warning:</strong> Generating payslips before the month ends may result 
+                in incomplete or inaccurate attendance data. Only use this for testing or preview purposes.
+              </div>
             )}
           </div>
 
+          {/* Error Display */}
           {error && (
-            <div className="error-message">
+            <div className="error-box">
               <strong>Error:</strong> {error}
             </div>
           )}
 
+          {/* Results Display */}
           {result && (
-            <div className={`result-message ${result.failed > 0 ? 'result-warning' : 'result-success'}`}>
+            <div className={`result-box ${isCompleteSuccess ? 'success' : hasErrors ? 'warning' : 'info'}`}>
               <h3>{result.message}</h3>
+              
+              {/* Stats Summary */}
               <div className="result-stats">
                 <div className="stat">
-                  <span className="stat-label">Processed:</span>
+                  <span className="stat-label">Processed</span>
                   <span className="stat-value">{result.processed}</span>
                 </div>
-                <div className="stat">
-                  <span className="stat-label">Success:</span>
-                  <span className="stat-value success">{result.success}</span>
+                <div className="stat success">
+                  <span className="stat-label">Success</span>
+                  <span className="stat-value">{result.success}</span>
                 </div>
                 {result.skipped > 0 && (
-                  <div className="stat">
-                    <span className="stat-label">Skipped:</span>
-                    <span className="stat-value skipped">{result.skipped}</span>
+                  <div className="stat info">
+                    <span className="stat-label">Skipped</span>
+                    <span className="stat-value">{result.skipped}</span>
                   </div>
                 )}
                 {result.failed > 0 && (
-                  <div className="stat">
-                    <span className="stat-label">Failed:</span>
-                    <span className="stat-value failed">{result.failed}</span>
+                  <div className="stat error">
+                    <span className="stat-label">Failed</span>
+                    <span className="stat-value">{result.failed}</span>
                   </div>
                 )}
               </div>
 
+              {/* Errors List */}
               {result.errors && result.errors.length > 0 && (
                 <div className="error-list">
-                  <h4>Errors:</h4>
+                  <h4>❌ Errors ({result.errors.length})</h4>
                   <ul>
                     {result.errors.map((err, index) => (
                       <li key={index}>{err}</li>
                     ))}
                   </ul>
+                  <p className="help-text">
+                    Fix the issues above and re-run generation. Successfully generated payslips 
+                    will be skipped automatically.
+                  </p>
                 </div>
               )}
 
+              {/* Warnings List */}
               {result.warnings && result.warnings.length > 0 && (
                 <div className="warning-list">
-                  <h4>Warnings:</h4>
+                  <h4>⚠️ Warnings ({result.warnings.length})</h4>
                   <ul>
                     {result.warnings.map((warn, index) => (
                       <li key={index}>{warn}</li>
@@ -198,6 +233,26 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
                   </ul>
                 </div>
               )}
+
+              {/* Success Message */}
+              {isCompleteSuccess && (
+                <p className="success-message">
+                  ✅ All payslips generated successfully! This window will close automatically.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Help Text */}
+          {!result && !error && (
+            <div className="info-box">
+              <h4>ℹ️ Before you generate:</h4>
+              <ul>
+                <li>Ensure attendance data has been uploaded for {monthNames[month - 1]} {year}</li>
+                <li>All employees must have salary structures configured</li>
+                <li>Payroll can only be run after the month has ended (unless using force flag)</li>
+                <li>Re-running is safe - existing payslips will be skipped</li>
+              </ul>
             </div>
           )}
         </div>
@@ -208,7 +263,7 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
             onClick={handleClose}
             disabled={loading}
           >
-            Cancel
+            {result && result.success > 0 ? 'Close' : 'Cancel'}
           </button>
           <button
             className="btn-primary"
@@ -219,9 +274,11 @@ const PayslipGenerationModal: React.FC<PayslipGenerationModalProps> = ({ isOpen,
           </button>
         </div>
 
+        {/* Loading Overlay */}
         {loading && (
           <div className="loading-overlay">
             <div className="spinner"></div>
+            <p>Processing payroll...</p>
           </div>
         )}
       </div>

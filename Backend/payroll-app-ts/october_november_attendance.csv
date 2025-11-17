@@ -1,0 +1,1151 @@
+employeeid,date,status,checkin,checkout,hoursworked,overtimehours,notes
+EMP001,2025-10-01,P,09:00,19:00,10,2,Late check-in
+EMP002,2025-10-01,P,09:15,19:30,10.25,2,Early departure
+EMP003,2025-10-01,P,09:30,20:00,10.5,2,Overtime work
+EMP004,2025-10-01,A,,,0,0,Absent without notice
+EMP005,2025-10-01,LOP,,,0,0,Leave without pay
+EMP006,2025-10-01,PL,,,0,0,Paid leave
+EMP007,2025-10-01,P,09:00,18:30,9.5,2,
+EMP008,2025-10-01,P,09:15,19:00,9.75,2,Regular shift
+EMP009,2025-10-01,P,09:30,19:30,10,2,Late check-in
+EMP010,2025-10-01,P,10:00,20:00,10,2,Early departure
+EMP011,2025-10-01,P,08:30,17:30,9,1,Overtime work
+EMP012,2025-10-01,A,,,0,0,Absent without notice
+EMP013,2025-10-01,LOP,,,0,0,Leave without pay
+EMP014,2025-10-01,PL,,,0,0,Paid leave
+EMP015,2025-10-01,P,09:30,19:00,9.5,2,
+EMP016,2025-10-01,P,10:00,19:30,9.5,2,Regular shift
+EMP017,2025-10-01,P,08:30,20:00,11.5,4,Late check-in
+EMP018,2025-10-01,P,08:45,17:30,8.75,1,Early departure
+EMP019,2025-10-01,P,09:00,18:00,9,1,Overtime work
+EMP020,2025-10-01,A,,,0,0,Absent without notice
+EMP021,2025-10-01,LOP,,,0,0,Leave without pay
+EMP022,2025-10-01,PL,,,0,0,Paid leave
+EMP023,2025-10-01,P,08:30,19:30,11,3,
+EMP024,2025-10-01,P,08:45,20:00,11.25,3,Regular shift
+EMP025,2025-10-01,P,09:00,17:30,8.5,0,Late check-in
+EMP001,2025-10-02,H,,,0,0,Public holiday
+EMP002,2025-10-02,H,,,0,0,Public holiday
+EMP003,2025-10-02,H,,,0,0,Public holiday
+EMP004,2025-10-02,H,,,0,0,Public holiday
+EMP005,2025-10-02,H,,,0,0,Public holiday
+EMP006,2025-10-02,H,,,0,0,Public holiday
+EMP007,2025-10-02,H,,,0,0,Public holiday
+EMP008,2025-10-02,H,,,0,0,Public holiday
+EMP009,2025-10-02,H,,,0,0,Public holiday
+EMP010,2025-10-02,H,,,0,0,Public holiday
+EMP011,2025-10-02,H,,,0,0,Public holiday
+EMP012,2025-10-02,H,,,0,0,Public holiday
+EMP013,2025-10-02,H,,,0,0,Public holiday
+EMP014,2025-10-02,H,,,0,0,Public holiday
+EMP015,2025-10-02,H,,,0,0,Public holiday
+EMP016,2025-10-02,H,,,0,0,Public holiday
+EMP017,2025-10-02,H,,,0,0,Public holiday
+EMP018,2025-10-02,H,,,0,0,Public holiday
+EMP019,2025-10-02,H,,,0,0,Public holiday
+EMP020,2025-10-02,H,,,0,0,Public holiday
+EMP021,2025-10-02,H,,,0,0,Public holiday
+EMP022,2025-10-02,H,,,0,0,Public holiday
+EMP023,2025-10-02,H,,,0,0,Public holiday
+EMP024,2025-10-02,H,,,0,0,Public holiday
+EMP025,2025-10-02,H,,,0,0,Public holiday
+EMP001,2025-10-03,P,09:30,20:00,10.5,2,Overtime work
+EMP002,2025-10-03,A,,,0,0,Absent without notice
+EMP003,2025-10-03,LOP,,,0,0,Leave without pay
+EMP004,2025-10-03,PL,,,0,0,Paid leave
+EMP005,2025-10-03,P,09:00,18:30,9.5,2,
+EMP006,2025-10-03,P,09:15,19:00,9.75,2,Regular shift
+EMP007,2025-10-03,P,09:30,19:30,10,2,Late check-in
+EMP008,2025-10-03,P,10:00,20:00,10,2,Early departure
+EMP009,2025-10-03,P,08:30,17:30,9,1,Overtime work
+EMP010,2025-10-03,A,,,0,0,Absent without notice
+EMP011,2025-10-03,LOP,,,0,0,Leave without pay
+EMP012,2025-10-03,PL,,,0,0,Paid leave
+EMP013,2025-10-03,P,09:30,19:00,9.5,2,
+EMP014,2025-10-03,P,10:00,19:30,9.5,2,Regular shift
+EMP015,2025-10-03,P,08:30,20:00,11.5,4,Late check-in
+EMP016,2025-10-03,P,08:45,17:30,8.75,1,Early departure
+EMP017,2025-10-03,P,09:00,18:00,9,1,Overtime work
+EMP018,2025-10-03,A,,,0,0,Absent without notice
+EMP019,2025-10-03,LOP,,,0,0,Leave without pay
+EMP020,2025-10-03,PL,,,0,0,Paid leave
+EMP021,2025-10-03,P,08:30,19:30,11,3,
+EMP022,2025-10-03,P,08:45,20:00,11.25,3,Regular shift
+EMP023,2025-10-03,P,09:00,17:30,8.5,0,Late check-in
+EMP024,2025-10-03,P,09:15,18:00,8.75,1,Early departure
+EMP025,2025-10-03,P,09:30,18:15,8.75,1,Overtime work
+EMP001,2025-10-04,A,,,0,0,Absent without notice
+EMP002,2025-10-04,LOP,,,0,0,Leave without pay
+EMP003,2025-10-04,PL,,,0,0,Paid leave
+EMP004,2025-10-04,P,09:00,18:30,9.5,2,
+EMP005,2025-10-04,P,09:15,19:00,9.75,2,Regular shift
+EMP006,2025-10-04,P,09:30,19:30,10,2,Late check-in
+EMP007,2025-10-04,P,10:00,20:00,10,2,Early departure
+EMP008,2025-10-04,P,08:30,17:30,9,1,Overtime work
+EMP009,2025-10-04,A,,,0,0,Absent without notice
+EMP010,2025-10-04,LOP,,,0,0,Leave without pay
+EMP011,2025-10-04,PL,,,0,0,Paid leave
+EMP012,2025-10-04,P,09:30,19:00,9.5,2,
+EMP013,2025-10-04,P,10:00,19:30,9.5,2,Regular shift
+EMP014,2025-10-04,P,08:30,20:00,11.5,4,Late check-in
+EMP015,2025-10-04,P,08:45,17:30,8.75,1,Early departure
+EMP016,2025-10-04,P,09:00,18:00,9,1,Overtime work
+EMP017,2025-10-04,A,,,0,0,Absent without notice
+EMP018,2025-10-04,LOP,,,0,0,Leave without pay
+EMP019,2025-10-04,PL,,,0,0,Paid leave
+EMP020,2025-10-04,P,08:30,19:30,11,3,
+EMP021,2025-10-04,P,08:45,20:00,11.25,3,Regular shift
+EMP022,2025-10-04,P,09:00,17:30,8.5,0,Late check-in
+EMP023,2025-10-04,P,09:15,18:00,8.75,1,Early departure
+EMP024,2025-10-04,P,09:30,18:15,8.75,1,Overtime work
+EMP025,2025-10-04,A,,,0,0,Absent without notice
+EMP001,2025-10-05,WO,,,0,0,Weekly off
+EMP002,2025-10-05,WO,,,0,0,Weekly off
+EMP003,2025-10-05,WO,,,0,0,Weekly off
+EMP004,2025-10-05,WO,,,0,0,Weekly off
+EMP005,2025-10-05,WO,,,0,0,Weekly off
+EMP006,2025-10-05,WO,,,0,0,Weekly off
+EMP007,2025-10-05,WO,,,0,0,Weekly off
+EMP008,2025-10-05,WO,,,0,0,Weekly off
+EMP009,2025-10-05,WO,,,0,0,Weekly off
+EMP010,2025-10-05,WO,,,0,0,Weekly off
+EMP011,2025-10-05,WO,,,0,0,Weekly off
+EMP012,2025-10-05,WO,,,0,0,Weekly off
+EMP013,2025-10-05,WO,,,0,0,Weekly off
+EMP014,2025-10-05,WO,,,0,0,Weekly off
+EMP015,2025-10-05,WO,,,0,0,Weekly off
+EMP016,2025-10-05,WO,,,0,0,Weekly off
+EMP017,2025-10-05,WO,,,0,0,Weekly off
+EMP018,2025-10-05,WO,,,0,0,Weekly off
+EMP019,2025-10-05,WO,,,0,0,Weekly off
+EMP020,2025-10-05,WO,,,0,0,Weekly off
+EMP021,2025-10-05,WO,,,0,0,Weekly off
+EMP022,2025-10-05,WO,,,0,0,Weekly off
+EMP023,2025-10-05,WO,,,0,0,Weekly off
+EMP024,2025-10-05,WO,,,0,0,Weekly off
+EMP025,2025-10-05,WO,,,0,0,Weekly off
+EMP001,2025-10-06,PL,,,0,0,Paid leave
+EMP002,2025-10-06,P,09:00,18:30,9.5,2,
+EMP003,2025-10-06,P,09:15,19:00,9.75,2,Regular shift
+EMP004,2025-10-06,P,09:30,19:30,10,2,Late check-in
+EMP005,2025-10-06,P,10:00,20:00,10,2,Early departure
+EMP006,2025-10-06,P,08:30,17:30,9,1,Overtime work
+EMP007,2025-10-06,A,,,0,0,Absent without notice
+EMP008,2025-10-06,LOP,,,0,0,Leave without pay
+EMP009,2025-10-06,PL,,,0,0,Paid leave
+EMP010,2025-10-06,P,09:30,19:00,9.5,2,
+EMP011,2025-10-06,P,10:00,19:30,9.5,2,Regular shift
+EMP012,2025-10-06,P,08:30,20:00,11.5,4,Late check-in
+EMP013,2025-10-06,P,08:45,17:30,8.75,1,Early departure
+EMP014,2025-10-06,P,09:00,18:00,9,1,Overtime work
+EMP015,2025-10-06,A,,,0,0,Absent without notice
+EMP016,2025-10-06,LOP,,,0,0,Leave without pay
+EMP017,2025-10-06,PL,,,0,0,Paid leave
+EMP018,2025-10-06,P,08:30,19:30,11,3,
+EMP019,2025-10-06,P,08:45,20:00,11.25,3,Regular shift
+EMP020,2025-10-06,P,09:00,17:30,8.5,0,Late check-in
+EMP021,2025-10-06,P,09:15,18:00,8.75,1,Early departure
+EMP022,2025-10-06,P,09:30,18:15,8.75,1,Overtime work
+EMP023,2025-10-06,A,,,0,0,Absent without notice
+EMP024,2025-10-06,LOP,,,0,0,Leave without pay
+EMP025,2025-10-06,PL,,,0,0,Paid leave
+EMP001,2025-10-07,P,09:00,18:30,9.5,2,
+EMP002,2025-10-07,P,09:15,19:00,9.75,2,Regular shift
+EMP003,2025-10-07,P,09:30,19:30,10,2,Late check-in
+EMP004,2025-10-07,P,10:00,20:00,10,2,Early departure
+EMP005,2025-10-07,P,08:30,17:30,9,1,Overtime work
+EMP006,2025-10-07,A,,,0,0,Absent without notice
+EMP007,2025-10-07,LOP,,,0,0,Leave without pay
+EMP008,2025-10-07,PL,,,0,0,Paid leave
+EMP009,2025-10-07,P,09:30,19:00,9.5,2,
+EMP010,2025-10-07,P,10:00,19:30,9.5,2,Regular shift
+EMP011,2025-10-07,P,08:30,20:00,11.5,4,Late check-in
+EMP012,2025-10-07,P,08:45,17:30,8.75,1,Early departure
+EMP013,2025-10-07,P,09:00,18:00,9,1,Overtime work
+EMP014,2025-10-07,A,,,0,0,Absent without notice
+EMP015,2025-10-07,LOP,,,0,0,Leave without pay
+EMP016,2025-10-07,PL,,,0,0,Paid leave
+EMP017,2025-10-07,P,08:30,19:30,11,3,
+EMP018,2025-10-07,P,08:45,20:00,11.25,3,Regular shift
+EMP019,2025-10-07,P,09:00,17:30,8.5,0,Late check-in
+EMP020,2025-10-07,P,09:15,18:00,8.75,1,Early departure
+EMP021,2025-10-07,P,09:30,18:15,8.75,1,Overtime work
+EMP022,2025-10-07,A,,,0,0,Absent without notice
+EMP023,2025-10-07,LOP,,,0,0,Leave without pay
+EMP024,2025-10-07,PL,,,0,0,Paid leave
+EMP025,2025-10-07,P,09:00,20:00,11,3,
+EMP001,2025-10-08,P,09:15,19:00,9.75,2,Regular shift
+EMP002,2025-10-08,P,09:30,19:30,10,2,Late check-in
+EMP003,2025-10-08,P,10:00,20:00,10,2,Early departure
+EMP004,2025-10-08,P,08:30,17:30,9,1,Overtime work
+EMP005,2025-10-08,A,,,0,0,Absent without notice
+EMP006,2025-10-08,LOP,,,0,0,Leave without pay
+EMP007,2025-10-08,PL,,,0,0,Paid leave
+EMP008,2025-10-08,P,09:30,19:00,9.5,2,
+EMP009,2025-10-08,P,10:00,19:30,9.5,2,Regular shift
+EMP010,2025-10-08,P,08:30,20:00,11.5,4,Late check-in
+EMP011,2025-10-08,P,08:45,17:30,8.75,1,Early departure
+EMP012,2025-10-08,P,09:00,18:00,9,1,Overtime work
+EMP013,2025-10-08,A,,,0,0,Absent without notice
+EMP014,2025-10-08,LOP,,,0,0,Leave without pay
+EMP015,2025-10-08,PL,,,0,0,Paid leave
+EMP016,2025-10-08,P,08:30,19:30,11,3,
+EMP017,2025-10-08,P,08:45,20:00,11.25,3,Regular shift
+EMP018,2025-10-08,P,09:00,17:30,8.5,0,Late check-in
+EMP019,2025-10-08,P,09:15,18:00,8.75,1,Early departure
+EMP020,2025-10-08,P,09:30,18:15,8.75,1,Overtime work
+EMP021,2025-10-08,A,,,0,0,Absent without notice
+EMP022,2025-10-08,LOP,,,0,0,Leave without pay
+EMP023,2025-10-08,PL,,,0,0,Paid leave
+EMP024,2025-10-08,P,09:00,20:00,11,3,
+EMP025,2025-10-08,P,09:15,17:30,8.25,0,Regular shift
+EMP001,2025-10-09,P,09:30,19:30,10,2,Late check-in
+EMP002,2025-10-09,P,10:00,20:00,10,2,Early departure
+EMP003,2025-10-09,P,08:30,17:30,9,1,Overtime work
+EMP004,2025-10-09,A,,,0,0,Absent without notice
+EMP005,2025-10-09,LOP,,,0,0,Leave without pay
+EMP006,2025-10-09,PL,,,0,0,Paid leave
+EMP007,2025-10-09,P,09:30,19:00,9.5,2,
+EMP008,2025-10-09,P,10:00,19:30,9.5,2,Regular shift
+EMP009,2025-10-09,P,08:30,20:00,11.5,4,Late check-in
+EMP010,2025-10-09,P,08:45,17:30,8.75,1,Early departure
+EMP011,2025-10-09,P,09:00,18:00,9,1,Overtime work
+EMP012,2025-10-09,A,,,0,0,Absent without notice
+EMP013,2025-10-09,LOP,,,0,0,Leave without pay
+EMP014,2025-10-09,PL,,,0,0,Paid leave
+EMP015,2025-10-09,P,08:30,19:30,11,3,
+EMP016,2025-10-09,P,08:45,20:00,11.25,3,Regular shift
+EMP017,2025-10-09,P,09:00,17:30,8.5,0,Late check-in
+EMP018,2025-10-09,P,09:15,18:00,8.75,1,Early departure
+EMP019,2025-10-09,P,09:30,18:15,8.75,1,Overtime work
+EMP020,2025-10-09,A,,,0,0,Absent without notice
+EMP021,2025-10-09,LOP,,,0,0,Leave without pay
+EMP022,2025-10-09,PL,,,0,0,Paid leave
+EMP023,2025-10-09,P,09:00,20:00,11,3,
+EMP024,2025-10-09,P,09:15,17:30,8.25,0,Regular shift
+EMP025,2025-10-09,P,09:30,18:00,8.5,0,Late check-in
+EMP001,2025-10-10,P,10:00,20:00,10,2,Early departure
+EMP002,2025-10-10,P,08:30,17:30,9,1,Overtime work
+EMP003,2025-10-10,A,,,0,0,Absent without notice
+EMP004,2025-10-10,LOP,,,0,0,Leave without pay
+EMP005,2025-10-10,PL,,,0,0,Paid leave
+EMP006,2025-10-10,P,09:30,19:00,9.5,2,
+EMP007,2025-10-10,P,10:00,19:30,9.5,2,Regular shift
+EMP008,2025-10-10,P,08:30,20:00,11.5,4,Late check-in
+EMP009,2025-10-10,P,08:45,17:30,8.75,1,Early departure
+EMP010,2025-10-10,P,09:00,18:00,9,1,Overtime work
+EMP011,2025-10-10,A,,,0,0,Absent without notice
+EMP012,2025-10-10,LOP,,,0,0,Leave without pay
+EMP013,2025-10-10,PL,,,0,0,Paid leave
+EMP014,2025-10-10,P,08:30,19:30,11,3,
+EMP015,2025-10-10,P,08:45,20:00,11.25,3,Regular shift
+EMP016,2025-10-10,P,09:00,17:30,8.5,0,Late check-in
+EMP017,2025-10-10,P,09:15,18:00,8.75,1,Early departure
+EMP018,2025-10-10,P,09:30,18:15,8.75,1,Overtime work
+EMP019,2025-10-10,A,,,0,0,Absent without notice
+EMP020,2025-10-10,LOP,,,0,0,Leave without pay
+EMP021,2025-10-10,PL,,,0,0,Paid leave
+EMP022,2025-10-10,P,09:00,20:00,11,3,
+EMP023,2025-10-10,P,09:15,17:30,8.25,0,Regular shift
+EMP024,2025-10-10,P,09:30,18:00,8.5,0,Late check-in
+EMP025,2025-10-10,P,10:00,18:15,8.25,0,Early departure
+EMP001,2025-10-11,P,08:30,17:30,9,1,Overtime work
+EMP002,2025-10-11,A,,,0,0,Absent without notice
+EMP003,2025-10-11,LOP,,,0,0,Leave without pay
+EMP004,2025-10-11,PL,,,0,0,Paid leave
+EMP005,2025-10-11,P,09:30,19:00,9.5,2,
+EMP006,2025-10-11,P,10:00,19:30,9.5,2,Regular shift
+EMP007,2025-10-11,P,08:30,20:00,11.5,4,Late check-in
+EMP008,2025-10-11,P,08:45,17:30,8.75,1,Early departure
+EMP009,2025-10-11,P,09:00,18:00,9,1,Overtime work
+EMP010,2025-10-11,A,,,0,0,Absent without notice
+EMP011,2025-10-11,LOP,,,0,0,Leave without pay
+EMP012,2025-10-11,PL,,,0,0,Paid leave
+EMP013,2025-10-11,P,08:30,19:30,11,3,
+EMP014,2025-10-11,P,08:45,20:00,11.25,3,Regular shift
+EMP015,2025-10-11,P,09:00,17:30,8.5,0,Late check-in
+EMP016,2025-10-11,P,09:15,18:00,8.75,1,Early departure
+EMP017,2025-10-11,P,09:30,18:15,8.75,1,Overtime work
+EMP018,2025-10-11,A,,,0,0,Absent without notice
+EMP019,2025-10-11,LOP,,,0,0,Leave without pay
+EMP020,2025-10-11,PL,,,0,0,Paid leave
+EMP021,2025-10-11,P,09:00,20:00,11,3,
+EMP022,2025-10-11,P,09:15,17:30,8.25,0,Regular shift
+EMP023,2025-10-11,P,09:30,18:00,8.5,0,Late check-in
+EMP024,2025-10-11,P,10:00,18:15,8.25,0,Early departure
+EMP025,2025-10-11,P,08:30,18:30,10,2,Overtime work
+EMP001,2025-10-12,WO,,,0,0,Weekly off
+EMP002,2025-10-12,WO,,,0,0,Weekly off
+EMP003,2025-10-12,WO,,,0,0,Weekly off
+EMP004,2025-10-12,WO,,,0,0,Weekly off
+EMP005,2025-10-12,WO,,,0,0,Weekly off
+EMP006,2025-10-12,WO,,,0,0,Weekly off
+EMP007,2025-10-12,WO,,,0,0,Weekly off
+EMP008,2025-10-12,WO,,,0,0,Weekly off
+EMP009,2025-10-12,WO,,,0,0,Weekly off
+EMP010,2025-10-12,WO,,,0,0,Weekly off
+EMP011,2025-10-12,WO,,,0,0,Weekly off
+EMP012,2025-10-12,WO,,,0,0,Weekly off
+EMP013,2025-10-12,WO,,,0,0,Weekly off
+EMP014,2025-10-12,WO,,,0,0,Weekly off
+EMP015,2025-10-12,WO,,,0,0,Weekly off
+EMP016,2025-10-12,WO,,,0,0,Weekly off
+EMP017,2025-10-12,WO,,,0,0,Weekly off
+EMP018,2025-10-12,WO,,,0,0,Weekly off
+EMP019,2025-10-12,WO,,,0,0,Weekly off
+EMP020,2025-10-12,WO,,,0,0,Weekly off
+EMP021,2025-10-12,WO,,,0,0,Weekly off
+EMP022,2025-10-12,WO,,,0,0,Weekly off
+EMP023,2025-10-12,WO,,,0,0,Weekly off
+EMP024,2025-10-12,WO,,,0,0,Weekly off
+EMP025,2025-10-12,WO,,,0,0,Weekly off
+EMP001,2025-10-13,LOP,,,0,0,Leave without pay
+EMP002,2025-10-13,PL,,,0,0,Paid leave
+EMP003,2025-10-13,P,09:30,19:00,9.5,2,
+EMP004,2025-10-13,P,10:00,19:30,9.5,2,Regular shift
+EMP005,2025-10-13,P,08:30,20:00,11.5,4,Late check-in
+EMP006,2025-10-13,P,08:45,17:30,8.75,1,Early departure
+EMP007,2025-10-13,P,09:00,18:00,9,1,Overtime work
+EMP008,2025-10-13,A,,,0,0,Absent without notice
+EMP009,2025-10-13,LOP,,,0,0,Leave without pay
+EMP010,2025-10-13,PL,,,0,0,Paid leave
+EMP011,2025-10-13,P,08:30,19:30,11,3,
+EMP012,2025-10-13,P,08:45,20:00,11.25,3,Regular shift
+EMP013,2025-10-13,P,09:00,17:30,8.5,0,Late check-in
+EMP014,2025-10-13,P,09:15,18:00,8.75,1,Early departure
+EMP015,2025-10-13,P,09:30,18:15,8.75,1,Overtime work
+EMP016,2025-10-13,A,,,0,0,Absent without notice
+EMP017,2025-10-13,LOP,,,0,0,Leave without pay
+EMP018,2025-10-13,PL,,,0,0,Paid leave
+EMP019,2025-10-13,P,09:00,20:00,11,3,
+EMP020,2025-10-13,P,09:15,17:30,8.25,0,Regular shift
+EMP021,2025-10-13,P,09:30,18:00,8.5,0,Late check-in
+EMP022,2025-10-13,P,10:00,18:15,8.25,0,Early departure
+EMP023,2025-10-13,P,08:30,18:30,10,2,Overtime work
+EMP024,2025-10-13,A,,,0,0,Absent without notice
+EMP025,2025-10-13,LOP,,,0,0,Leave without pay
+EMP001,2025-10-14,PL,,,0,0,Paid leave
+EMP002,2025-10-14,P,09:30,19:00,9.5,2,
+EMP003,2025-10-14,P,10:00,19:30,9.5,2,Regular shift
+EMP004,2025-10-14,P,08:30,20:00,11.5,4,Late check-in
+EMP005,2025-10-14,P,08:45,17:30,8.75,1,Early departure
+EMP006,2025-10-14,P,09:00,18:00,9,1,Overtime work
+EMP007,2025-10-14,A,,,0,0,Absent without notice
+EMP008,2025-10-14,LOP,,,0,0,Leave without pay
+EMP009,2025-10-14,PL,,,0,0,Paid leave
+EMP010,2025-10-14,P,08:30,19:30,11,3,
+EMP011,2025-10-14,P,08:45,20:00,11.25,3,Regular shift
+EMP012,2025-10-14,P,09:00,17:30,8.5,0,Late check-in
+EMP013,2025-10-14,P,09:15,18:00,8.75,1,Early departure
+EMP014,2025-10-14,P,09:30,18:15,8.75,1,Overtime work
+EMP015,2025-10-14,A,,,0,0,Absent without notice
+EMP016,2025-10-14,LOP,,,0,0,Leave without pay
+EMP017,2025-10-14,PL,,,0,0,Paid leave
+EMP018,2025-10-14,P,09:00,20:00,11,3,
+EMP019,2025-10-14,P,09:15,17:30,8.25,0,Regular shift
+EMP020,2025-10-14,P,09:30,18:00,8.5,0,Late check-in
+EMP021,2025-10-14,P,10:00,18:15,8.25,0,Early departure
+EMP022,2025-10-14,P,08:30,18:30,10,2,Overtime work
+EMP023,2025-10-14,A,,,0,0,Absent without notice
+EMP024,2025-10-14,LOP,,,0,0,Leave without pay
+EMP025,2025-10-14,PL,,,0,0,Paid leave
+EMP001,2025-10-15,H,,,0,0,Public holiday
+EMP002,2025-10-15,H,,,0,0,Public holiday
+EMP003,2025-10-15,H,,,0,0,Public holiday
+EMP004,2025-10-15,H,,,0,0,Public holiday
+EMP005,2025-10-15,H,,,0,0,Public holiday
+EMP006,2025-10-15,H,,,0,0,Public holiday
+EMP007,2025-10-15,H,,,0,0,Public holiday
+EMP008,2025-10-15,H,,,0,0,Public holiday
+EMP009,2025-10-15,H,,,0,0,Public holiday
+EMP010,2025-10-15,H,,,0,0,Public holiday
+EMP011,2025-10-15,H,,,0,0,Public holiday
+EMP012,2025-10-15,H,,,0,0,Public holiday
+EMP013,2025-10-15,H,,,0,0,Public holiday
+EMP014,2025-10-15,H,,,0,0,Public holiday
+EMP015,2025-10-15,H,,,0,0,Public holiday
+EMP016,2025-10-15,H,,,0,0,Public holiday
+EMP017,2025-10-15,H,,,0,0,Public holiday
+EMP018,2025-10-15,H,,,0,0,Public holiday
+EMP019,2025-10-15,H,,,0,0,Public holiday
+EMP020,2025-10-15,H,,,0,0,Public holiday
+EMP021,2025-10-15,H,,,0,0,Public holiday
+EMP022,2025-10-15,H,,,0,0,Public holiday
+EMP023,2025-10-15,H,,,0,0,Public holiday
+EMP024,2025-10-15,H,,,0,0,Public holiday
+EMP025,2025-10-15,H,,,0,0,Public holiday
+EMP001,2025-10-16,P,10:00,19:30,9.5,2,Regular shift
+EMP002,2025-10-16,P,08:30,20:00,11.5,4,Late check-in
+EMP003,2025-10-16,P,08:45,17:30,8.75,1,Early departure
+EMP004,2025-10-16,P,09:00,18:00,9,1,Overtime work
+EMP005,2025-10-16,A,,,0,0,Absent without notice
+EMP006,2025-10-16,LOP,,,0,0,Leave without pay
+EMP007,2025-10-16,PL,,,0,0,Paid leave
+EMP008,2025-10-16,P,08:30,19:30,11,3,
+EMP009,2025-10-16,P,08:45,20:00,11.25,3,Regular shift
+EMP010,2025-10-16,P,09:00,17:30,8.5,0,Late check-in
+EMP011,2025-10-16,P,09:15,18:00,8.75,1,Early departure
+EMP012,2025-10-16,P,09:30,18:15,8.75,1,Overtime work
+EMP013,2025-10-16,A,,,0,0,Absent without notice
+EMP014,2025-10-16,LOP,,,0,0,Leave without pay
+EMP015,2025-10-16,PL,,,0,0,Paid leave
+EMP016,2025-10-16,P,09:00,20:00,11,3,
+EMP017,2025-10-16,P,09:15,17:30,8.25,0,Regular shift
+EMP018,2025-10-16,P,09:30,18:00,8.5,0,Late check-in
+EMP019,2025-10-16,P,10:00,18:15,8.25,0,Early departure
+EMP020,2025-10-16,P,08:30,18:30,10,2,Overtime work
+EMP021,2025-10-16,A,,,0,0,Absent without notice
+EMP022,2025-10-16,LOP,,,0,0,Leave without pay
+EMP023,2025-10-16,PL,,,0,0,Paid leave
+EMP024,2025-10-16,P,09:30,17:30,8,0,
+EMP025,2025-10-16,P,10:00,18:00,8,0,Regular shift
+EMP001,2025-10-17,P,08:30,20:00,11.5,4,Late check-in
+EMP002,2025-10-17,P,08:45,17:30,8.75,1,Early departure
+EMP003,2025-10-17,P,09:00,18:00,9,1,Overtime work
+EMP004,2025-10-17,A,,,0,0,Absent without notice
+EMP005,2025-10-17,LOP,,,0,0,Leave without pay
+EMP006,2025-10-17,PL,,,0,0,Paid leave
+EMP007,2025-10-17,P,08:30,19:30,11,3,
+EMP008,2025-10-17,P,08:45,20:00,11.25,3,Regular shift
+EMP009,2025-10-17,P,09:00,17:30,8.5,0,Late check-in
+EMP010,2025-10-17,P,09:15,18:00,8.75,1,Early departure
+EMP011,2025-10-17,P,09:30,18:15,8.75,1,Overtime work
+EMP012,2025-10-17,A,,,0,0,Absent without notice
+EMP013,2025-10-17,LOP,,,0,0,Leave without pay
+EMP014,2025-10-17,PL,,,0,0,Paid leave
+EMP015,2025-10-17,P,09:00,20:00,11,3,
+EMP016,2025-10-17,P,09:15,17:30,8.25,0,Regular shift
+EMP017,2025-10-17,P,09:30,18:00,8.5,0,Late check-in
+EMP018,2025-10-17,P,10:00,18:15,8.25,0,Early departure
+EMP019,2025-10-17,P,08:30,18:30,10,2,Overtime work
+EMP020,2025-10-17,A,,,0,0,Absent without notice
+EMP021,2025-10-17,LOP,,,0,0,Leave without pay
+EMP022,2025-10-17,PL,,,0,0,Paid leave
+EMP023,2025-10-17,P,09:30,17:30,8,0,
+EMP024,2025-10-17,P,10:00,18:00,8,0,Regular shift
+EMP025,2025-10-17,P,08:30,18:15,9.75,2,Late check-in
+EMP001,2025-10-18,P,08:45,17:30,8.75,1,Early departure
+EMP002,2025-10-18,P,09:00,18:00,9,1,Overtime work
+EMP003,2025-10-18,A,,,0,0,Absent without notice
+EMP004,2025-10-18,LOP,,,0,0,Leave without pay
+EMP005,2025-10-18,PL,,,0,0,Paid leave
+EMP006,2025-10-18,P,08:30,19:30,11,3,
+EMP007,2025-10-18,P,08:45,20:00,11.25,3,Regular shift
+EMP008,2025-10-18,P,09:00,17:30,8.5,0,Late check-in
+EMP009,2025-10-18,P,09:15,18:00,8.75,1,Early departure
+EMP010,2025-10-18,P,09:30,18:15,8.75,1,Overtime work
+EMP011,2025-10-18,A,,,0,0,Absent without notice
+EMP012,2025-10-18,LOP,,,0,0,Leave without pay
+EMP013,2025-10-18,PL,,,0,0,Paid leave
+EMP014,2025-10-18,P,09:00,20:00,11,3,
+EMP015,2025-10-18,P,09:15,17:30,8.25,0,Regular shift
+EMP016,2025-10-18,P,09:30,18:00,8.5,0,Late check-in
+EMP017,2025-10-18,P,10:00,18:15,8.25,0,Early departure
+EMP018,2025-10-18,P,08:30,18:30,10,2,Overtime work
+EMP019,2025-10-18,A,,,0,0,Absent without notice
+EMP020,2025-10-18,LOP,,,0,0,Leave without pay
+EMP021,2025-10-18,PL,,,0,0,Paid leave
+EMP022,2025-10-18,P,09:30,17:30,8,0,
+EMP023,2025-10-18,P,10:00,18:00,8,0,Regular shift
+EMP024,2025-10-18,P,08:30,18:15,9.75,2,Late check-in
+EMP025,2025-10-18,P,08:45,18:30,9.75,2,Early departure
+EMP001,2025-10-19,WO,,,0,0,Weekly off
+EMP002,2025-10-19,WO,,,0,0,Weekly off
+EMP003,2025-10-19,WO,,,0,0,Weekly off
+EMP004,2025-10-19,WO,,,0,0,Weekly off
+EMP005,2025-10-19,WO,,,0,0,Weekly off
+EMP006,2025-10-19,WO,,,0,0,Weekly off
+EMP007,2025-10-19,WO,,,0,0,Weekly off
+EMP008,2025-10-19,WO,,,0,0,Weekly off
+EMP009,2025-10-19,WO,,,0,0,Weekly off
+EMP010,2025-10-19,WO,,,0,0,Weekly off
+EMP011,2025-10-19,WO,,,0,0,Weekly off
+EMP012,2025-10-19,WO,,,0,0,Weekly off
+EMP013,2025-10-19,WO,,,0,0,Weekly off
+EMP014,2025-10-19,WO,,,0,0,Weekly off
+EMP015,2025-10-19,WO,,,0,0,Weekly off
+EMP016,2025-10-19,WO,,,0,0,Weekly off
+EMP017,2025-10-19,WO,,,0,0,Weekly off
+EMP018,2025-10-19,WO,,,0,0,Weekly off
+EMP019,2025-10-19,WO,,,0,0,Weekly off
+EMP020,2025-10-19,WO,,,0,0,Weekly off
+EMP021,2025-10-19,WO,,,0,0,Weekly off
+EMP022,2025-10-19,WO,,,0,0,Weekly off
+EMP023,2025-10-19,WO,,,0,0,Weekly off
+EMP024,2025-10-19,WO,,,0,0,Weekly off
+EMP025,2025-10-19,WO,,,0,0,Weekly off
+EMP001,2025-10-20,A,,,0,0,Absent without notice
+EMP002,2025-10-20,LOP,,,0,0,Leave without pay
+EMP003,2025-10-20,PL,,,0,0,Paid leave
+EMP004,2025-10-20,P,08:30,19:30,11,3,
+EMP005,2025-10-20,P,08:45,20:00,11.25,3,Regular shift
+EMP006,2025-10-20,P,09:00,17:30,8.5,0,Late check-in
+EMP007,2025-10-20,P,09:15,18:00,8.75,1,Early departure
+EMP008,2025-10-20,P,09:30,18:15,8.75,1,Overtime work
+EMP009,2025-10-20,A,,,0,0,Absent without notice
+EMP010,2025-10-20,LOP,,,0,0,Leave without pay
+EMP011,2025-10-20,PL,,,0,0,Paid leave
+EMP012,2025-10-20,P,09:00,20:00,11,3,
+EMP013,2025-10-20,P,09:15,17:30,8.25,0,Regular shift
+EMP014,2025-10-20,P,09:30,18:00,8.5,0,Late check-in
+EMP015,2025-10-20,P,10:00,18:15,8.25,0,Early departure
+EMP016,2025-10-20,P,08:30,18:30,10,2,Overtime work
+EMP017,2025-10-20,A,,,0,0,Absent without notice
+EMP018,2025-10-20,LOP,,,0,0,Leave without pay
+EMP019,2025-10-20,PL,,,0,0,Paid leave
+EMP020,2025-10-20,P,09:30,17:30,8,0,
+EMP021,2025-10-20,P,10:00,18:00,8,0,Regular shift
+EMP022,2025-10-20,P,08:30,18:15,9.75,2,Late check-in
+EMP023,2025-10-20,P,08:45,18:30,9.75,2,Early departure
+EMP024,2025-10-20,P,09:00,19:00,10,2,Overtime work
+EMP025,2025-10-20,A,,,0,0,Absent without notice
+EMP001,2025-10-21,LOP,,,0,0,Leave without pay
+EMP002,2025-10-21,PL,,,0,0,Paid leave
+EMP003,2025-10-21,P,08:30,19:30,11,3,
+EMP004,2025-10-21,P,08:45,20:00,11.25,3,Regular shift
+EMP005,2025-10-21,P,09:00,17:30,8.5,0,Late check-in
+EMP006,2025-10-21,P,09:15,18:00,8.75,1,Early departure
+EMP007,2025-10-21,P,09:30,18:15,8.75,1,Overtime work
+EMP008,2025-10-21,A,,,0,0,Absent without notice
+EMP009,2025-10-21,LOP,,,0,0,Leave without pay
+EMP010,2025-10-21,PL,,,0,0,Paid leave
+EMP011,2025-10-21,P,09:00,20:00,11,3,
+EMP012,2025-10-21,P,09:15,17:30,8.25,0,Regular shift
+EMP013,2025-10-21,P,09:30,18:00,8.5,0,Late check-in
+EMP014,2025-10-21,P,10:00,18:15,8.25,0,Early departure
+EMP015,2025-10-21,P,08:30,18:30,10,2,Overtime work
+EMP016,2025-10-21,A,,,0,0,Absent without notice
+EMP017,2025-10-21,LOP,,,0,0,Leave without pay
+EMP018,2025-10-21,PL,,,0,0,Paid leave
+EMP019,2025-10-21,P,09:30,17:30,8,0,
+EMP020,2025-10-21,P,10:00,18:00,8,0,Regular shift
+EMP021,2025-10-21,P,08:30,18:15,9.75,2,Late check-in
+EMP022,2025-10-21,P,08:45,18:30,9.75,2,Early departure
+EMP023,2025-10-21,P,09:00,19:00,10,2,Overtime work
+EMP024,2025-10-21,A,,,0,0,Absent without notice
+EMP025,2025-10-21,LOP,,,0,0,Leave without pay
+EMP001,2025-10-22,PL,,,0,0,Paid leave
+EMP002,2025-10-22,P,08:30,19:30,11,3,
+EMP003,2025-10-22,P,08:45,20:00,11.25,3,Regular shift
+EMP004,2025-10-22,P,09:00,17:30,8.5,0,Late check-in
+EMP005,2025-10-22,P,09:15,18:00,8.75,1,Early departure
+EMP006,2025-10-22,P,09:30,18:15,8.75,1,Overtime work
+EMP007,2025-10-22,A,,,0,0,Absent without notice
+EMP008,2025-10-22,LOP,,,0,0,Leave without pay
+EMP009,2025-10-22,PL,,,0,0,Paid leave
+EMP010,2025-10-22,P,09:00,20:00,11,3,
+EMP011,2025-10-22,P,09:15,17:30,8.25,0,Regular shift
+EMP012,2025-10-22,P,09:30,18:00,8.5,0,Late check-in
+EMP013,2025-10-22,P,10:00,18:15,8.25,0,Early departure
+EMP014,2025-10-22,P,08:30,18:30,10,2,Overtime work
+EMP015,2025-10-22,A,,,0,0,Absent without notice
+EMP016,2025-10-22,LOP,,,0,0,Leave without pay
+EMP017,2025-10-22,PL,,,0,0,Paid leave
+EMP018,2025-10-22,P,09:30,17:30,8,0,
+EMP019,2025-10-22,P,10:00,18:00,8,0,Regular shift
+EMP020,2025-10-22,P,08:30,18:15,9.75,2,Late check-in
+EMP021,2025-10-22,P,08:45,18:30,9.75,2,Early departure
+EMP022,2025-10-22,P,09:00,19:00,10,2,Overtime work
+EMP023,2025-10-22,A,,,0,0,Absent without notice
+EMP024,2025-10-22,LOP,,,0,0,Leave without pay
+EMP025,2025-10-22,PL,,,0,0,Paid leave
+EMP001,2025-10-23,P,08:30,19:30,11,3,
+EMP002,2025-10-23,P,08:45,20:00,11.25,3,Regular shift
+EMP003,2025-10-23,P,09:00,17:30,8.5,0,Late check-in
+EMP004,2025-10-23,P,09:15,18:00,8.75,1,Early departure
+EMP005,2025-10-23,P,09:30,18:15,8.75,1,Overtime work
+EMP006,2025-10-23,A,,,0,0,Absent without notice
+EMP007,2025-10-23,LOP,,,0,0,Leave without pay
+EMP008,2025-10-23,PL,,,0,0,Paid leave
+EMP009,2025-10-23,P,09:00,20:00,11,3,
+EMP010,2025-10-23,P,09:15,17:30,8.25,0,Regular shift
+EMP011,2025-10-23,P,09:30,18:00,8.5,0,Late check-in
+EMP012,2025-10-23,P,10:00,18:15,8.25,0,Early departure
+EMP013,2025-10-23,P,08:30,18:30,10,2,Overtime work
+EMP014,2025-10-23,A,,,0,0,Absent without notice
+EMP015,2025-10-23,LOP,,,0,0,Leave without pay
+EMP016,2025-10-23,PL,,,0,0,Paid leave
+EMP017,2025-10-23,P,09:30,17:30,8,0,
+EMP018,2025-10-23,P,10:00,18:00,8,0,Regular shift
+EMP019,2025-10-23,P,08:30,18:15,9.75,2,Late check-in
+EMP020,2025-10-23,P,08:45,18:30,9.75,2,Early departure
+EMP021,2025-10-23,P,09:00,19:00,10,2,Overtime work
+EMP022,2025-10-23,A,,,0,0,Absent without notice
+EMP023,2025-10-23,LOP,,,0,0,Leave without pay
+EMP024,2025-10-23,PL,,,0,0,Paid leave
+EMP025,2025-10-23,P,08:30,18:00,9.5,2,
+EMP001,2025-10-24,P,08:45,20:00,11.25,3,Regular shift
+EMP002,2025-10-24,P,09:00,17:30,8.5,0,Late check-in
+EMP003,2025-10-24,P,09:15,18:00,8.75,1,Early departure
+EMP004,2025-10-24,P,09:30,18:15,8.75,1,Overtime work
+EMP005,2025-10-24,A,,,0,0,Absent without notice
+EMP006,2025-10-24,LOP,,,0,0,Leave without pay
+EMP007,2025-10-24,PL,,,0,0,Paid leave
+EMP008,2025-10-24,P,09:00,20:00,11,3,
+EMP009,2025-10-24,P,09:15,17:30,8.25,0,Regular shift
+EMP010,2025-10-24,P,09:30,18:00,8.5,0,Late check-in
+EMP011,2025-10-24,P,10:00,18:15,8.25,0,Early departure
+EMP012,2025-10-24,P,08:30,18:30,10,2,Overtime work
+EMP013,2025-10-24,A,,,0,0,Absent without notice
+EMP014,2025-10-24,LOP,,,0,0,Leave without pay
+EMP015,2025-10-24,PL,,,0,0,Paid leave
+EMP016,2025-10-24,P,09:30,17:30,8,0,
+EMP017,2025-10-24,P,10:00,18:00,8,0,Regular shift
+EMP018,2025-10-24,P,08:30,18:15,9.75,2,Late check-in
+EMP019,2025-10-24,P,08:45,18:30,9.75,2,Early departure
+EMP020,2025-10-24,P,09:00,19:00,10,2,Overtime work
+EMP021,2025-10-24,A,,,0,0,Absent without notice
+EMP022,2025-10-24,LOP,,,0,0,Leave without pay
+EMP023,2025-10-24,PL,,,0,0,Paid leave
+EMP024,2025-10-24,P,08:30,18:00,9.5,2,
+EMP025,2025-10-24,P,08:45,18:15,9.5,2,Regular shift
+EMP001,2025-10-25,P,09:00,17:30,8.5,0,Late check-in
+EMP002,2025-10-25,P,09:15,18:00,8.75,1,Early departure
+EMP003,2025-10-25,P,09:30,18:15,8.75,1,Overtime work
+EMP004,2025-10-25,A,,,0,0,Absent without notice
+EMP005,2025-10-25,LOP,,,0,0,Leave without pay
+EMP006,2025-10-25,PL,,,0,0,Paid leave
+EMP007,2025-10-25,P,09:00,20:00,11,3,
+EMP008,2025-10-25,P,09:15,17:30,8.25,0,Regular shift
+EMP009,2025-10-25,P,09:30,18:00,8.5,0,Late check-in
+EMP010,2025-10-25,P,10:00,18:15,8.25,0,Early departure
+EMP011,2025-10-25,P,08:30,18:30,10,2,Overtime work
+EMP012,2025-10-25,A,,,0,0,Absent without notice
+EMP013,2025-10-25,LOP,,,0,0,Leave without pay
+EMP014,2025-10-25,PL,,,0,0,Paid leave
+EMP015,2025-10-25,P,09:30,17:30,8,0,
+EMP016,2025-10-25,P,10:00,18:00,8,0,Regular shift
+EMP017,2025-10-25,P,08:30,18:15,9.75,2,Late check-in
+EMP018,2025-10-25,P,08:45,18:30,9.75,2,Early departure
+EMP019,2025-10-25,P,09:00,19:00,10,2,Overtime work
+EMP020,2025-10-25,A,,,0,0,Absent without notice
+EMP021,2025-10-25,LOP,,,0,0,Leave without pay
+EMP022,2025-10-25,PL,,,0,0,Paid leave
+EMP023,2025-10-25,P,08:30,18:00,9.5,2,
+EMP024,2025-10-25,P,08:45,18:15,9.5,2,Regular shift
+EMP025,2025-10-25,P,09:00,18:30,9.5,2,Late check-in
+EMP001,2025-10-26,WO,,,0,0,Weekly off
+EMP002,2025-10-26,WO,,,0,0,Weekly off
+EMP003,2025-10-26,WO,,,0,0,Weekly off
+EMP004,2025-10-26,WO,,,0,0,Weekly off
+EMP005,2025-10-26,WO,,,0,0,Weekly off
+EMP006,2025-10-26,WO,,,0,0,Weekly off
+EMP007,2025-10-26,WO,,,0,0,Weekly off
+EMP008,2025-10-26,WO,,,0,0,Weekly off
+EMP009,2025-10-26,WO,,,0,0,Weekly off
+EMP010,2025-10-26,WO,,,0,0,Weekly off
+EMP011,2025-10-26,WO,,,0,0,Weekly off
+EMP012,2025-10-26,WO,,,0,0,Weekly off
+EMP013,2025-10-26,WO,,,0,0,Weekly off
+EMP014,2025-10-26,WO,,,0,0,Weekly off
+EMP015,2025-10-26,WO,,,0,0,Weekly off
+EMP016,2025-10-26,WO,,,0,0,Weekly off
+EMP017,2025-10-26,WO,,,0,0,Weekly off
+EMP018,2025-10-26,WO,,,0,0,Weekly off
+EMP019,2025-10-26,WO,,,0,0,Weekly off
+EMP020,2025-10-26,WO,,,0,0,Weekly off
+EMP021,2025-10-26,WO,,,0,0,Weekly off
+EMP022,2025-10-26,WO,,,0,0,Weekly off
+EMP023,2025-10-26,WO,,,0,0,Weekly off
+EMP024,2025-10-26,WO,,,0,0,Weekly off
+EMP025,2025-10-26,WO,,,0,0,Weekly off
+EMP001,2025-10-27,P,09:30,18:15,8.75,1,Overtime work
+EMP002,2025-10-27,A,,,0,0,Absent without notice
+EMP003,2025-10-27,LOP,,,0,0,Leave without pay
+EMP004,2025-10-27,PL,,,0,0,Paid leave
+EMP005,2025-10-27,P,09:00,20:00,11,3,
+EMP006,2025-10-27,P,09:15,17:30,8.25,0,Regular shift
+EMP007,2025-10-27,P,09:30,18:00,8.5,0,Late check-in
+EMP008,2025-10-27,P,10:00,18:15,8.25,0,Early departure
+EMP009,2025-10-27,P,08:30,18:30,10,2,Overtime work
+EMP010,2025-10-27,A,,,0,0,Absent without notice
+EMP011,2025-10-27,LOP,,,0,0,Leave without pay
+EMP012,2025-10-27,PL,,,0,0,Paid leave
+EMP013,2025-10-27,P,09:30,17:30,8,0,
+EMP014,2025-10-27,P,10:00,18:00,8,0,Regular shift
+EMP015,2025-10-27,P,08:30,18:15,9.75,2,Late check-in
+EMP016,2025-10-27,P,08:45,18:30,9.75,2,Early departure
+EMP017,2025-10-27,P,09:00,19:00,10,2,Overtime work
+EMP018,2025-10-27,A,,,0,0,Absent without notice
+EMP019,2025-10-27,LOP,,,0,0,Leave without pay
+EMP020,2025-10-27,PL,,,0,0,Paid leave
+EMP021,2025-10-27,P,08:30,18:00,9.5,2,
+EMP022,2025-10-27,P,08:45,18:15,9.5,2,Regular shift
+EMP023,2025-10-27,P,09:00,18:30,9.5,2,Late check-in
+EMP024,2025-10-27,P,09:15,19:00,9.75,2,Early departure
+EMP025,2025-10-27,P,09:30,19:30,10,2,Overtime work
+EMP001,2025-10-28,A,,,0,0,Absent without notice
+EMP002,2025-10-28,LOP,,,0,0,Leave without pay
+EMP003,2025-10-28,PL,,,0,0,Paid leave
+EMP004,2025-10-28,P,09:00,20:00,11,3,
+EMP005,2025-10-28,P,09:15,17:30,8.25,0,Regular shift
+EMP006,2025-10-28,P,09:30,18:00,8.5,0,Late check-in
+EMP007,2025-10-28,P,10:00,18:15,8.25,0,Early departure
+EMP008,2025-10-28,P,08:30,18:30,10,2,Overtime work
+EMP009,2025-10-28,A,,,0,0,Absent without notice
+EMP010,2025-10-28,LOP,,,0,0,Leave without pay
+EMP011,2025-10-28,PL,,,0,0,Paid leave
+EMP012,2025-10-28,P,09:30,17:30,8,0,
+EMP013,2025-10-28,P,10:00,18:00,8,0,Regular shift
+EMP014,2025-10-28,P,08:30,18:15,9.75,2,Late check-in
+EMP015,2025-10-28,P,08:45,18:30,9.75,2,Early departure
+EMP016,2025-10-28,P,09:00,19:00,10,2,Overtime work
+EMP017,2025-10-28,A,,,0,0,Absent without notice
+EMP018,2025-10-28,LOP,,,0,0,Leave without pay
+EMP019,2025-10-28,PL,,,0,0,Paid leave
+EMP020,2025-10-28,P,08:30,18:00,9.5,2,
+EMP021,2025-10-28,P,08:45,18:15,9.5,2,Regular shift
+EMP022,2025-10-28,P,09:00,18:30,9.5,2,Late check-in
+EMP023,2025-10-28,P,09:15,19:00,9.75,2,Early departure
+EMP024,2025-10-28,P,09:30,19:30,10,2,Overtime work
+EMP025,2025-10-28,A,,,0,0,Absent without notice
+EMP001,2025-10-29,LOP,,,0,0,Leave without pay
+EMP002,2025-10-29,PL,,,0,0,Paid leave
+EMP003,2025-10-29,P,09:00,20:00,11,3,
+EMP004,2025-10-29,P,09:15,17:30,8.25,0,Regular shift
+EMP005,2025-10-29,P,09:30,18:00,8.5,0,Late check-in
+EMP006,2025-10-29,P,10:00,18:15,8.25,0,Early departure
+EMP007,2025-10-29,P,08:30,18:30,10,2,Overtime work
+EMP008,2025-10-29,A,,,0,0,Absent without notice
+EMP009,2025-10-29,LOP,,,0,0,Leave without pay
+EMP010,2025-10-29,PL,,,0,0,Paid leave
+EMP011,2025-10-29,P,09:30,17:30,8,0,
+EMP012,2025-10-29,P,10:00,18:00,8,0,Regular shift
+EMP013,2025-10-29,P,08:30,18:15,9.75,2,Late check-in
+EMP014,2025-10-29,P,08:45,18:30,9.75,2,Early departure
+EMP015,2025-10-29,P,09:00,19:00,10,2,Overtime work
+EMP016,2025-10-29,A,,,0,0,Absent without notice
+EMP017,2025-10-29,LOP,,,0,0,Leave without pay
+EMP018,2025-10-29,PL,,,0,0,Paid leave
+EMP019,2025-10-29,P,08:30,18:00,9.5,2,
+EMP020,2025-10-29,P,08:45,18:15,9.5,2,Regular shift
+EMP021,2025-10-29,P,09:00,18:30,9.5,2,Late check-in
+EMP022,2025-10-29,P,09:15,19:00,9.75,2,Early departure
+EMP023,2025-10-29,P,09:30,19:30,10,2,Overtime work
+EMP024,2025-10-29,A,,,0,0,Absent without notice
+EMP025,2025-10-29,LOP,,,0,0,Leave without pay
+EMP001,2025-10-30,PL,,,0,0,Paid leave
+EMP002,2025-10-30,P,09:00,20:00,11,3,
+EMP003,2025-10-30,P,09:15,17:30,8.25,0,Regular shift
+EMP004,2025-10-30,P,09:30,18:00,8.5,0,Late check-in
+EMP005,2025-10-30,P,10:00,18:15,8.25,0,Early departure
+EMP006,2025-10-30,P,08:30,18:30,10,2,Overtime work
+EMP007,2025-10-30,A,,,0,0,Absent without notice
+EMP008,2025-10-30,LOP,,,0,0,Leave without pay
+EMP009,2025-10-30,PL,,,0,0,Paid leave
+EMP010,2025-10-30,P,09:30,17:30,8,0,
+EMP011,2025-10-30,P,10:00,18:00,8,0,Regular shift
+EMP012,2025-10-30,P,08:30,18:15,9.75,2,Late check-in
+EMP013,2025-10-30,P,08:45,18:30,9.75,2,Early departure
+EMP014,2025-10-30,P,09:00,19:00,10,2,Overtime work
+EMP015,2025-10-30,A,,,0,0,Absent without notice
+EMP016,2025-10-30,LOP,,,0,0,Leave without pay
+EMP017,2025-10-30,PL,,,0,0,Paid leave
+EMP018,2025-10-30,P,08:30,18:00,9.5,2,
+EMP019,2025-10-30,P,08:45,18:15,9.5,2,Regular shift
+EMP020,2025-10-30,P,09:00,18:30,9.5,2,Late check-in
+EMP021,2025-10-30,P,09:15,19:00,9.75,2,Early departure
+EMP022,2025-10-30,P,09:30,19:30,10,2,Overtime work
+EMP023,2025-10-30,A,,,0,0,Absent without notice
+EMP024,2025-10-30,LOP,,,0,0,Leave without pay
+EMP025,2025-10-30,PL,,,0,0,Paid leave
+EMP001,2025-10-31,P,09:00,20:00,11,3,
+EMP002,2025-10-31,P,09:15,17:30,8.25,0,Regular shift
+EMP003,2025-10-31,P,09:30,18:00,8.5,0,Late check-in
+EMP004,2025-10-31,P,10:00,18:15,8.25,0,Early departure
+EMP005,2025-10-31,P,08:30,18:30,10,2,Overtime work
+EMP006,2025-10-31,A,,,0,0,Absent without notice
+EMP007,2025-10-31,LOP,,,0,0,Leave without pay
+EMP008,2025-10-31,PL,,,0,0,Paid leave
+EMP009,2025-10-31,P,09:30,17:30,8,0,
+EMP010,2025-10-31,P,10:00,18:00,8,0,Regular shift
+EMP011,2025-10-31,P,08:30,18:15,9.75,2,Late check-in
+EMP012,2025-10-31,P,08:45,18:30,9.75,2,Early departure
+EMP013,2025-10-31,P,09:00,19:00,10,2,Overtime work
+EMP014,2025-10-31,A,,,0,0,Absent without notice
+EMP015,2025-10-31,LOP,,,0,0,Leave without pay
+EMP016,2025-10-31,PL,,,0,0,Paid leave
+EMP017,2025-10-31,P,08:30,18:00,9.5,2,
+EMP018,2025-10-31,P,08:45,18:15,9.5,2,Regular shift
+EMP019,2025-10-31,P,09:00,18:30,9.5,2,Late check-in
+EMP020,2025-10-31,P,09:15,19:00,9.75,2,Early departure
+EMP021,2025-10-31,P,09:30,19:30,10,2,Overtime work
+EMP022,2025-10-31,A,,,0,0,Absent without notice
+EMP023,2025-10-31,LOP,,,0,0,Leave without pay
+EMP024,2025-10-31,PL,,,0,0,Paid leave
+EMP025,2025-10-31,P,09:00,18:15,9.25,1,
+EMP001,2025-11-01,H,,,0,0,Public holiday
+EMP002,2025-11-01,H,,,0,0,Public holiday
+EMP003,2025-11-01,H,,,0,0,Public holiday
+EMP004,2025-11-01,H,,,0,0,Public holiday
+EMP005,2025-11-01,H,,,0,0,Public holiday
+EMP006,2025-11-01,H,,,0,0,Public holiday
+EMP007,2025-11-01,H,,,0,0,Public holiday
+EMP008,2025-11-01,H,,,0,0,Public holiday
+EMP009,2025-11-01,H,,,0,0,Public holiday
+EMP010,2025-11-01,H,,,0,0,Public holiday
+EMP011,2025-11-01,H,,,0,0,Public holiday
+EMP012,2025-11-01,H,,,0,0,Public holiday
+EMP013,2025-11-01,H,,,0,0,Public holiday
+EMP014,2025-11-01,H,,,0,0,Public holiday
+EMP015,2025-11-01,H,,,0,0,Public holiday
+EMP016,2025-11-01,H,,,0,0,Public holiday
+EMP017,2025-11-01,H,,,0,0,Public holiday
+EMP018,2025-11-01,H,,,0,0,Public holiday
+EMP019,2025-11-01,H,,,0,0,Public holiday
+EMP020,2025-11-01,H,,,0,0,Public holiday
+EMP021,2025-11-01,H,,,0,0,Public holiday
+EMP022,2025-11-01,H,,,0,0,Public holiday
+EMP023,2025-11-01,H,,,0,0,Public holiday
+EMP024,2025-11-01,H,,,0,0,Public holiday
+EMP025,2025-11-01,H,,,0,0,Public holiday
+EMP001,2025-11-02,WO,,,0,0,Weekly off
+EMP002,2025-11-02,WO,,,0,0,Weekly off
+EMP003,2025-11-02,WO,,,0,0,Weekly off
+EMP004,2025-11-02,WO,,,0,0,Weekly off
+EMP005,2025-11-02,WO,,,0,0,Weekly off
+EMP006,2025-11-02,WO,,,0,0,Weekly off
+EMP007,2025-11-02,WO,,,0,0,Weekly off
+EMP008,2025-11-02,WO,,,0,0,Weekly off
+EMP009,2025-11-02,WO,,,0,0,Weekly off
+EMP010,2025-11-02,WO,,,0,0,Weekly off
+EMP011,2025-11-02,WO,,,0,0,Weekly off
+EMP012,2025-11-02,WO,,,0,0,Weekly off
+EMP013,2025-11-02,WO,,,0,0,Weekly off
+EMP014,2025-11-02,WO,,,0,0,Weekly off
+EMP015,2025-11-02,WO,,,0,0,Weekly off
+EMP016,2025-11-02,WO,,,0,0,Weekly off
+EMP017,2025-11-02,WO,,,0,0,Weekly off
+EMP018,2025-11-02,WO,,,0,0,Weekly off
+EMP019,2025-11-02,WO,,,0,0,Weekly off
+EMP020,2025-11-02,WO,,,0,0,Weekly off
+EMP021,2025-11-02,WO,,,0,0,Weekly off
+EMP022,2025-11-02,WO,,,0,0,Weekly off
+EMP023,2025-11-02,WO,,,0,0,Weekly off
+EMP024,2025-11-02,WO,,,0,0,Weekly off
+EMP025,2025-11-02,WO,,,0,0,Weekly off
+EMP001,2025-11-03,P,09:30,20:00,10.5,2,Overtime work
+EMP002,2025-11-03,A,,,0,0,Absent without notice
+EMP003,2025-11-03,LOP,,,0,0,Leave without pay
+EMP004,2025-11-03,PL,,,0,0,Paid leave
+EMP005,2025-11-03,P,09:00,18:30,9.5,2,
+EMP006,2025-11-03,P,09:15,19:00,9.75,2,Regular shift
+EMP007,2025-11-03,P,09:30,19:30,10,2,Late check-in
+EMP008,2025-11-03,P,10:00,20:00,10,2,Early departure
+EMP009,2025-11-03,P,08:30,17:30,9,1,Overtime work
+EMP010,2025-11-03,A,,,0,0,Absent without notice
+EMP011,2025-11-03,LOP,,,0,0,Leave without pay
+EMP012,2025-11-03,PL,,,0,0,Paid leave
+EMP013,2025-11-03,P,09:30,19:00,9.5,2,
+EMP014,2025-11-03,P,10:00,19:30,9.5,2,Regular shift
+EMP015,2025-11-03,P,08:30,20:00,11.5,4,Late check-in
+EMP016,2025-11-03,P,08:45,17:30,8.75,1,Early departure
+EMP017,2025-11-03,P,09:00,18:00,9,1,Overtime work
+EMP018,2025-11-03,A,,,0,0,Absent without notice
+EMP019,2025-11-03,LOP,,,0,0,Leave without pay
+EMP020,2025-11-03,PL,,,0,0,Paid leave
+EMP021,2025-11-03,P,08:30,19:30,11,3,
+EMP022,2025-11-03,P,08:45,20:00,11.25,3,Regular shift
+EMP023,2025-11-03,P,09:00,17:30,8.5,0,Late check-in
+EMP024,2025-11-03,P,09:15,18:00,8.75,1,Early departure
+EMP025,2025-11-03,P,09:30,18:15,8.75,1,Overtime work
+EMP001,2025-11-04,A,,,0,0,Absent without notice
+EMP002,2025-11-04,LOP,,,0,0,Leave without pay
+EMP003,2025-11-04,PL,,,0,0,Paid leave
+EMP004,2025-11-04,P,09:00,18:30,9.5,2,
+EMP005,2025-11-04,P,09:15,19:00,9.75,2,Regular shift
+EMP006,2025-11-04,P,09:30,19:30,10,2,Late check-in
+EMP007,2025-11-04,P,10:00,20:00,10,2,Early departure
+EMP008,2025-11-04,P,08:30,17:30,9,1,Overtime work
+EMP009,2025-11-04,A,,,0,0,Absent without notice
+EMP010,2025-11-04,LOP,,,0,0,Leave without pay
+EMP011,2025-11-04,PL,,,0,0,Paid leave
+EMP012,2025-11-04,P,09:30,19:00,9.5,2,
+EMP013,2025-11-04,P,10:00,19:30,9.5,2,Regular shift
+EMP014,2025-11-04,P,08:30,20:00,11.5,4,Late check-in
+EMP015,2025-11-04,P,08:45,17:30,8.75,1,Early departure
+EMP016,2025-11-04,P,09:00,18:00,9,1,Overtime work
+EMP017,2025-11-04,A,,,0,0,Absent without notice
+EMP018,2025-11-04,LOP,,,0,0,Leave without pay
+EMP019,2025-11-04,PL,,,0,0,Paid leave
+EMP020,2025-11-04,P,08:30,19:30,11,3,
+EMP021,2025-11-04,P,08:45,20:00,11.25,3,Regular shift
+EMP022,2025-11-04,P,09:00,17:30,8.5,0,Late check-in
+EMP023,2025-11-04,P,09:15,18:00,8.75,1,Early departure
+EMP024,2025-11-04,P,09:30,18:15,8.75,1,Overtime work
+EMP025,2025-11-04,A,,,0,0,Absent without notice
+EMP001,2025-11-05,LOP,,,0,0,Leave without pay
+EMP002,2025-11-05,PL,,,0,0,Paid leave
+EMP003,2025-11-05,P,09:00,18:30,9.5,2,
+EMP004,2025-11-05,P,09:15,19:00,9.75,2,Regular shift
+EMP005,2025-11-05,P,09:30,19:30,10,2,Late check-in
+EMP006,2025-11-05,P,10:00,20:00,10,2,Early departure
+EMP007,2025-11-05,P,08:30,17:30,9,1,Overtime work
+EMP008,2025-11-05,A,,,0,0,Absent without notice
+EMP009,2025-11-05,LOP,,,0,0,Leave without pay
+EMP010,2025-11-05,PL,,,0,0,Paid leave
+EMP011,2025-11-05,P,09:30,19:00,9.5,2,
+EMP012,2025-11-05,P,10:00,19:30,9.5,2,Regular shift
+EMP013,2025-11-05,P,08:30,20:00,11.5,4,Late check-in
+EMP014,2025-11-05,P,08:45,17:30,8.75,1,Early departure
+EMP015,2025-11-05,P,09:00,18:00,9,1,Overtime work
+EMP016,2025-11-05,A,,,0,0,Absent without notice
+EMP017,2025-11-05,LOP,,,0,0,Leave without pay
+EMP018,2025-11-05,PL,,,0,0,Paid leave
+EMP019,2025-11-05,P,08:30,19:30,11,3,
+EMP020,2025-11-05,P,08:45,20:00,11.25,3,Regular shift
+EMP021,2025-11-05,P,09:00,17:30,8.5,0,Late check-in
+EMP022,2025-11-05,P,09:15,18:00,8.75,1,Early departure
+EMP023,2025-11-05,P,09:30,18:15,8.75,1,Overtime work
+EMP024,2025-11-05,A,,,0,0,Absent without notice
+EMP025,2025-11-05,LOP,,,0,0,Leave without pay
+EMP001,2025-11-06,PL,,,0,0,Paid leave
+EMP002,2025-11-06,P,09:00,18:30,9.5,2,
+EMP003,2025-11-06,P,09:15,19:00,9.75,2,Regular shift
+EMP004,2025-11-06,P,09:30,19:30,10,2,Late check-in
+EMP005,2025-11-06,P,10:00,20:00,10,2,Early departure
+EMP006,2025-11-06,P,08:30,17:30,9,1,Overtime work
+EMP007,2025-11-06,A,,,0,0,Absent without notice
+EMP008,2025-11-06,LOP,,,0,0,Leave without pay
+EMP009,2025-11-06,PL,,,0,0,Paid leave
+EMP010,2025-11-06,P,09:30,19:00,9.5,2,
+EMP011,2025-11-06,P,10:00,19:30,9.5,2,Regular shift
+EMP012,2025-11-06,P,08:30,20:00,11.5,4,Late check-in
+EMP013,2025-11-06,P,08:45,17:30,8.75,1,Early departure
+EMP014,2025-11-06,P,09:00,18:00,9,1,Overtime work
+EMP015,2025-11-06,A,,,0,0,Absent without notice
+EMP016,2025-11-06,LOP,,,0,0,Leave without pay
+EMP017,2025-11-06,PL,,,0,0,Paid leave
+EMP018,2025-11-06,P,08:30,19:30,11,3,
+EMP019,2025-11-06,P,08:45,20:00,11.25,3,Regular shift
+EMP020,2025-11-06,P,09:00,17:30,8.5,0,Late check-in
+EMP021,2025-11-06,P,09:15,18:00,8.75,1,Early departure
+EMP022,2025-11-06,P,09:30,18:15,8.75,1,Overtime work
+EMP023,2025-11-06,A,,,0,0,Absent without notice
+EMP024,2025-11-06,LOP,,,0,0,Leave without pay
+EMP025,2025-11-06,PL,,,0,0,Paid leave
+EMP001,2025-11-07,P,09:00,18:30,9.5,2,
+EMP002,2025-11-07,P,09:15,19:00,9.75,2,Regular shift
+EMP003,2025-11-07,P,09:30,19:30,10,2,Late check-in
+EMP004,2025-11-07,P,10:00,20:00,10,2,Early departure
+EMP005,2025-11-07,P,08:30,17:30,9,1,Overtime work
+EMP006,2025-11-07,A,,,0,0,Absent without notice
+EMP007,2025-11-07,LOP,,,0,0,Leave without pay
+EMP008,2025-11-07,PL,,,0,0,Paid leave
+EMP009,2025-11-07,P,09:30,19:00,9.5,2,
+EMP010,2025-11-07,P,10:00,19:30,9.5,2,Regular shift
+EMP011,2025-11-07,P,08:30,20:00,11.5,4,Late check-in
+EMP012,2025-11-07,P,08:45,17:30,8.75,1,Early departure
+EMP013,2025-11-07,P,09:00,18:00,9,1,Overtime work
+EMP014,2025-11-07,A,,,0,0,Absent without notice
+EMP015,2025-11-07,LOP,,,0,0,Leave without pay
+EMP016,2025-11-07,PL,,,0,0,Paid leave
+EMP017,2025-11-07,P,08:30,19:30,11,3,
+EMP018,2025-11-07,P,08:45,20:00,11.25,3,Regular shift
+EMP019,2025-11-07,P,09:00,17:30,8.5,0,Late check-in
+EMP020,2025-11-07,P,09:15,18:00,8.75,1,Early departure
+EMP021,2025-11-07,P,09:30,18:15,8.75,1,Overtime work
+EMP022,2025-11-07,A,,,0,0,Absent without notice
+EMP023,2025-11-07,LOP,,,0,0,Leave without pay
+EMP024,2025-11-07,PL,,,0,0,Paid leave
+EMP025,2025-11-07,P,09:00,20:00,11,3,
+EMP001,2025-11-08,P,09:15,19:00,9.75,2,Regular shift
+EMP002,2025-11-08,P,09:30,19:30,10,2,Late check-in
+EMP003,2025-11-08,P,10:00,20:00,10,2,Early departure
+EMP004,2025-11-08,P,08:30,17:30,9,1,Overtime work
+EMP005,2025-11-08,A,,,0,0,Absent without notice
+EMP006,2025-11-08,LOP,,,0,0,Leave without pay
+EMP007,2025-11-08,PL,,,0,0,Paid leave
+EMP008,2025-11-08,P,09:30,19:00,9.5,2,
+EMP009,2025-11-08,P,10:00,19:30,9.5,2,Regular shift
+EMP010,2025-11-08,P,08:30,20:00,11.5,4,Late check-in
+EMP011,2025-11-08,P,08:45,17:30,8.75,1,Early departure
+EMP012,2025-11-08,P,09:00,18:00,9,1,Overtime work
+EMP013,2025-11-08,A,,,0,0,Absent without notice
+EMP014,2025-11-08,LOP,,,0,0,Leave without pay
+EMP015,2025-11-08,PL,,,0,0,Paid leave
+EMP016,2025-11-08,P,08:30,19:30,11,3,
+EMP017,2025-11-08,P,08:45,20:00,11.25,3,Regular shift
+EMP018,2025-11-08,P,09:00,17:30,8.5,0,Late check-in
+EMP019,2025-11-08,P,09:15,18:00,8.75,1,Early departure
+EMP020,2025-11-08,P,09:30,18:15,8.75,1,Overtime work
+EMP021,2025-11-08,A,,,0,0,Absent without notice
+EMP022,2025-11-08,LOP,,,0,0,Leave without pay
+EMP023,2025-11-08,PL,,,0,0,Paid leave
+EMP024,2025-11-08,P,09:00,20:00,11,3,
+EMP025,2025-11-08,P,09:15,17:30,8.25,0,Regular shift
+EMP001,2025-11-09,WO,,,0,0,Weekly off
+EMP002,2025-11-09,WO,,,0,0,Weekly off
+EMP003,2025-11-09,WO,,,0,0,Weekly off
+EMP004,2025-11-09,WO,,,0,0,Weekly off
+EMP005,2025-11-09,WO,,,0,0,Weekly off
+EMP006,2025-11-09,WO,,,0,0,Weekly off
+EMP007,2025-11-09,WO,,,0,0,Weekly off
+EMP008,2025-11-09,WO,,,0,0,Weekly off
+EMP009,2025-11-09,WO,,,0,0,Weekly off
+EMP010,2025-11-09,WO,,,0,0,Weekly off
+EMP011,2025-11-09,WO,,,0,0,Weekly off
+EMP012,2025-11-09,WO,,,0,0,Weekly off
+EMP013,2025-11-09,WO,,,0,0,Weekly off
+EMP014,2025-11-09,WO,,,0,0,Weekly off
+EMP015,2025-11-09,WO,,,0,0,Weekly off
+EMP016,2025-11-09,WO,,,0,0,Weekly off
+EMP017,2025-11-09,WO,,,0,0,Weekly off
+EMP018,2025-11-09,WO,,,0,0,Weekly off
+EMP019,2025-11-09,WO,,,0,0,Weekly off
+EMP020,2025-11-09,WO,,,0,0,Weekly off
+EMP021,2025-11-09,WO,,,0,0,Weekly off
+EMP022,2025-11-09,WO,,,0,0,Weekly off
+EMP023,2025-11-09,WO,,,0,0,Weekly off
+EMP024,2025-11-09,WO,,,0,0,Weekly off
+EMP025,2025-11-09,WO,,,0,0,Weekly off
+EMP001,2025-11-10,P,10:00,20:00,10,2,Early departure
+EMP002,2025-11-10,P,08:30,17:30,9,1,Overtime work
+EMP003,2025-11-10,A,,,0,0,Absent without notice
+EMP004,2025-11-10,LOP,,,0,0,Leave without pay
+EMP005,2025-11-10,PL,,,0,0,Paid leave
+EMP006,2025-11-10,P,09:30,19:00,9.5,2,
+EMP007,2025-11-10,P,10:00,19:30,9.5,2,Regular shift
+EMP008,2025-11-10,P,08:30,20:00,11.5,4,Late check-in
+EMP009,2025-11-10,P,08:45,17:30,8.75,1,Early departure
+EMP010,2025-11-10,P,09:00,18:00,9,1,Overtime work
+EMP011,2025-11-10,A,,,0,0,Absent without notice
+EMP012,2025-11-10,LOP,,,0,0,Leave without pay
+EMP013,2025-11-10,PL,,,0,0,Paid leave
+EMP014,2025-11-10,P,08:30,19:30,11,3,
+EMP015,2025-11-10,P,08:45,20:00,11.25,3,Regular shift
+EMP016,2025-11-10,P,09:00,17:30,8.5,0,Late check-in
+EMP017,2025-11-10,P,09:15,18:00,8.75,1,Early departure
+EMP018,2025-11-10,P,09:30,18:15,8.75,1,Overtime work
+EMP019,2025-11-10,A,,,0,0,Absent without notice
+EMP020,2025-11-10,LOP,,,0,0,Leave without pay
+EMP021,2025-11-10,PL,,,0,0,Paid leave
+EMP022,2025-11-10,P,09:00,20:00,11,3,
+EMP023,2025-11-10,P,09:15,17:30,8.25,0,Regular shift
+EMP024,2025-11-10,P,09:30,18:00,8.5,0,Late check-in
+EMP025,2025-11-10,P,10:00,18:15,8.25,0,Early departure
+EMP001,2025-11-11,P,08:30,17:30,9,1,Overtime work
+EMP002,2025-11-11,A,,,0,0,Absent without notice
+EMP003,2025-11-11,LOP,,,0,0,Leave without pay
+EMP004,2025-11-11,PL,,,0,0,Paid leave
+EMP005,2025-11-11,P,09:30,19:00,9.5,2,
+EMP006,2025-11-11,P,10:00,19:30,9.5,2,Regular shift
+EMP007,2025-11-11,P,08:30,20:00,11.5,4,Late check-in
+EMP008,2025-11-11,P,08:45,17:30,8.75,1,Early departure
+EMP009,2025-11-11,P,09:00,18:00,9,1,Overtime work
+EMP010,2025-11-11,A,,,0,0,Absent without notice
+EMP011,2025-11-11,LOP,,,0,0,Leave without pay
+EMP012,2025-11-11,PL,,,0,0,Paid leave
+EMP013,2025-11-11,P,08:30,19:30,11,3,
+EMP014,2025-11-11,P,08:45,20:00,11.25,3,Regular shift
+EMP015,2025-11-11,P,09:00,17:30,8.5,0,Late check-in
+EMP016,2025-11-11,P,09:15,18:00,8.75,1,Early departure
+EMP017,2025-11-11,P,09:30,18:15,8.75,1,Overtime work
+EMP018,2025-11-11,A,,,0,0,Absent without notice
+EMP019,2025-11-11,LOP,,,0,0,Leave without pay
+EMP020,2025-11-11,PL,,,0,0,Paid leave
+EMP021,2025-11-11,P,09:00,20:00,11,3,
+EMP022,2025-11-11,P,09:15,17:30,8.25,0,Regular shift
+EMP023,2025-11-11,P,09:30,18:00,8.5,0,Late check-in
+EMP024,2025-11-11,P,10:00,18:15,8.25,0,Early departure
+EMP025,2025-11-11,P,08:30,18:30,10,2,Overtime work
+EMP001,2025-11-12,A,,,0,0,Absent without notice
+EMP002,2025-11-12,LOP,,,0,0,Leave without pay
+EMP003,2025-11-12,PL,,,0,0,Paid leave
+EMP004,2025-11-12,P,09:30,19:00,9.5,2,
+EMP005,2025-11-12,P,10:00,19:30,9.5,2,Regular shift
+EMP006,2025-11-12,P,08:30,20:00,11.5,4,Late check-in
+EMP007,2025-11-12,P,08:45,17:30,8.75,1,Early departure
+EMP008,2025-11-12,P,09:00,18:00,9,1,Overtime work
+EMP009,2025-11-12,A,,,0,0,Absent without notice
+EMP010,2025-11-12,LOP,,,0,0,Leave without pay
+EMP011,2025-11-12,PL,,,0,0,Paid leave
+EMP012,2025-11-12,P,08:30,19:30,11,3,
+EMP013,2025-11-12,P,08:45,20:00,11.25,3,Regular shift
+EMP014,2025-11-12,P,09:00,17:30,8.5,0,Late check-in
+EMP015,2025-11-12,P,09:15,18:00,8.75,1,Early departure
+EMP016,2025-11-12,P,09:30,18:15,8.75,1,Overtime work
+EMP017,2025-11-12,A,,,0,0,Absent without notice
+EMP018,2025-11-12,LOP,,,0,0,Leave without pay
+EMP019,2025-11-12,PL,,,0,0,Paid leave
+EMP020,2025-11-12,P,09:00,20:00,11,3,
+EMP021,2025-11-12,P,09:15,17:30,8.25,0,Regular shift
+EMP022,2025-11-12,P,09:30,18:00,8.5,0,Late check-in
+EMP023,2025-11-12,P,10:00,18:15,8.25,0,Early departure
+EMP024,2025-11-12,P,08:30,18:30,10,2,Overtime work
+EMP025,2025-11-12,A,,,0,0,Absent without notice
+EMP001,2025-11-13,LOP,,,0,0,Leave without pay
+EMP002,2025-11-13,PL,,,0,0,Paid leave
+EMP003,2025-11-13,P,09:30,19:00,9.5,2,
+EMP004,2025-11-13,P,10:00,19:30,9.5,2,Regular shift
+EMP005,2025-11-13,P,08:30,20:00,11.5,4,Late check-in
+EMP006,2025-11-13,P,08:45,17:30,8.75,1,Early departure
+EMP007,2025-11-13,P,09:00,18:00,9,1,Overtime work
+EMP008,2025-11-13,A,,,0,0,Absent without notice
+EMP009,2025-11-13,LOP,,,0,0,Leave without pay
+EMP010,2025-11-13,PL,,,0,0,Paid leave
+EMP011,2025-11-13,P,08:30,19:30,11,3,
+EMP012,2025-11-13,P,08:45,20:00,11.25,3,Regular shift
+EMP013,2025-11-13,P,09:00,17:30,8.5,0,Late check-in
+EMP014,2025-11-13,P,09:15,18:00,8.75,1,Early departure
+EMP015,2025-11-13,P,09:30,18:15,8.75,1,Overtime work
+EMP016,2025-11-13,A,,,0,0,Absent without notice
+EMP017,2025-11-13,LOP,,,0,0,Leave without pay
+EMP018,2025-11-13,PL,,,0,0,Paid leave
+EMP019,2025-11-13,P,09:00,20:00,11,3,
+EMP020,2025-11-13,P,09:15,17:30,8.25,0,Regular shift
+EMP021,2025-11-13,P,09:30,18:00,8.5,0,Late check-in
+EMP022,2025-11-13,P,10:00,18:15,8.25,0,Early departure
+EMP023,2025-11-13,P,08:30,18:30,10,2,Overtime work
+EMP024,2025-11-13,A,,,0,0,Absent without notice
+EMP025,2025-11-13,LOP,,,0,0,Leave without pay
+EMP001,2025-11-14,PL,,,0,0,Paid leave
+EMP002,2025-11-14,P,09:30,19:00,9.5,2,
+EMP003,2025-11-14,P,10:00,19:30,9.5,2,Regular shift
+EMP004,2025-11-14,P,08:30,20:00,11.5,4,Late check-in
+EMP005,2025-11-14,P,08:45,17:30,8.75,1,Early departure
+EMP006,2025-11-14,P,09:00,18:00,9,1,Overtime work
+EMP007,2025-11-14,A,,,0,0,Absent without notice
+EMP008,2025-11-14,LOP,,,0,0,Leave without pay
+EMP009,2025-11-14,PL,,,0,0,Paid leave
+EMP010,2025-11-14,P,08:30,19:30,11,3,
+EMP011,2025-11-14,P,08:45,20:00,11.25,3,Regular shift
+EMP012,2025-11-14,P,09:00,17:30,8.5,0,Late check-in
+EMP013,2025-11-14,P,09:15,18:00,8.75,1,Early departure
+EMP014,2025-11-14,P,09:30,18:15,8.75,1,Overtime work
+EMP015,2025-11-14,A,,,0,0,Absent without notice
+EMP016,2025-11-14,LOP,,,0,0,Leave without pay
+EMP017,2025-11-14,PL,,,0,0,Paid leave
+EMP018,2025-11-14,P,09:00,20:00,11,3,
+EMP019,2025-11-14,P,09:15,17:30,8.25,0,Regular shift
+EMP020,2025-11-14,P,09:30,18:00,8.5,0,Late check-in
+EMP021,2025-11-14,P,10:00,18:15,8.25,0,Early departure
+EMP022,2025-11-14,P,08:30,18:30,10,2,Overtime work
+EMP023,2025-11-14,A,,,0,0,Absent without notice
+EMP024,2025-11-14,LOP,,,0,0,Leave without pay
+EMP025,2025-11-14,PL,,,0,0,Paid leave
+EMP001,2025-11-15,P,09:30,19:00,9.5,2,
+EMP002,2025-11-15,P,10:00,19:30,9.5,2,Regular shift
+EMP003,2025-11-15,P,08:30,20:00,11.5,4,Late check-in
+EMP004,2025-11-15,P,08:45,17:30,8.75,1,Early departure
+EMP005,2025-11-15,P,09:00,18:00,9,1,Overtime work
+EMP006,2025-11-15,A,,,0,0,Absent without notice
+EMP007,2025-11-15,LOP,,,0,0,Leave without pay
+EMP008,2025-11-15,PL,,,0,0,Paid leave
+EMP009,2025-11-15,P,08:30,19:30,11,3,
+EMP010,2025-11-15,P,08:45,20:00,11.25,3,Regular shift
+EMP011,2025-11-15,P,09:00,17:30,8.5,0,Late check-in
+EMP012,2025-11-15,P,09:15,18:00,8.75,1,Early departure
+EMP013,2025-11-15,P,09:30,18:15,8.75,1,Overtime work
+EMP014,2025-11-15,A,,,0,0,Absent without notice
+EMP015,2025-11-15,LOP,,,0,0,Leave without pay
+EMP016,2025-11-15,PL,,,0,0,Paid leave
+EMP017,2025-11-15,P,09:00,20:00,11,3,
+EMP018,2025-11-15,P,09:15,17:30,8.25,0,Regular shift
+EMP019,2025-11-15,P,09:30,18:00,8.5,0,Late check-in
+EMP020,2025-11-15,P,10:00,18:15,8.25,0,Early departure
+EMP021,2025-11-15,P,08:30,18:30,10,2,Overtime work
+EMP022,2025-11-15,A,,,0,0,Absent without notice
+EMP023,2025-11-15,LOP,,,0,0,Leave without pay
+EMP024,2025-11-15,PL,,,0,0,Paid leave
+EMP025,2025-11-15,P,09:30,17:30,8,0,

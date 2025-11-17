@@ -701,6 +701,93 @@ export const processPayrollUpload = async (
 };
 
 // ==========================================================
+// --- HELPER: Aggregate Daily Attendance to Monthly Summary ---
+// ==========================================================
+/**
+ * Aggregates daily attendance records for an employee for a given month/year
+ * Returns monthly summary compatible with payroll calculations
+ */
+const aggregateDailyAttendance = async (
+  employeeId: Types.ObjectId,
+  month: number,
+  year: number
+): Promise<{
+  totalWorkingDays: number;
+  daysPresent: number;
+  leaveWithoutPay: number;
+  overtimeHours: number;
+  variableEarnings: IVariableEarning[];
+  variableDeductions: IVariableDeduction[];
+} | null> => {
+  // Calculate first and last day of the month
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0); // Day 0 = last day of previous month
+  
+  const startDateStr = `${year}-${String(month).padStart(2, '0')}-01`;
+  const endDateStr = `${year}-${String(month).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+
+  // Fetch all daily records for the employee in the given month
+  const dailyRecords = await DailyAttendance.find({
+    employee: employeeId,
+    date: {
+      $gte: startDateStr,
+      $lte: endDateStr,
+    },
+  });
+
+  if (!dailyRecords || dailyRecords.length === 0) {
+    return null; // No daily attendance data for this month
+  }
+
+  // Calculate aggregates
+  let totalWorkingDays = 0;
+  let daysPresent = 0;
+  let leaveWithoutPay = 0;
+  let totalOvertimeHours = 0;
+
+  for (const record of dailyRecords) {
+    totalWorkingDays++;
+
+    switch (record.status) {
+      case 'P': // Present
+        daysPresent++;
+        break;
+      case 'LOP': // Leave Without Pay
+        leaveWithoutPay++;
+        break;
+      case 'PL': // Paid Leave (counts as present for salary calculation)
+      case 'H': // Holiday (counts as present)
+      case 'WO': // Week Off (counts as present)
+        daysPresent++;
+        break;
+      case 'A': // Absent (doesn't count as present)
+        break;
+    }
+
+    if (record.overtimeHours) {
+      totalOvertimeHours += record.overtimeHours;
+    }
+  }
+
+  // For now, variable earnings/deductions come from monthly attendance_details if exists
+  // If you want to add them to daily records in future, include them here
+  const monthlyRecord = await Attendance.findOne({
+    employee: employeeId,
+    month,
+    year,
+  });
+
+  return {
+    totalWorkingDays,
+    daysPresent,
+    leaveWithoutPay,
+    overtimeHours: totalOvertimeHours,
+    variableEarnings: monthlyRecord?.variableEarnings || [],
+    variableDeductions: monthlyRecord?.variableDeductions || [],
+  };
+};
+
+// ==========================================================
 // --- REVAMPED: Payroll Generation Service ---
 // ==========================================================
 export const generatePayslips = async (
@@ -772,13 +859,11 @@ export const generatePayslips = async (
         continue;
       }
 
-      // Fetch salary and attendance data
+      // Fetch salary data
       const salary = await Salary.findOne({ employee: employee._id });
-      const attendance = await Attendance.findOne({
-        employee: employee._id,
-        month,
-        year,
-      });
+
+      // Aggregate daily attendance into monthly summary
+      const attendance = await aggregateDailyAttendance(employee._id as Types.ObjectId, month, year);
 
       // Validate required data exists
       if (!salary) {
