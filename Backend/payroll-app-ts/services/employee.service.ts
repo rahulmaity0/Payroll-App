@@ -68,7 +68,7 @@ export const updateMyProfile = async (
 
 export const getMyPayslips = async (
   employeeId: string | Types.ObjectId,
-  query: ParsedQs
+  query: any
 ): Promise<any[]> => {
   const year = query.year ? parseInt(query.year as string) : null;
 
@@ -147,7 +147,7 @@ export const getPayslipDetails = async (
 
 export const getMyAttendance = async (
   employeeId: string | Types.ObjectId,
-  query: ParsedQs
+  query: any
 ): Promise<IAttendance[]> => {
   const { year, month } = query;
   
@@ -166,7 +166,7 @@ export const getMyAttendance = async (
 
 export const downloadMyAttendance = async (
   employeeId: string | Types.ObjectId,
-  query: ParsedQs
+  query: any
 ): Promise<string> => {
   const attendanceData = await getMyAttendance(employeeId, query);
 
@@ -195,7 +195,7 @@ export const downloadMyAttendance = async (
 // Get my daily attendance records
 export const getMyDailyAttendance = async (
   employeeId: string | Types.ObjectId,
-  query: ParsedQs
+  query: any
 ): Promise<IDailyAttendance[]> => {
   const { year, month } = query;
   
@@ -336,7 +336,7 @@ export const deleteMyDailyAttendance = async (
 // Download my daily attendance as CSV
 export const downloadMyDailyAttendance = async (
   employeeId: string | Types.ObjectId,
-  query: ParsedQs
+  query: any
 ): Promise<string> => {
   const records = await getMyDailyAttendance(employeeId, query);
 
