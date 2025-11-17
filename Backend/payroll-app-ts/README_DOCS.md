@@ -171,10 +171,24 @@ payroll-app-ts/
 - `PUT /api/users/password` - Change password
 
 ### Employee Routes (Employee Role)
-- `GET /api/employee/payslips` - View my payslips
-- `GET /api/employee/payslips/:id/download` - Get my payslip details (JSON for frontend PDF)
-- `GET /api/employee/attendance` - View my attendance
-- `GET /api/employee/attendance/download` - Download attendance CSV
+**Profile:**
+- `GET /api/employee/profile` - View my profile with salary breakdown
+- `PUT /api/employee/profile` - Update my profile (editable fields only)
+
+**Payslips:**
+- `GET /api/employee/payslips` - View my payslips (filter by year)
+- `GET /api/employee/payslips/:id/download` - Get payslip details (JSON for frontend PDF)
+
+**Daily Attendance (Self-Service):**
+- `GET /api/employee/attendance/daily` - View my daily attendance records
+- `POST /api/employee/attendance/daily` - Mark my attendance (self-mark)
+- `PUT /api/employee/attendance/daily/:recordId` - Update my attendance record
+- `DELETE /api/employee/attendance/daily/:recordId` - Delete my attendance record
+- `GET /api/employee/attendance/daily/download` - Download daily attendance CSV
+
+**Monthly Attendance (Legacy):**
+- `GET /api/employee/attendance` - View my monthly attendance
+- `GET /api/employee/attendance/download` - Download monthly attendance CSV
 
 ### HR Routes (HR Role)
 - `POST /api/hr/onboard` - Onboard new employee

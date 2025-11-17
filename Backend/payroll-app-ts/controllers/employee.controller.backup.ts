@@ -1,4 +1,4 @@
-﻿// controllers/employee.controller.ts
+// controllers/employee.controller.ts
 import { Request, Response } from 'express';
 import * as EmployeeService from '../services/employee.service';
 
@@ -71,9 +71,7 @@ export const downloadPayslip = async (req: Request, res: Response) => {
   }
 };
 
-// --- Monthly Attendance Controllers (Legacy) ---
-
-// @desc    View my monthly attendance records (filter by year/month)
+// @desc    View my attendance records (filter by year/month)
 // @route   GET /api/employee/attendance
 // @access  Private (Employee)
 export const viewMyAttendance = async (req: Request, res: Response) => {
@@ -89,7 +87,7 @@ export const viewMyAttendance = async (req: Request, res: Response) => {
   }
 };
 
-// @desc    Download my monthly attendance records as CSV
+// @desc    Download my attendance records as CSV
 // @route   GET /api/employee/attendance/download
 // @access  Private (Employee)
 export const downloadMyAttendance = async (req: Request, res: Response) => {
@@ -103,99 +101,7 @@ export const downloadMyAttendance = async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename=\"attendance.csv\"'
-    );
-    res.status(200).send(csv);
-  } catch (error) {
-    const message = (error as Error).message;
-    res.status(404).json({ message });
-  }
-};
-
-// --- Daily Attendance Controllers (Employee Self-Service) ---
-
-// @desc    Get my daily attendance records
-// @route   GET /api/employee/attendance/daily
-// @access  Private (Employee)
-export const getMyDailyAttendance = async (req: Request, res: Response) => {
-  try {
-    const records = await EmployeeService.getMyDailyAttendance(
-      req.user!.employee,
-      req.query
-    );
-    res.status(200).json(records);
-  } catch (error) {
-    const message = (error as Error).message;
-    res.status(404).json({ message });
-  }
-};
-
-// @desc    Mark/update my daily attendance (self-mark)
-// @route   POST /api/employee/attendance/daily
-// @access  Private (Employee)
-export const markMyAttendance = async (req: Request, res: Response) => {
-  try {
-    const record = await EmployeeService.markMyAttendance(
-      req.user!.employee,
-      req.body
-    );
-    res.status(200).json({
-      message: 'Attendance marked successfully',
-      data: record,
-    });
-  } catch (error) {
-    const message = (error as Error).message;
-    res.status(400).json({ message });
-  }
-};
-
-// @desc    Update my existing daily attendance record
-// @route   PUT /api/employee/attendance/daily/:recordId
-// @access  Private (Employee)
-export const updateMyDailyAttendance = async (req: Request, res: Response) => {
-  try {
-    const updated = await EmployeeService.updateMyDailyAttendance(
-      req.user!.employee,
-      req.params.recordId,
-      req.body
-    );
-    res.status(200).json(updated);
-  } catch (error) {
-    const message = (error as Error).message;
-    res.status(400).json({ message });
-  }
-};
-
-// @desc    Delete my daily attendance record
-// @route   DELETE /api/employee/attendance/daily/:recordId
-// @access  Private (Employee)
-export const deleteMyDailyAttendance = async (req: Request, res: Response) => {
-  try {
-    const result = await EmployeeService.deleteMyDailyAttendance(
-      req.user!.employee,
-      req.params.recordId
-    );
-    res.status(200).json(result);
-  } catch (error) {
-    const message = (error as Error).message;
-    res.status(404).json({ message });
-  }
-};
-
-// @desc    Download my daily attendance as CSV
-// @route   GET /api/employee/attendance/daily/download
-// @access  Private (Employee)
-export const downloadMyDailyAttendance = async (req: Request, res: Response) => {
-  try {
-    const csv = await EmployeeService.downloadMyDailyAttendance(
-      req.user!.employee,
-      req.query
-    );
-
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader(
-      'Content-Disposition',
-      'attachment; filename=\"daily-attendance.csv\"'
+      'attachment; filename="attendance.csv"'
     );
     res.status(200).send(csv);
   } catch (error) {

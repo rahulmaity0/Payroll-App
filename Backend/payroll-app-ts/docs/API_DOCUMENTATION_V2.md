@@ -260,7 +260,118 @@ Authorization: Bearer <token>
 
 All employee endpoints require `role: "employee"`.
 
-### 3.1 View My Payslips
+### 3.1 Get My Profile (with Salary)
+- **Method:** `GET`
+- **Endpoint:** `/employee/profile`
+- **Access:** Private (Employee only)
+- **Description:** View complete profile including salary breakdown
+
+**Response (200):**
+```json
+{
+  "_id": "674123456789abcdef012345",
+  "employeeId": "EMP001",
+  "firstName": "John",
+  "lastName": "Doe",
+  "personalEmail": "john.doe@personal.com",
+  "designation": "Senior Software Engineer",
+  "department": "Engineering",
+  "joiningDate": "2023-01-15T00:00:00.000Z",
+  "dob": "1990-05-20T00:00:00.000Z",
+  "phone": "+1234567890",
+  "address": {
+    "street": "123 Main St",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "zip": "400001"
+  },
+  "bankDetails": {
+    "bankName": "HDFC Bank",
+    "accountNumber": "1234567890",
+    "ifscCode": "HDFC0001234"
+  },
+  "taxInfo": {
+    "pan": "ABCDE1234F",
+    "uan": "101234567890"
+  },
+  "isActive": true,
+  "salary": {
+    "_id": "674567890abcdef123456789",
+    "employee": "674123456789abcdef012345",
+    "annualCTC": 1200000,
+    "effectiveDate": "2023-01-15T00:00:00.000Z",
+    "earnings": [
+      { "name": "Basic Salary", "amount": 50000 },
+      { "name": "HRA", "amount": 15000 },
+      { "name": "Special Allowance", "amount": 10000 }
+    ],
+    "deductions": [
+      { "name": "Provident Fund", "amount": 6000, "isPercent": true, "percentOf": "Basic" },
+      { "name": "Professional Tax", "amount": 200, "isPercent": false, "percentOf": "Basic" }
+    ],
+    "employerContributions": [
+      { "name": "Employer PF", "amount": 6000, "isPercent": true, "percentOf": "Basic" }
+    ]
+  }
+}
+```
+
+**Note:** Salary field will be `null` if not configured
+
+---
+
+### 3.2 Update My Profile
+- **Method:** `PUT`
+- **Endpoint:** `/employee/profile`
+- **Access:** Private (Employee only)
+- **Description:** Update employee-editable fields only
+
+**Request Body:**
+```json
+{
+  "personalEmail": "john.new@email.com",
+  "phone": "+9876543210",
+  "dob": "1990-05-20",
+  "address": {
+    "street": "456 New St",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "zip": "400002"
+  },
+  "bankDetails": {
+    "bankName": "ICICI Bank",
+    "accountNumber": "9876543210",
+    "ifscCode": "ICIC0001234"
+  }
+}
+```
+
+**Editable Fields:**
+- `personalEmail` - Personal email address
+- `phone` - Phone number
+- `dob` - Date of birth
+- `address` - Residential address
+- `bankDetails` - Bank account details
+
+**Readonly Fields (HR only):**
+- `employeeId`, `firstName`, `lastName`, `designation`, `department`, `joiningDate`, `isActive`
+
+**Response (200):**
+```json
+{
+  "_id": "674123456789abcdef012345",
+  "employeeId": "EMP001",
+  "firstName": "John",
+  "lastName": "Doe",
+  "personalEmail": "john.new@email.com",
+  "phone": "+9876543210",
+  ...
+}
+```
+
+---
+
+### 3.3 View My Payslips
 - **Method:** `GET`
 - **Endpoint:** `/employee/payslips`
 - **Access:** Private (Employee only)
@@ -275,51 +386,41 @@ All employee endpoints require `role: "employee"`.
 [
   {
     "_id": "507f1f77bcf86cd799439013",
-    "employee": "507f1f77bcf86cd799439012",
-    "month": 1,
-    "year": 2024,
-    "generatedOn": "2024-02-01T10:00:00.000Z",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Senior Software Engineer"
+    },
+    "month": 11,
+    "year": 2025,
+    "generatedOn": "2025-11-15T10:00:00.000Z",
     "payrollInfo": {
       "totalWorkingDays": 22,
       "daysPaid": 20,
       "lopDays": 2
     },
     "earnings": [
-      {
-        "name": "Basic Salary",
-        "amount": 50000,
-        "type": "fixed"
-      },
-      {
-        "name": "HRA",
-        "amount": 15000,
-        "type": "fixed"
-      }
+      { "name": "Basic Salary", "amount": 50000, "type": "fixed" },
+      { "name": "HRA", "amount": 15000, "type": "fixed" }
     ],
     "deductions": [
-      {
-        "name": "Income Tax",
-        "amount": 5000,
-        "type": "tax"
-      },
-      {
-        "name": "PF",
-        "amount": 1800,
-        "type": "statutory"
-      }
+      { "name": "Income Tax", "amount": 5000, "type": "tax" },
+      { "name": "PF", "amount": 1800, "type": "statutory" }
     ],
     "grossEarnings": 70000,
     "totalDeductions": 6800,
     "netPay": 63200,
     "status": "generated",
-    "paymentDate": "2024-02-05T00:00:00.000Z"
+    "paymentDate": "2025-11-30T00:00:00.000Z"
   }
 ]
 ```
 
 ---
 
-### 3.2 Get Payslip Details (JSON)
+### 3.4 Get Payslip Details (JSON)
 - **Method:** `GET`
 - **Endpoint:** `/employee/payslips/:id/download`
 - **Access:** Private (Employee only)
@@ -386,7 +487,197 @@ All employee endpoints require `role: "employee"`.
 
 ---
 
-### 3.3 View My Attendance
+### 3.5 View My Daily Attendance
+- **Method:** `GET`
+- **Endpoint:** `/employee/attendance/daily`
+- **Access:** Private (Employee only)
+- **Description:** View my daily attendance records (chronological order)
+
+**Query Parameters (Optional):**
+```
+?year=2025&month=11
+```
+
+**Response (200):**
+```json
+[
+  {
+    "_id": "674abc123def456789012345",
+    "employee": "674123456789abcdef012345",
+    "date": "2025-11-01",
+    "status": "P",
+    "checkIn": "09:00",
+    "checkOut": "18:00",
+    "hoursWorked": 9,
+    "overtimeHours": 1,
+    "notes": "Worked on project deadline",
+    "createdAt": "2025-11-01T09:00:00.000Z",
+    "updatedAt": "2025-11-01T18:00:00.000Z"
+  },
+  {
+    "_id": "674abc123def456789012346",
+    "employee": "674123456789abcdef012345",
+    "date": "2025-11-02",
+    "status": "PL",
+    "checkIn": null,
+    "checkOut": null,
+    "hoursWorked": 0,
+    "overtimeHours": 0,
+    "notes": "Paid leave - personal",
+    "createdAt": "2025-11-02T08:00:00.000Z",
+    "updatedAt": "2025-11-02T08:00:00.000Z"
+  }
+]
+```
+
+**Status Codes:**
+- `P` - Present
+- `A` - Absent
+- `LOP` - Leave Without Pay
+- `PL` - Paid Leave
+- `H` - Holiday (HR only)
+- `WO` - Week Off (HR only)
+
+---
+
+### 3.6 Mark My Attendance (Self-Mark)
+- **Method:** `POST`
+- **Endpoint:** `/employee/attendance/daily`
+- **Access:** Private (Employee only)
+- **Description:** Mark or update attendance for a specific date (UPSERT)
+
+**Request Body:**
+```json
+{
+  "date": "2025-11-17",
+  "status": "P",
+  "checkIn": "09:15",
+  "checkOut": "18:30",
+  "hoursWorked": 9.25,
+  "notes": "Arrived 15 mins late due to traffic"
+}
+```
+
+**Field Validation:**
+- `date` - Required, YYYY-MM-DD format
+- `status` - Required, must be one of: `P`, `A`, `LOP`, `PL`
+- `checkIn` - Optional, HH:mm format
+- `checkOut` - Optional, HH:mm format
+- `hoursWorked` - Optional, 0-24
+- `notes` - Optional, max 500 characters
+
+**Response (200):**
+```json
+{
+  "message": "Attendance marked successfully",
+  "data": {
+    "_id": "674abc123def456789012347",
+    "employee": "674123456789abcdef012345",
+    "date": "2025-11-17",
+    "status": "P",
+    "checkIn": "09:15",
+    "checkOut": "18:30",
+    "hoursWorked": 9.25,
+    "notes": "Arrived 15 mins late due to traffic",
+    "createdAt": "2025-11-17T09:15:00.000Z",
+    "updatedAt": "2025-11-17T18:30:00.000Z"
+  }
+}
+```
+
+**Note:** If record exists for the date, it will be updated (UPSERT behavior)
+
+---
+
+### 3.7 Update My Attendance Record
+- **Method:** `PUT`
+- **Endpoint:** `/employee/attendance/daily/:recordId`
+- **Access:** Private (Employee only)
+- **Description:** Update an existing daily attendance record
+
+**URL Parameters:**
+```
+:recordId = MongoDB ObjectId of the attendance record
+```
+
+**Request Body (partial update):**
+```json
+{
+  "checkOut": "19:00",
+  "hoursWorked": 10,
+  "overtimeHours": 2,
+  "notes": "Worked late to finish sprint tasks"
+}
+```
+
+**Response (200):**
+```json
+{
+  "_id": "674abc123def456789012347",
+  "employee": "674123456789abcdef012345",
+  "date": "2025-11-17",
+  "status": "P",
+  "checkIn": "09:15",
+  "checkOut": "19:00",
+  "hoursWorked": 10,
+  "overtimeHours": 2,
+  "notes": "Worked late to finish sprint tasks",
+  "updatedAt": "2025-11-17T19:00:00.000Z"
+}
+```
+
+**Security:** Can only update own records
+
+---
+
+### 3.8 Delete My Attendance Record
+- **Method:** `DELETE`
+- **Endpoint:** `/employee/attendance/daily/:recordId`
+- **Access:** Private (Employee only)
+- **Description:** Delete a daily attendance record
+
+**URL Parameters:**
+```
+:recordId = MongoDB ObjectId of the attendance record
+```
+
+**Response (200):**
+```json
+{
+  "message": "Attendance record deleted successfully"
+}
+```
+
+**Security:** Can only delete own records
+
+---
+
+### 3.9 Download My Daily Attendance (CSV)
+- **Method:** `GET`
+- **Endpoint:** `/employee/attendance/daily/download`
+- **Access:** Private (Employee only)
+- **Description:** Download daily attendance records as CSV
+
+**Query Parameters (Optional):**
+```
+?year=2025&month=11
+```
+
+**Response (200):**
+- Content-Type: `text/csv`
+- Content-Disposition: `attachment; filename="daily-attendance.csv"`
+
+**CSV Format:**
+```csv
+date,status,checkIn,checkOut,hoursWorked,overtimeHours,notes
+2025-11-01,P,09:00,18:00,9,1,Worked on project deadline
+2025-11-02,PL,,,0,0,Paid leave - personal
+2025-11-03,P,09:15,18:30,9.25,0,
+```
+
+---
+
+### 3.10 View My Monthly Attendance (Legacy)
 - **Method:** `GET`
 - **Endpoint:** `/employee/attendance`
 - **Access:** Private (Employee only)
@@ -409,16 +700,10 @@ All employee endpoints require `role: "employee"`.
     "leaveWithoutPay": 2,
     "overtimeHours": 8,
     "variableEarnings": [
-      {
-        "name": "Overtime Bonus",
-        "amount": 2000
-      }
+      { "name": "Overtime Bonus", "amount": 2000 }
     ],
     "variableDeductions": [
-      {
-        "name": "LOP Deduction",
-        "amount": 4545.45
-      }
+      { "name": "LOP Deduction", "amount": 4545.45 }
     ]
   }
 ]
@@ -426,7 +711,7 @@ All employee endpoints require `role: "employee"`.
 
 ---
 
-### 3.4 Download Attendance (CSV)
+### 3.11 Download Monthly Attendance (CSV - Legacy)
 - **Method:** `GET`
 - **Endpoint:** `/employee/attendance/download`
 - **Access:** Private (Employee only)
@@ -1744,19 +2029,30 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 | GET | `/users/profile` | Any | Get my profile |
 | PUT | `/users/profile` | Any | Update my profile |
 | PUT | `/users/password` | Any | Change password |
-| GET | `/employee/payslips` | Employee | View payslips |
+| **GET** | **`/employee/profile`** | **Employee** | **Get profile with salary** |
+| **PUT** | **`/employee/profile`** | **Employee** | **Update my profile** |
+| GET | `/employee/payslips` | Employee | View my payslips |
 | GET | `/employee/payslips/:id/download` | Employee | Get payslip details (JSON for PDF) |
-| GET | `/employee/attendance` | Employee | View attendance |
-| GET | `/employee/attendance/download` | Employee | Download attendance CSV |
+| **GET** | **`/employee/attendance/daily`** | **Employee** | **View daily attendance** |
+| **POST** | **`/employee/attendance/daily`** | **Employee** | **Mark attendance (self-mark)** |
+| **PUT** | **`/employee/attendance/daily/:recordId`** | **Employee** | **Update attendance record** |
+| **DELETE** | **`/employee/attendance/daily/:recordId`** | **Employee** | **Delete attendance record** |
+| **GET** | **`/employee/attendance/daily/download`** | **Employee** | **Download daily attendance CSV** |
+| GET | `/employee/attendance` | Employee | View monthly attendance (legacy) |
+| GET | `/employee/attendance/download` | Employee | Download monthly attendance CSV |
 | POST | `/hr/onboard` | HR | Onboard employee |
 | GET | `/hr/employees` | HR | List all employees |
 | GET | `/hr/employees/:id` | HR | Get employee details |
 | PUT | `/hr/employees/:id` | HR | Update employee |
 | GET | `/hr/employees/:id/salary` | HR | Get salary details |
 | PUT | `/hr/employees/:id/salary` | HR | Update salary |
-| GET | `/hr/employees/:id/attendance` | HR | Get employee attendance |
-| POST | `/hr/attendance` | HR | Create attendance record |
-| PUT | `/hr/attendance/:attId` | HR | Update attendance record |
+| GET | `/hr/employees/:id/attendance` | HR | Get employee monthly attendance |
+| GET | `/hr/employees/:employeeId/attendance/daily` | HR | Get daily attendance records |
+| POST | `/hr/attendance/daily` | HR | Create/update daily attendance |
+| PUT | `/hr/attendance/daily/:recordId` | HR | Update daily attendance record |
+| DELETE | `/hr/attendance/daily/:recordId` | HR | Delete daily attendance record |
+| POST | `/hr/attendance` | HR | Create monthly attendance (legacy) |
+| PUT | `/hr/attendance/:attId` | HR | Update monthly attendance (legacy) |
 | POST | `/hr/attendance/upload` | HR | Upload attendance CSV |
 | POST | `/hr/payroll/generate` | HR | Generate payslips |
 | GET | `/hr/payslips` | HR | View all payslips (with filters) |

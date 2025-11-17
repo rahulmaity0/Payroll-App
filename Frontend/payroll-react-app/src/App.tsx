@@ -11,6 +11,10 @@ import EmployeeAttendancePage from './pages/EmployeeAttendancePage';
 import AttendanceUploadPage from './pages/AttendanceUploadPage';
 import EmployeePayslipPage from './pages/EmployeePayslipPage';
 import PayslipDetailPage from './pages/PayslipDetailPage';
+import EmployeeProfilePage from './pages/Employee/EmployeeProfilePage';
+import EmployeePayslipsPage from './pages/Employee/EmployeePayslipsPage';
+import EmployeePayslipDetailPage from './pages/Employee/EmployeePayslipDetailPage';
+import EmployeeAttendancePageNew from './pages/Employee/EmployeeAttendancePage';
 import { useAuth } from './context/AuthContext';
 
 // ProtectedRoute component - redirects to login if not authenticated
@@ -40,6 +44,13 @@ function App() {
         <Route path="/hr/employee-payslips" element={<ProtectedRoute element={<EmployeePayslipPage />} />} />
         <Route path="/hr/payslips/:id" element={<ProtectedRoute element={<PayslipDetailPage />} />} />
 
+        {/* Employee Protected Routes */}
+        <Route path="/employee/dashboard" element={<ProtectedRoute element={<EmployeeDashboardPage />} />} />
+        <Route path="/employee/profile" element={<ProtectedRoute element={<EmployeeProfilePage />} />} />
+        <Route path="/employee/attendance" element={<ProtectedRoute element={<EmployeeAttendancePageNew />} />} />
+        <Route path="/employee/payslips" element={<ProtectedRoute element={<EmployeePayslipsPage />} />} />
+        <Route path="/employee/payslips/:id" element={<ProtectedRoute element={<EmployeePayslipDetailPage />} />} />
+
         {/* Root redirect - goes to appropriate dashboard based on role if authenticated, otherwise to login */}
         <Route
           path="/"
@@ -48,7 +59,7 @@ function App() {
               to={
                 isAuthenticated
                   ? role === 'employee'
-                    ? '/employee-dashboard'
+                    ? '/employee/dashboard'
                     : '/dashboard'
                   : '/login'
               }
