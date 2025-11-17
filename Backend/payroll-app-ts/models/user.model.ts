@@ -4,10 +4,11 @@ import bcrypt from 'bcryptjs';
 
 // 1. Define the Interface for a User document
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   email: string;
   password: string; // Will be hashed
   role: 'employee' | 'hr';
-  employee: Schema.Types.ObjectId;
+  employee: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   

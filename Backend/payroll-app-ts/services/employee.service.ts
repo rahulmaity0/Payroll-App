@@ -101,7 +101,7 @@ export const getPayslipDetails = async (
   }
 
   // Authorization: ensure the payslip belongs to the requesting employee
-  if (payslip.employee._id.toString() !== employeeId.toString()) {
+  if ((payslip.employee as any)._id.toString() !== employeeId.toString()) {
     throw new Error('Unauthorized access to payslip');
   }
 
@@ -291,11 +291,11 @@ export const updateMyDailyAttendance = async (
 
   // Only allow updating specific fields
   const allowedFields = ['status', 'checkIn', 'checkOut', 'hoursWorked', 'notes'];
-  const updates: any = {};
+  const updates: Partial<IDailyAttendance> = {};
   
-  for (const key in data) {
+  for (const key of Object.keys(data)) {
     if (allowedFields.includes(key)) {
-      updates[key] = data[key];
+      (updates as any)[key] = (data as any)[key];
     }
   }
 
