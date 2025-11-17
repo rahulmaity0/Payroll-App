@@ -1,11 +1,13 @@
 # Attendance Upload API - Specification
 
-**Last Updated:** November 16, 2025
+**Last Updated:** November 17, 2025
 
 This document describes the actual API endpoints and file formats for HR to upload attendance data into the Payroll system.
 
 ## Features
 - Supports both **daily** (per-day records) and **monthly** (aggregate summary) attendance uploads
+- **Daily attendance is the primary source for payroll calculations** - automatically aggregated for payslip generation
+- Monthly attendance is optional - used only for variable earnings/deductions
 - Auto-detection of CSV format based on headers
 - CSV header validation before processing
 - Multiple upload modes: preview, append, overwrite

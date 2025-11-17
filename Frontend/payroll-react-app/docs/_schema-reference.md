@@ -84,9 +84,43 @@
 }
 ```
 
-### 4\. `attendance_details` Collection
+### 4\.  `daily_attendance` Collection
 
-**Purpose:** Stores all the *variable monthly inputs* for payroll. This is populated by the CSV upload.
+**Purpose:** Stores individual daily attendance records. This is the **primary source** for payroll calculations. CSV uploads populate this collection.
+
+```javascript
+{
+  _id: ObjectId,
+  employee: ObjectId, (Ref: 'Employee', Required)
+  date: String, (Required, Format: YYYY-MM-DD)
+  status: String, (Required, Enum: ['P', 'A', 'LOP', 'PL', 'H', 'WO'])
+  checkIn: String, (Optional, Format: HH:mm)
+  checkOut: String, (Optional, Format: HH:mm)
+  hoursWorked: Number, (Optional, 0-24)
+  overtimeHours: Number, (Optional, >= 0)
+  notes: String, (Optional, Max: 500 chars)
+  timestamps: true
+  // Unique Index: (employee, date)
+}
+```
+
+**Status Codes:**
+- `P` = Present (counts as paid day)
+- `A` = Absent (no pay)
+- `LOP` = Leave Without Pay (deduction)
+- `PL` = Paid Leave (counts as paid day)
+- `H` = Holiday (counts as paid day)
+- `WO` = Week Off (counts as paid day)
+
+**Payroll Usage:**
+- Payslip generation **aggregates** daily records to calculate monthly totals
+- totalWorkingDays = count of all records
+- daysPresent = count of P + PL + H + WO
+- lopDays = count of LOP
+
+### 5\. `attendance_details` Collection
+
+**Purpose:** Stores **optional** monthly variable inputs for payroll (bonuses, advances, etc.). This is a supplementary collection - **not required** for payroll if only using daily attendance.
 
 ```javascript
 {
@@ -113,9 +147,14 @@
 }
 ```
 
-### 5\. `payslips` Collection
+### 6\. `payslips` Collection
 
 **Purpose:** Stores the final, calculated *result* of a payroll run. This is a permanent historical record (a snapshot).
+
+**Data Sources:**
+- Salary structure from `salary_details`
+- Attendance aggregated from `daily_attendance` (primary)
+- Optional variable earnings/deductions from `attendance_details` (supplementary)
 
 ```javascript
 {

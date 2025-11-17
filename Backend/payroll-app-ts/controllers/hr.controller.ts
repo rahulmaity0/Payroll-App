@@ -291,22 +291,58 @@ export const generatePayslips = async (req: Request, res: Response) => {
   }
 };
 
+// --- HR Payslip Viewing Controllers ---
+
+// @desc    View all payslips (with optional filters)
+// @route   GET /api/hr/payslips
+// @access  Private (HR)
+export const viewAllPayslips = async (req: Request, res: Response) => {
+  try {
+    const filters: any = {};
+    
+    if (req.query.year) filters.year = parseInt(req.query.year as string);
+    if (req.query.month) filters.month = parseInt(req.query.month as string);
+    if (req.query.employeeId) filters.employeeId = req.query.employeeId;
+    
+    const payslips = await HRService.getAllPayslips(filters);
+    res.status(200).json(payslips);
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(500).json({ message });
+  }
+};
+
+// @desc    View all payslips for a specific employee
+// @route   GET /api/hr/employees/:employeeId/payslips
+// @access  Private (HR)
+export const viewEmployeePayslips = async (req: Request, res: Response) => {
+  try {
+    const employeeId = req.params.employeeId;
+    const filters: any = {};
+    
+    if (req.query.year) filters.year = parseInt(req.query.year as string);
+    if (req.query.month) filters.month = parseInt(req.query.month as string);
+    
+    const payslips = await HRService.getEmployeePayslips(employeeId, filters);
+    res.status(200).json(payslips);
+  } catch (error) {
+    const message = (error as Error).message;
+    res.status(404).json({ message });
+  }
+};
+
+// @desc    Get payslip details for an employee (JSON for frontend PDF generation)
+// @route   GET /api/hr/payslips/:id/download
+// @access  Private (HR)
 export const downloadPayslipForEmployee = async (
   req: Request,
   res: Response
 ) => {
   try {
     const payslipId = req.params.id;
-    const doc = await HRService.downloadEmployeePayslip(payslipId);
+    const payslipData = await HRService.getEmployeePayslipDetails(payslipId);
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="payslip-${payslipId}.pdf"`
-    );
-
-    doc.pipe(res);
-    doc.end();
+    res.status(200).json(payslipData);
   } catch (error) {
     const message = (error as Error).message;
     res.status(404).json({ message });

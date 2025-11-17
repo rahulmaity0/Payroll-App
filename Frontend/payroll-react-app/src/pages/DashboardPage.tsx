@@ -63,6 +63,13 @@ const DashboardPage: React.FC = () => {
             <p>Generate monthly payslips for all employees with validations and reports.</p>
             <div className="card-arrow">→</div>
           </div>
+
+          <div className="card" onClick={() => navigate('/hr/employee-payslips')}>
+            <div className="card-icon">📊</div>
+            <h2>View Employee Payslips</h2>
+            <p>Search employees and view detailed payslip breakdowns with charts and analytics.</p>
+            <div className="card-arrow">→</div>
+          </div>
         </div>
       </div>
 

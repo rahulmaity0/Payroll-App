@@ -20,6 +20,8 @@ import {
   getAttendanceSummary,
   uploadPayroll,
   generatePayslips,
+  viewAllPayslips,
+  viewEmployeePayslips,
   downloadPayslipForEmployee,
   resetUserPassword,
   getDailyAttendance,
@@ -199,7 +201,9 @@ router.delete(
 // --- END DAILY ATTENDANCE ROUTES ---
 // ==========================================================
 
-// --- Payroll & Password Routes ---
+// --- Payroll & Payslip Routes ---
+
+// Generate payslips for all employees (for a specific month/year)
 router.post(
   '/payroll/generate',
   [
@@ -210,12 +214,26 @@ router.post(
   generatePayslips
 );
 
+// View all payslips (with optional filters: year, month, employeeId)
+router.get('/payslips', viewAllPayslips);
+
+// View all payslips for a specific employee (with optional filters: year, month)
+router.get(
+  '/employees/:employeeId/payslips',
+  [param('employeeId').isMongoId().withMessage('Invalid Employee ID')],
+  handleValidationErrors,
+  viewEmployeePayslips
+);
+
+// Get payslip details by payslip ID (returns JSON data for frontend PDF generation)
 router.get(
   '/payslips/:id/download',
   [param('id').isMongoId().withMessage('Invalid Payslip ID')],
   handleValidationErrors,
   downloadPayslipForEmployee
 );
+
+// --- User Management Routes ---
 
 router.put(
   '/users/:id/reset-password',

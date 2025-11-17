@@ -27,47 +27,60 @@ export const getMyPayslips = async (
   return payslips;
 };
 
-export const downloadPayslip = async (
+// --- Get Payslip Details Service (for frontend PDF generation) ---
+export const getPayslipDetails = async (
   employeeId: string | Types.ObjectId,
   payslipId: string
-): Promise<PDFDocument> => {
-  // Use a generic to type the populated 'employee' field
-  const payslip = await Payslip.findById(payslipId).populate<{
-    employee: IEmployee;
-  }>('employee');
+): Promise<any> => {
+  const payslip = await Payslip.findById(payslipId)
+    .populate<{ employee: IEmployee }>('employee')
+    .lean();
 
-  // Business Logic Validation:
   if (!payslip) {
     throw new Error('Payslip not found');
   }
-  // Use .toString() for safe comparison of ObjectIds
+
+  // Authorization: ensure the payslip belongs to the requesting employee
   if (payslip.employee._id.toString() !== employeeId.toString()) {
-    throw new Error('You are not authorized to view this payslip');
+    throw new Error('Unauthorized access to payslip');
   }
 
-  // Generate PDF
-  const doc = new PDFDocument();
-  doc.fontSize(20).text('Payslip', { align: 'center' });
-  doc.fontSize(12);
-  doc.moveDown();
-  doc.text(
-    `Employee: ${payslip.employee.firstName} ${payslip.employee.lastName}`
-  );
-  doc.text(`Month: ${payslip.month}/${payslip.year}`);
-  doc.moveDown();
-  doc.text('--- Earnings ---');
-  payslip.earnings.forEach((e) =>
-    doc.text(`${e.name}: ${e.amount.toFixed(2)}`)
-  );
-  doc.moveDown();
-  doc.text('--- Deductions ---');
-  payslip.deductions.forEach((d) =>
-    doc.text(`${d.name}: ${d.amount.toFixed(2)}`)
-  );
-  doc.moveDown();
-  doc.fontSize(16).text(`Net Pay: ${payslip.netPay.toFixed(2)}`);
-
-  return doc; // Return the PDF document stream
+  // Return complete payslip data for frontend PDF generation
+  return {
+    _id: payslip._id,
+    employee: {
+      employeeId: payslip.employee.employeeId,
+      firstName: payslip.employee.firstName,
+      lastName: payslip.employee.lastName,
+      designation: payslip.employee.designation,
+      department: payslip.employee.department,
+      bankDetails: payslip.employee.bankDetails,
+      taxInfo: payslip.employee.taxInfo,
+    },
+    month: payslip.month,
+    year: payslip.year,
+    generatedOn: payslip.generatedOn,
+    payrollInfo: {
+      totalWorkingDays: payslip.payrollInfo.totalWorkingDays,
+      daysPaid: payslip.payrollInfo.daysPaid,
+      lopDays: payslip.payrollInfo.lopDays,
+    },
+    earnings: payslip.earnings.map(e => ({
+      name: e.name,
+      amount: e.amount,
+      type: e.type,
+    })),
+    deductions: payslip.deductions.map(d => ({
+      name: d.name,
+      amount: d.amount,
+      type: d.type,
+    })),
+    grossEarnings: payslip.grossEarnings,
+    totalDeductions: payslip.totalDeductions,
+    netPay: payslip.netPay,
+    status: payslip.status,
+    paymentDate: payslip.paymentDate,
+  };
 };
 
 // --- Attendance Services ---

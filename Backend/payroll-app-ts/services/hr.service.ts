@@ -1014,42 +1014,88 @@ export const generatePayslips = async (
   return results;
 };
 
-// --- HR Payslip Download Service ---
-export const downloadEmployeePayslip = async (
+// --- HR Payslip Viewing Services ---
+
+// Get all payslips with optional filters
+export const getAllPayslips = async (
+  filters?: { year?: number; month?: number; employeeId?: string }
+): Promise<any[]> => {
+  const query: any = {};
+  
+  if (filters?.year) query.year = filters.year;
+  if (filters?.month) query.month = filters.month;
+  if (filters?.employeeId) query.employee = filters.employeeId;
+  
+  return await Payslip.find(query)
+    .populate('employee', 'employeeId firstName lastName designation')
+    .sort({ year: -1, month: -1 })
+    .lean();
+};
+
+// Get all payslips for a specific employee
+export const getEmployeePayslips = async (
+  employeeId: string,
+  filters?: { year?: number; month?: number }
+): Promise<any[]> => {
+  const query: any = { employee: employeeId };
+  
+  if (filters?.year) query.year = filters.year;
+  if (filters?.month) query.month = filters.month;
+  
+  return await Payslip.find(query)
+    .populate('employee', 'employeeId firstName lastName designation')
+    .sort({ year: -1, month: -1 })
+    .lean();
+};
+
+// --- Get Employee Payslip Details Service (for frontend PDF generation) ---
+export const getEmployeePayslipDetails = async (
   payslipId: string
 ): Promise<any> => {
-  const payslip = await Payslip.findById(payslipId).populate<{
-    employee: IEmployee;
-  }>('employee');
+  const payslip = await Payslip.findById(payslipId)
+    .populate<{ employee: IEmployee }>('employee')
+    .lean();
 
   if (!payslip) {
     throw new Error('Payslip not found');
   }
 
-  const doc = new PDFDocument();
-  doc.fontSize(20).text('Payslip', { align: 'center' });
-  doc.fontSize(12);
-  doc.moveDown();
-  doc.text(
-    `Employee: ${payslip.employee.firstName} ${payslip.employee.lastName} (ID: ${payslip.employee.employeeId})`
-  );
-  doc.text(`Month: ${payslip.month}/${payslip.year}`);
-  doc.moveDown();
-  doc.text('--- Earnings ---');
-  payslip.earnings.forEach((e) =>
-    doc.text(`${e.name}: ${e.amount.toFixed(2)}`)
-  );
-  doc.moveDown();
-  doc.text('--- Deductions ---');
-  payslip.deductions.forEach((d) =>
-    doc.text(`${d.name}: ${d.amount.toFixed(2)}`)
-  );
-  doc.moveDown();
-  doc.fontSize(16).text(`Gross Earnings: ${payslip.grossEarnings.toFixed(2)}`);
-  doc.fontSize(16).text(`Total Deductions: ${payslip.totalDeductions.toFixed(2)}`);
-  doc.fontSize(16).text(`Net Pay: ${payslip.netPay.toFixed(2)}`);
-
-  return doc;
+  // Return complete payslip data with full breakdown for frontend PDF generation
+  return {
+    _id: payslip._id,
+    employee: {
+      employeeId: payslip.employee.employeeId,
+      firstName: payslip.employee.firstName,
+      lastName: payslip.employee.lastName,
+      designation: payslip.employee.designation,
+      department: payslip.employee.department,
+      bankDetails: payslip.employee.bankDetails,
+      taxInfo: payslip.employee.taxInfo,
+    },
+    month: payslip.month,
+    year: payslip.year,
+    generatedOn: payslip.generatedOn,
+    payrollInfo: {
+      totalWorkingDays: payslip.payrollInfo.totalWorkingDays,
+      daysPaid: payslip.payrollInfo.daysPaid,
+      lopDays: payslip.payrollInfo.lopDays,
+    },
+    earnings: payslip.earnings.map(e => ({
+      name: e.name,
+      amount: e.amount,
+      type: e.type,
+    })),
+    deductions: payslip.deductions.map(d => ({
+      name: d.name,
+      amount: d.amount,
+      type: d.type,
+    })),
+    grossEarnings: payslip.grossEarnings,
+    totalDeductions: payslip.totalDeductions,
+    netPay: payslip.netPay,
+    status: payslip.status,
+    paymentDate: payslip.paymentDate,
+  };
 };
 
 // --- HR Password Reset Service ---

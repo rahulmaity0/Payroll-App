@@ -1,7 +1,7 @@
 # Payroll Management System API - Complete Documentation
 
-**Version:** 2.0  
-**Last Updated:** November 16, 2025
+**Version:** 2.1  
+**Last Updated:** November 17, 2025
 
 A comprehensive Node.js + TypeScript + MongoDB backend for managing employee payroll, attendance, and salary information.
 
@@ -11,10 +11,13 @@ A comprehensive Node.js + TypeScript + MongoDB backend for managing employee pay
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| **[API_DOCUMENTATION_V2.md](./API_DOCUMENTATION_V2.md)** | Complete API endpoint reference with examples | Frontend Developers |
-| **[FRONTEND_INTEGRATION.md](./FRONTEND_INTEGRATION.md)** | Frontend integration guide with React examples | Frontend Developers |
-| **[MODELS_DOCUMENTATION.md](./MODELS_DOCUMENTATION.md)** | Database schema and model definitions | All Developers |
+| **[API_DOCUMENTATION_V2.md](./docs/API_DOCUMENTATION_V2.md)** | Complete API endpoint reference with examples | Frontend Developers |
+| **[ATTENDANCE_API_COMPLETE_REFERENCE.md](./docs/ATTENDANCE_API_COMPLETE_REFERENCE.md)** | Comprehensive attendance module documentation (CRUD + CSV upload) | Frontend Developers |
+| **[PAYSLIP_GENERATION_API_REFERENCE.md](./docs/PAYSLIP_GENERATION_API_REFERENCE.md)** | Complete payslip generation API and business logic | Frontend Developers |
+| **[MODELS_DOCUMENTATION.md](./docs/MODELS_DOCUMENTATION.md)** | Database schema and model definitions | All Developers |
+| **[_schema-reference.md](./docs/_schema-reference.md)** | Quick schema reference (collections overview) | All Developers |
 | **[ATTENDANCE_UPLOAD_SPEC.md](./ATTENDANCE_UPLOAD_SPEC.md)** | CSV upload format and specifications | Frontend/HR Users |
+| **[PAYSLIP_REFACTOR_NOTES.md](./docs/PAYSLIP_REFACTOR_NOTES.md)** | Technical notes on payslip-attendance integration refactor | Backend Developers |
 | **README_DOCS.md** | This file - overview and quick start | All Developers |
 
 ---
@@ -169,7 +172,7 @@ payroll-app-ts/
 
 ### Employee Routes (Employee Role)
 - `GET /api/employee/payslips` - View my payslips
-- `GET /api/employee/payslips/:id/download` - Download payslip PDF
+- `GET /api/employee/payslips/:id/download` - Get my payslip details (JSON for frontend PDF)
 - `GET /api/employee/attendance` - View my attendance
 - `GET /api/employee/attendance/download` - Download attendance CSV
 
@@ -180,15 +183,22 @@ payroll-app-ts/
 - `PUT /api/hr/employees/:id` - Update employee
 - `GET /api/hr/employees/:id/salary` - Get salary details
 - `PUT /api/hr/employees/:id/salary` - Update salary
-- `GET /api/hr/employees/:id/attendance` - Get employee attendance
-- `POST /api/hr/attendance` - Create attendance record
-- `PUT /api/hr/attendance/:attId` - Update attendance record
-- `POST /api/hr/attendance/upload` - Upload attendance CSV
-- `POST /api/hr/payroll/generate` - Generate payslips
-- `GET /api/hr/payslips/:id/download` - Download payslip PDF
+- `GET /api/hr/employees/:employeeId/attendance/daily` - Get daily attendance records
+- `POST /api/hr/attendance/daily` - Create/update daily attendance (UPSERT)
+- `PUT /api/hr/attendance/daily/:recordId` - Update daily attendance record
+- `DELETE /api/hr/attendance/daily/:recordId` - Delete daily attendance record
+- `GET /api/hr/attendance/summary` - Get attendance summary (all employees, specific month)
+- `GET /api/hr/employees/:id/attendance` - Get monthly attendance (legacy)
+- `POST /api/hr/attendance` - Create monthly attendance record (legacy)
+- `PUT /api/hr/attendance/:attId` - Update monthly attendance record (legacy)
+- `POST /api/hr/attendance/upload` - Upload attendance CSV (daily or monthly)
+- `POST /api/hr/payroll/generate` - Generate payslips (auto-aggregates daily attendance)
+- `GET /api/hr/payslips` - View all payslips (with filters: year, month, employeeId)
+- `GET /api/hr/employees/:employeeId/payslips` - View payslips for specific employee
+- `GET /api/hr/payslips/:id/download` - Get payslip details (JSON for frontend PDF)
 - `PUT /api/hr/users/:id/reset-password` - Reset user password
 
-**For detailed request/response examples, see [API_DOCUMENTATION_V2.md](./API_DOCUMENTATION_V2.md)**
+**For detailed request/response examples, see [API_DOCUMENTATION_V2.md](./docs/API_DOCUMENTATION_V2.md)**
 
 ---
 
@@ -199,8 +209,9 @@ payroll-app-ts/
 1. **User** - Authentication credentials (email, password, role)
 2. **Employee** - Personal & professional information
 3. **Salary** - Salary structure (earnings, deductions)
-4. **Attendance** - Monthly attendance records
-5. **Payslip** - Generated payslips with calculations
+4. **DailyAttendance** - Individual daily attendance records (primary for payroll)
+5. **Attendance** - Monthly attendance records (optional, for variable earnings/deductions)
+6. **Payslip** - Generated payslips with calculations
 
 ### Model Relationships
 
@@ -208,9 +219,19 @@ payroll-app-ts/
 User ──┬──> Employee
        │
 Employee ──┬──> Salary
-           ├──> Attendance
+           ├──> DailyAttendance (primary)
+           ├──> Attendance (optional)
            └──> Payslip
 ```
+
+### Collections
+
+- `users` - Login credentials
+- `employee_details` - Employee master data
+- `salary_details` - Salary structure
+- `daily_attendance` - **Primary source** for payroll (individual daily records)
+- `attendance_details` - **Optional** monthly variable earnings/deductions
+- `payslips` - Generated payroll results
 
 ### Auto-Generated Fields
 
@@ -231,14 +252,18 @@ Employee ──┬──> Salary
 - Creates salary structure based on annual CTC
 
 ### 2. Attendance Management
-- Manual entry (single record)
+- **Daily attendance records** (individual day-by-day tracking)
+- Manual entry (create/update single daily record)
 - CSV bulk upload (daily or monthly format)
 - Preview mode (validate without saving)
 - Duplicate handling strategies (skip/update/error)
 - Auto-detection of CSV format
+- Status codes: P (Present), A (Absent), LOP, PL, H (Holiday), WO (Week Off)
+- Monthly summary aggregation from daily records
 
 ### 3. Payroll Processing
 - Generate payslips for entire organization
+- **Automatically aggregates daily attendance** to monthly summary
 - Calculates:
   - Gross earnings (fixed + variable)
   - LOP deductions based on attendance

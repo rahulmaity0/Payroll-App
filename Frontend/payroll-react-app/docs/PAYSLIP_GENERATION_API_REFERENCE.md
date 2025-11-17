@@ -23,9 +23,18 @@
 
 The Payslip Generation module handles **monthly payroll processing** for all active employees. It calculates salaries based on:
 - Fixed salary structure (from employee master)
-- Attendance data (working days, LOP, overtime)
+- **Daily attendance data** (automatically aggregated to monthly summary)
 - Variable earnings/deductions (bonuses, advances)
 - Pro-rata adjustments (for mid-month joiners)
+
+### Data Source
+
+Payslip generation **automatically aggregates daily attendance records** from the `daily_attendance` collection:
+- Queries all daily records for each employee for the target month
+- Calculates: totalWorkingDays, daysPresent, LOP days, overtime hours
+- Status codes that count as "present": P (Present), PL (Paid Leave), H (Holiday), WO (Week Off)
+- Status codes for deductions: A (Absent - no pay), LOP (Leave Without Pay)
+- Optional variable earnings/deductions from `attendance_details` collection if needed
 
 ### Key Features
 
@@ -42,13 +51,13 @@ The Payslip Generation module handles **monthly payroll processing** for all act
 ### Workflow
 
 ```
-1. HR uploads attendance data (monthly CSV)
+1. HR uploads attendance data (daily CSV with date, status, hours)
 2. HR triggers payslip generation (POST /hr/payroll/generate)
 3. Backend validates month has ended
 4. Backend processes each employee:
    - Checks for existing payslip (skip if exists)
    - Fetches salary structure
-   - Fetches attendance data
+   - Aggregates daily attendance records to monthly summary
    - Validates data completeness
    - Calculates pro-rata (if mid-month joiner)
    - Calculates earnings (fixed + variable)
@@ -210,8 +219,9 @@ The API performs these validations **before** processing:
    - Error if missing
 
 6. ✅ **Attendance Data Check**
-   - Attendance record must exist for month/year
-   - Error if missing
+   - At least one daily attendance record must exist for the month
+   - Automatically aggregates from `daily_attendance` collection
+   - Error if no daily records found
 
 7. ✅ **Working Days Validation**
    - `totalWorkingDays` must be > 0
@@ -283,6 +293,17 @@ The API performs these validations **before** processing:
   "message": "No active employees found for payroll processing. (HR users are excluded from payroll)"
 }
 ```
+
+**No Daily Attendance Data (Individual Employee Error):**
+```json
+{
+  "errors": [
+    "Employee EMP001: Missing attendance data. Please upload attendance before generating payslips."
+  ]
+}
+```
+
+**Note:** The "Missing attendance data" error means no daily attendance records found in `daily_attendance` collection for that employee for the target month.
 
 **With Force Flag (Before Month End):**
 ```json
@@ -457,7 +478,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ### 3. Download My Payslip (Employee)
 
-Download individual payslip as PDF.
+Get complete payslip details with attendance summary and salary breakdown for frontend PDF generation.
 
 **Endpoint:** `GET /api/employee/payslips/:id/download`  
 **Access:** Employee only  
@@ -485,11 +506,117 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 **Headers:**
 ```http
-Content-Type: application/pdf
-Content-Disposition: attachment; filename="payslip-673abc123def456789012345.pdf"
+Content-Type: application/json
 ```
 
-**Body:** Binary PDF file
+**Body:**
+```json
+{
+  "_id": "673abc123def456789012345",
+  "employee": {
+    "employeeId": "EMP001",
+    "firstName": "John",
+    "lastName": "Doe",
+    "designation": "Senior Software Engineer",
+    "department": "Engineering",
+    "bankDetails": {
+      "bankName": "HDFC Bank",
+      "accountNumber": "1234567890",
+      "ifscCode": "HDFC0001234"
+    },
+    "taxInfo": {
+      "pan": "ABCDE1234F",
+      "uan": "101234567890"
+    }
+  },
+  "month": 10,
+  "year": 2025,
+  "generatedOn": "2025-11-01T10:00:00.000Z",
+  "payrollInfo": {
+    "totalWorkingDays": 22,
+    "daysPaid": 20,
+    "lopDays": 2
+  },
+  "earnings": [
+    {
+      "name": "Basic Salary",
+      "amount": 45455,
+      "type": "fixed"
+    },
+    {
+      "name": "HRA",
+      "amount": 13636,
+      "type": "fixed"
+    },
+    {
+      "name": "Special Allowance",
+      "amount": 9091,
+      "type": "fixed"
+    },
+    {
+      "name": "Performance Bonus",
+      "amount": 5000,
+      "type": "variable"
+    }
+  ],
+  "deductions": [
+    {
+      "name": "Provident Fund",
+      "amount": 5455,
+      "type": "statutory"
+    },
+    {
+      "name": "Professional Tax",
+      "amount": 200,
+      "type": "tax"
+    },
+    {
+      "name": "LOP Deduction",
+      "amount": 4132,
+      "type": "lop"
+    }
+  ],
+  "grossEarnings": 73182,
+  "totalDeductions": 9787,
+  "netPay": 63395,
+  "status": "generated",
+  "paymentDate": null
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | string | Payslip MongoDB ObjectId |
+| `employee` | object | Employee details for payslip header |
+| `employee.employeeId` | string | Employee ID (e.g., EMP001) |
+| `employee.firstName` | string | Employee first name |
+| `employee.lastName` | string | Employee last name |
+| `employee.designation` | string | Job title |
+| `employee.department` | string | Department name |
+| `employee.bankDetails` | object | Bank account information |
+| `employee.taxInfo` | object | Tax information (PAN, UAN) |
+| `month` | number | Month (1-12) |
+| `year` | number | Year |
+| `generatedOn` | string | Timestamp when payslip was generated |
+| `payrollInfo` | object | **Attendance summary** |
+| `payrollInfo.totalWorkingDays` | number | Total working days in month |
+| `payrollInfo.daysPaid` | number | Days counted for salary (includes P, PL, H, WO) |
+| `payrollInfo.lopDays` | number | Leave Without Pay days |
+| `earnings` | array | **Salary breakdown - Earnings** |
+| `earnings[].name` | string | Earning component name |
+| `earnings[].amount` | number | Calculated amount (after LOP/pro-rata) |
+| `earnings[].type` | string | Type: `fixed`, `variable`, `reimbursement` |
+| `deductions` | array | **Salary breakdown - Deductions** |
+| `deductions[].name` | string | Deduction component name |
+| `deductions[].amount` | number | Calculated amount |
+| `deductions[].type` | string | Type: `statutory`, `tax`, `lop`, `other` |
+| `grossEarnings` | number | **Total earnings** (sum of all earnings) |
+| `totalDeductions` | number | **Total deductions** (sum of all deductions) |
+| `netPay` | number | **Final credit amount** (grossEarnings - totalDeductions) |
+| `status` | string | Payment status: `pending`, `paid`, `generated` |
+| `paymentDate` | string/null | Date when payment was made (null if not paid) |
 
 #### Error Response (404 Not Found)
 
@@ -505,9 +632,182 @@ Content-Disposition: attachment; filename="payslip-673abc123def456789012345.pdf"
 
 ---
 
-### 4. Download Employee Payslip (HR)
+### 4. View All Payslips (HR)
 
-Download any employee's payslip as PDF.
+Get list of all payslips across all employees with optional filters.
+
+**Endpoint:** `GET /api/hr/payslips`  
+**Access:** HR only  
+**Authentication:** Bearer token required
+
+#### Request
+
+**Headers:**
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Query Parameters:**
+```
+?year=2025
+?month=10
+?employeeId=507f1f77bcf86cd799439012
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| year | number | No | Filter by year (e.g., 2025) |
+| month | number | No | Filter by month (1-12) |
+| employeeId | string | No | Filter by employee MongoDB ObjectId |
+
+**Example:**
+```http
+GET /api/hr/payslips?year=2025&month=11
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+#### Response (200 OK)
+
+```json
+[
+  {
+    "_id": "674567890abcdef123456789",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 11,
+    "year": 2025,
+    "grossEarnings": 80000,
+    "totalDeductions": 16000,
+    "netPay": 64000,
+    "status": "paid",
+    "generatedOn": "2025-11-15T10:30:00.000Z",
+    "paymentDate": "2025-11-30T00:00:00.000Z"
+  },
+  {
+    "_id": "674567890abcdef123456790",
+    "employee": {
+      "_id": "674123456789abcdef012346",
+      "employeeId": "EMP002",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "designation": "Senior Developer"
+    },
+    "month": 11,
+    "year": 2025,
+    "grossEarnings": 100000,
+    "totalDeductions": 20000,
+    "netPay": 80000,
+    "status": "paid",
+    "generatedOn": "2025-11-15T10:30:00.000Z",
+    "paymentDate": "2025-11-30T00:00:00.000Z"
+  }
+]
+```
+
+**Empty Response:**
+```json
+[]
+```
+
+---
+
+### 5. View Employee Payslips (HR)
+
+Get all payslips for a specific employee with optional filters.
+
+**Endpoint:** `GET /api/hr/employees/:employeeId/payslips`  
+**Access:** HR only  
+**Authentication:** Bearer token required
+
+#### Request
+
+**Headers:**
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**URL Parameters:**
+```
+:employeeId = Employee MongoDB ObjectId
+```
+
+**Query Parameters:**
+```
+?year=2025
+?month=10
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| year | number | No | Filter by year (e.g., 2025) |
+| month | number | No | Filter by month (1-12) |
+
+**Example:**
+```http
+GET /api/hr/employees/674123456789abcdef012345/payslips?year=2025
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+#### Response (200 OK)
+
+```json
+[
+  {
+    "_id": "674567890abcdef123456789",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 11,
+    "year": 2025,
+    "grossEarnings": 80000,
+    "totalDeductions": 16000,
+    "netPay": 64000,
+    "status": "paid",
+    "generatedOn": "2025-11-15T10:30:00.000Z",
+    "paymentDate": "2025-11-30T00:00:00.000Z"
+  },
+  {
+    "_id": "674567890abcdef123456788",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 10,
+    "year": 2025,
+    "grossEarnings": 80000,
+    "totalDeductions": 16000,
+    "netPay": 64000,
+    "status": "paid",
+    "generatedOn": "2025-10-15T10:30:00.000Z",
+    "paymentDate": "2025-10-31T00:00:00.000Z"
+  }
+]
+```
+
+**Error Response (404):**
+```json
+{
+  "message": "Employee not found or no payslips available"
+}
+```
+
+---
+
+### 6. Download Employee Payslip Details (HR)
+
+Get complete payslip details for any employee with attendance summary and salary breakdown for frontend PDF generation.
 
 **Endpoint:** `GET /api/hr/payslips/:id/download`  
 **Access:** HR only  
@@ -525,15 +825,22 @@ Authorization: Bearer <JWT_TOKEN>
 :id = Payslip MongoDB ObjectId
 ```
 
+**Example:**
+```http
+GET /api/hr/payslips/673abc123def456789012345/download
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
 #### Response (200 OK)
 
 **Headers:**
 ```http
-Content-Type: application/pdf
-Content-Disposition: attachment; filename="payslip-673abc123def456789012345.pdf"
+Content-Type: application/json
 ```
 
-**Body:** Binary PDF file
+**Body:** Same as employee payslip response (see section 3 above)
+
+**Note:** HR can access any employee's payslip. Response includes complete attendance summary, salary breakdown, and final credit amount calculation.
 
 #### Error Response (404 Not Found)
 
@@ -542,6 +849,10 @@ Content-Disposition: attachment; filename="payslip-673abc123def456789012345.pdf"
   "message": "Payslip not found"
 }
 ```
+
+**Security:**
+- Employee endpoint: Can only access own payslips
+- HR endpoint: Can access any employee's payslips
 
 ---
 
@@ -794,51 +1105,116 @@ export const getMyPayslips = async (
   return response.data;
 };
 
-// 3. Download Payslip (Employee)
-export const downloadMyPayslip = async (
+// 3. Get Payslip Details with Full Breakdown (Employee)
+export const getMyPayslipDetails = async (
   payslipId: string,
   token: string
-): Promise<void> => {
+): Promise<any> => {
   const response = await axios.get(
     `${API_BASE_URL}/employee/payslips/${payslipId}/download`,
     {
-      headers: { Authorization: `Bearer ${token}` },
-      responseType: 'blob'
+      headers: { Authorization: `Bearer ${token}` }
     }
   );
   
-  // Create download link
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', `payslip-${payslipId}.pdf`);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
+  return response.data;
 };
 
-// 4. Download Employee Payslip (HR only)
-export const downloadEmployeePayslip = async (
+// 4. Get Employee Payslip Details (HR only)
+export const getEmployeePayslipDetails = async (
   payslipId: string,
   token: string
-): Promise<void> => {
+): Promise<any> => {
   const response = await axios.get(
     `${API_BASE_URL}/hr/payslips/${payslipId}/download`,
     {
-      headers: { Authorization: `Bearer ${token}` },
-      responseType: 'blob'
+      headers: { Authorization: `Bearer ${token}` }
     }
   );
   
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', `payslip-${payslipId}.pdf`);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
+  return response.data;
+};
+```
+
+### Frontend PDF Generation
+
+The API returns **JSON data with complete payslip breakdown**. Frontend is responsible for generating the PDF using this data.
+
+**Recommended Libraries:**
+- `jsPDF` - PDF generation
+- `pdfmake` - More advanced PDF layouts
+- `react-pdf` - React-specific PDF rendering
+
+**Example using jsPDF:**
+
+```typescript
+import jsPDF from 'jspdf';
+import { getMyPayslipDetails } from '../api/payroll';
+
+const generatePayslipPDF = async (payslipId: string, token: string) => {
+  const data = await getMyPayslipDetails(payslipId, token);
+  
+  const doc = new jsPDF();
+  
+  // Header
+  doc.setFontSize(20);
+  doc.text('PAYSLIP', 105, 20, { align: 'center' });
+  
+  // Employee Info
+  doc.setFontSize(12);
+  doc.text(`Employee: ${data.employee.firstName} ${data.employee.lastName}`, 20, 40);
+  doc.text(`ID: ${data.employee.employeeId}`, 20, 47);
+  doc.text(`Designation: ${data.employee.designation}`, 20, 54);
+  doc.text(`Month/Year: ${data.month}/${data.year}`, 20, 61);
+  
+  // Attendance Summary
+  doc.setFontSize(14);
+  doc.text('Attendance Summary', 20, 75);
+  doc.setFontSize(11);
+  doc.text(`Total Working Days: ${data.payrollInfo.totalWorkingDays}`, 20, 82);
+  doc.text(`Days Paid: ${data.payrollInfo.daysPaid}`, 20, 89);
+  doc.text(`LOP Days: ${data.payrollInfo.lopDays}`, 20, 96);
+  
+  // Earnings Breakdown
+  let y = 110;
+  doc.setFontSize(14);
+  doc.text('Earnings', 20, y);
+  y += 7;
+  doc.setFontSize(11);
+  data.earnings.forEach((e: any) => {
+    doc.text(`${e.name} (${e.type})`, 25, y);
+    doc.text(`₹${e.amount.toLocaleString()}`, 150, y, { align: 'right' });
+    y += 6;
+  });
+  
+  // Deductions Breakdown
+  y += 5;
+  doc.setFontSize(14);
+  doc.text('Deductions', 20, y);
+  y += 7;
+  doc.setFontSize(11);
+  data.deductions.forEach((d: any) => {
+    doc.text(`${d.name} (${d.type})`, 25, y);
+    doc.text(`₹${d.amount.toLocaleString()}`, 150, y, { align: 'right' });
+    y += 6;
+  });
+  
+  // Final Calculation
+  y += 10;
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Gross Earnings:', 20, y);
+  doc.text(`₹${data.grossEarnings.toLocaleString()}`, 150, y, { align: 'right' });
+  y += 7;
+  doc.text('Total Deductions:', 20, y);
+  doc.text(`₹${data.totalDeductions.toLocaleString()}`, 150, y, { align: 'right' });
+  y += 7;
+  doc.setFontSize(14);
+  doc.text('NET PAY:', 20, y);
+  doc.text(`₹${data.netPay.toLocaleString()}`, 150, y, { align: 'right' });
+  
+  // Save/Download
+  doc.save(`payslip-${data.employee.employeeId}-${data.month}-${data.year}.pdf`);
 };
 ```
 

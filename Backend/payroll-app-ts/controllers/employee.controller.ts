@@ -18,27 +18,18 @@ export const viewMyPayslips = async (req: Request, res: Response) => {
   }
 };
 
-// @desc    Download a specific payslip
+// @desc    Get payslip details with full breakdown (for frontend PDF generation)
 // @route   GET /api/employee/payslips/:id/download
 // @access  Private (Employee)
 export const downloadPayslip = async (req: Request, res: Response) => {
   try {
     const payslipId = req.params.id;
-    const doc = await EmployeeService.downloadPayslip(
+    const payslipData = await EmployeeService.getPayslipDetails(
       req.user!.employee,
       payslipId
     );
 
-    // Set headers for PDF download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="payslip-${payslipId}.pdf"`
-    );
-
-    // Pipe the PDF to the response
-    doc.pipe(res);
-    doc.end();
+    res.status(200).json(payslipData);
   } catch (error) {
     const message = (error as Error).message;
     res.status(404).json({ message });

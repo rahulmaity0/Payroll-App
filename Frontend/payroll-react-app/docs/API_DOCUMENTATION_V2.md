@@ -319,19 +319,70 @@ All employee endpoints require `role: "employee"`.
 
 ---
 
-### 3.2 Download Payslip (PDF)
+### 3.2 Get Payslip Details (JSON)
 - **Method:** `GET`
 - **Endpoint:** `/employee/payslips/:id/download`
 - **Access:** Private (Employee only)
+- **Description:** Get complete payslip with attendance summary and salary breakdown for frontend PDF generation
 
 **URL Parameters:**
 ```
-:id = "507f1f77bcf86cd799439013"
+:id = "507f1f77bcf86cd799439013" (Payslip MongoDB ObjectId)
 ```
 
 **Response (200):**
-- Content-Type: `application/pdf`
-- Content-Disposition: `attachment; filename="payslip-{id}.pdf"`
+```json
+{
+  "_id": "507f1f77bcf86cd799439013",
+  "employee": {
+    "employeeId": "EMP001",
+    "firstName": "John",
+    "lastName": "Doe",
+    "designation": "Senior Engineer",
+    "department": "Engineering",
+    "bankDetails": {
+      "bankName": "HDFC Bank",
+      "accountNumber": "1234567890",
+      "ifscCode": "HDFC0001234"
+    },
+    "taxInfo": {
+      "pan": "ABCDE1234F",
+      "uan": "101234567890"
+    }
+  },
+  "month": 10,
+  "year": 2025,
+  "generatedOn": "2025-11-01T10:00:00.000Z",
+  "payrollInfo": {
+    "totalWorkingDays": 22,
+    "daysPaid": 20,
+    "lopDays": 2
+  },
+  "earnings": [
+    { "name": "Basic Salary", "amount": 45455, "type": "fixed" },
+    { "name": "HRA", "amount": 13636, "type": "fixed" },
+    { "name": "Bonus", "amount": 5000, "type": "variable" }
+  ],
+  "deductions": [
+    { "name": "PF", "amount": 5455, "type": "statutory" },
+    { "name": "Tax", "amount": 200, "type": "tax" },
+    { "name": "LOP", "amount": 4132, "type": "lop" }
+  ],
+  "grossEarnings": 64091,
+  "totalDeductions": 9787,
+  "netPay": 54304,
+  "status": "generated",
+  "paymentDate": null
+}
+```
+
+**Key Fields:**
+- `payrollInfo` - Attendance summary (working days, days paid, LOP)
+- `earnings` - Salary breakdown with types (fixed/variable/reimbursement)
+- `deductions` - Deduction breakdown with types (statutory/tax/lop/other)
+- `netPay` - Final credit amount
+
+**Note:** Frontend generates PDF from this JSON data
 
 ---
 
@@ -1256,10 +1307,155 @@ If first run fails for 2 employees (missing data), fix their data and re-run. Th
 
 ---
 
-### 4.14 Download Employee Payslip (PDF)
+### 4.14 View All Payslips
+- **Method:** `GET`
+- **Endpoint:** `/hr/payslips`
+- **Access:** Private (HR only)
+- **Description:** Get list of all payslips across all employees with optional filters
+
+**Query Parameters:**
+```
+?year=2025           (Optional - filter by year)
+?month=10            (Optional - filter by month 1-12)
+?employeeId=<id>     (Optional - filter by employee MongoDB ObjectId)
+```
+
+**Example Request:**
+```bash
+GET /api/hr/payslips?year=2025&month=11
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+[
+  {
+    "_id": "674567890abcdef123456789",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 11,
+    "year": 2025,
+    "grossEarnings": 80000,
+    "totalDeductions": 16000,
+    "netPay": 64000,
+    "status": "paid",
+    "generatedOn": "2025-11-15T10:30:00.000Z",
+    "paymentDate": "2025-11-30T00:00:00.000Z"
+  },
+  {
+    "_id": "674567890abcdef123456790",
+    "employee": {
+      "_id": "674123456789abcdef012346",
+      "employeeId": "EMP002",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "designation": "Senior Developer"
+    },
+    "month": 11,
+    "year": 2025,
+    "grossEarnings": 100000,
+    "totalDeductions": 20000,
+    "netPay": 80000,
+    "status": "paid",
+    "generatedOn": "2025-11-15T10:30:00.000Z",
+    "paymentDate": "2025-11-30T00:00:00.000Z"
+  }
+]
+```
+
+**Response (500):**
+```json
+{
+  "message": "Server error message"
+}
+```
+
+---
+
+### 4.15 View Employee Payslips
+- **Method:** `GET`
+- **Endpoint:** `/hr/employees/:employeeId/payslips`
+- **Access:** Private (HR only)
+- **Description:** Get all payslips for a specific employee with optional filters
+
+**URL Parameters:**
+```
+:employeeId = Employee MongoDB ObjectId
+```
+
+**Query Parameters:**
+```
+?year=2025    (Optional - filter by year)
+?month=10     (Optional - filter by month 1-12)
+```
+
+**Example Request:**
+```bash
+GET /api/hr/employees/674123456789abcdef012345/payslips?year=2025
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+[
+  {
+    "_id": "674567890abcdef123456789",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 11,
+    "year": 2025,
+    "grossEarnings": 80000,
+    "totalDeductions": 16000,
+    "netPay": 64000,
+    "status": "paid",
+    "generatedOn": "2025-11-15T10:30:00.000Z",
+    "paymentDate": "2025-11-30T00:00:00.000Z"
+  },
+  {
+    "_id": "674567890abcdef123456788",
+    "employee": {
+      "_id": "674123456789abcdef012345",
+      "employeeId": "EMP001",
+      "firstName": "John",
+      "lastName": "Doe",
+      "designation": "Software Engineer"
+    },
+    "month": 10,
+    "year": 2025,
+    "grossEarnings": 80000,
+    "totalDeductions": 16000,
+    "netPay": 64000,
+    "status": "paid",
+    "generatedOn": "2025-10-15T10:30:00.000Z",
+    "paymentDate": "2025-10-31T00:00:00.000Z"
+  }
+]
+```
+
+**Response (404):**
+```json
+{
+  "message": "Employee not found or no payslips available"
+}
+```
+
+---
+
+### 4.16 Get Employee Payslip Details (JSON)
 - **Method:** `GET`
 - **Endpoint:** `/hr/payslips/:id/download`
 - **Access:** Private (HR only)
+- **Description:** Get complete payslip details for any employee with attendance summary and salary breakdown for frontend PDF generation
 
 **URL Parameters:**
 ```
@@ -1267,12 +1463,18 @@ If first run fails for 2 employees (missing data), fix their data and re-run. Th
 ```
 
 **Response (200):**
-- Content-Type: `application/pdf`
-- Content-Disposition: `attachment; filename="payslip-{id}.pdf"`
+Same as employee payslip response (see section 3.2)
+
+**Response (404):**
+```json
+{
+  "message": "Payslip not found"
+}
+```
 
 ---
 
-### 4.15 Reset User Password
+### 4.17 Reset User Password
 - **Method:** `PUT`
 - **Endpoint:** `/hr/users/:id/reset-password`
 - **Access:** Private (HR only)
@@ -1446,22 +1648,24 @@ const uploadAttendance = async (file, options = {}) => {
 };
 ```
 
-### Example: Download PDF
+### Example: Get Payslip Data for PDF Generation
 
 ```javascript
-const downloadPayslip = async (payslipId) => {
-  const response = await api.get(`/employee/payslips/${payslipId}/download`, {
-    responseType: 'blob'
-  });
+const getPayslipDetails = async (payslipId) => {
+  const { data } = await api.get(`/employee/payslips/${payslipId}/download`);
   
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', `payslip-${payslipId}.pdf`);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  // Data includes:
+  // - employee info (name, ID, designation, bank details, tax info)
+  // - payrollInfo (totalWorkingDays, daysPaid, lopDays) - Attendance Summary
+  // - earnings[] (with name, amount, type) - Salary Breakdown
+  // - deductions[] (with name, amount, type) - Deductions Breakdown
+  // - grossEarnings, totalDeductions, netPay - Final Calculation
+  
+  return data;
 };
+
+// Frontend generates PDF using jsPDF, pdfmake, or react-pdf
+// See PAYSLIP_GENERATION_API_REFERENCE.md for complete PDF generation example
 ```
 
 ### React Example: Protected Route
@@ -1541,7 +1745,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 | PUT | `/users/profile` | Any | Update my profile |
 | PUT | `/users/password` | Any | Change password |
 | GET | `/employee/payslips` | Employee | View payslips |
-| GET | `/employee/payslips/:id/download` | Employee | Download payslip PDF |
+| GET | `/employee/payslips/:id/download` | Employee | Get payslip details (JSON for PDF) |
 | GET | `/employee/attendance` | Employee | View attendance |
 | GET | `/employee/attendance/download` | Employee | Download attendance CSV |
 | POST | `/hr/onboard` | HR | Onboard employee |
@@ -1555,7 +1759,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 | PUT | `/hr/attendance/:attId` | HR | Update attendance record |
 | POST | `/hr/attendance/upload` | HR | Upload attendance CSV |
 | POST | `/hr/payroll/generate` | HR | Generate payslips |
-| GET | `/hr/payslips/:id/download` | HR | Download payslip PDF |
+| GET | `/hr/payslips` | HR | View all payslips (with filters) |
+| GET | `/hr/employees/:employeeId/payslips` | HR | View employee payslips |
+| GET | `/hr/payslips/:id/download` | HR | Get payslip details (JSON for PDF) |
 | PUT | `/hr/users/:id/reset-password` | HR | Reset user password |
 
 ---

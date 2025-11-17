@@ -9,6 +9,8 @@ import EmployeesListPage from './pages/EmployeesListPage';
 import AttendanceSummaryPage from './pages/AttendanceSummaryPage';
 import EmployeeAttendancePage from './pages/EmployeeAttendancePage';
 import AttendanceUploadPage from './pages/AttendanceUploadPage';
+import EmployeePayslipPage from './pages/EmployeePayslipPage';
+import PayslipDetailPage from './pages/PayslipDetailPage';
 import { useAuth } from './context/AuthContext';
 
 // ProtectedRoute component - redirects to login if not authenticated
@@ -35,6 +37,8 @@ function App() {
         <Route path="/attendance/upload" element={<ProtectedRoute element={<AttendanceUploadPage />} />} />
         <Route path="/attendance/:id" element={<ProtectedRoute element={<EmployeeAttendancePage />} />} />
         <Route path="/attendance" element={<ProtectedRoute element={<AttendanceSummaryPage />} />} />
+        <Route path="/hr/employee-payslips" element={<ProtectedRoute element={<EmployeePayslipPage />} />} />
+        <Route path="/hr/payslips/:id" element={<ProtectedRoute element={<PayslipDetailPage />} />} />
 
         {/* Root redirect - goes to appropriate dashboard based on role if authenticated, otherwise to login */}
         <Route

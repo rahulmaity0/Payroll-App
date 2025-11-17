@@ -25,6 +25,7 @@ router.get(
 );
 
 // @route   GET /api/employee/payslips/:id/download
+// @desc    Get payslip details with attendance summary and salary breakdown (JSON for frontend PDF generation)
 router.get(
   '/payslips/:id/download',
   [param('id').isMongoId().withMessage('Invalid Payslip ID')],

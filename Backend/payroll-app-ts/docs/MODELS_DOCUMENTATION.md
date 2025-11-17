@@ -302,11 +302,100 @@ For monthly payslip with AnnualCTC = 1,200,000:
 
 ---
 
-## 4. Attendance Model
+## 4. DailyAttendance Model
+
+**Collection Name:** `daily_attendance`
+
+**Purpose:** Stores individual daily attendance records for each employee. This is the **primary data source** for payroll calculations.
+
+### Main Fields:
+
+| Field | Type | Required | Unique (Within) | Description |
+|-------|------|----------|-----------------|-------------|
+| `_id` | ObjectId | Auto | Yes | MongoDB document ID |
+| `employee` | ObjectId (Ref: Employee) | Yes | employee+date | Reference to Employee |
+| `date` | String | Yes | employee+date | Date in YYYY-MM-DD format |
+| `status` | String | Yes | No | Attendance status (P/A/LOP/PL/H/WO) |
+| `checkIn` | String | No | No | Check-in time (HH:mm format) |
+| `checkOut` | String | No | No | Check-out time (HH:mm format) |
+| `hoursWorked` | Number | No | No | Hours worked (0-24) |
+| `overtimeHours` | Number | No | No | Overtime hours (>= 0) |
+| `notes` | String | No | No | Additional notes (max 500 chars) |
+| `createdAt` | Date | Auto | No | Document creation timestamp |
+| `updatedAt` | Date | Auto | No | Document last update timestamp |
+
+### Status Codes:
+
+| Code | Label | Counts as Present? | Description |
+|------|-------|-------------------|-------------|
+| `P` | Present | ✅ Yes | Employee worked |
+| `A` | Absent | ❌ No | Absent without leave |
+| `LOP` | Leave Without Pay | ❌ No | Unpaid leave/absence |
+| `PL` | Paid Leave | ✅ Yes | Vacation, sick leave |
+| `H` | Holiday | ✅ Yes | Company/public holiday |
+| `WO` | Week Off | ✅ Yes | Weekly off day |
+
+### Complete Example JSON:
+
+```json
+{
+  "_id": "673abc123def456789012345",
+  "employee": "507f1f77bcf86cd799439012",
+  "date": "2025-10-15",
+  "status": "P",
+  "checkIn": "09:00",
+  "checkOut": "18:30",
+  "hoursWorked": 9.5,
+  "overtimeHours": 1.5,
+  "notes": "Regular shift with overtime",
+  "createdAt": "2025-10-15T09:00:00.000Z",
+  "updatedAt": "2025-10-15T18:30:00.000Z"
+}
+```
+
+### Constraints:
+
+- Unique combination: one record per (employee, date)
+- Date must match format: YYYY-MM-DD (e.g., "2025-10-15")
+- Status must be one of: P, A, LOP, PL, H, WO
+- Check-in/check-out must match format: HH:mm (e.g., "09:00", "18:30")
+- Hours worked must be between 0 and 24
+- Overtime hours must be non-negative
+
+### Payroll Integration:
+
+**Automatic Monthly Aggregation:**
+
+When payslips are generated, the system automatically:
+1. Queries all daily records for employee in target month
+2. Calculates monthly totals:
+   - `totalWorkingDays` = count of all records
+   - `daysPresent` = count where status in (P, PL, H, WO)
+   - `lopDays` = count where status = LOP
+   - `overtimeHours` = sum of all overtimeHours
+3. Uses these aggregated values for salary calculations
+
+**Example Aggregation:**
+```
+Employee has 22 daily records in October:
+- 18 days with status = 'P'
+- 2 days with status = 'PL'
+- 1 day with status = 'LOP'
+- 1 day with status = 'H'
+
+Aggregated monthly values:
+- totalWorkingDays = 22
+- daysPresent = 21 (P + PL + H = 18 + 2 + 1)
+- lopDays = 1
+```
+
+---
+
+## 5. Attendance Model (Legacy)
 
 **Collection Name:** `attendance_details`
 
-**Purpose:** Tracks attendance and variable earnings/deductions for each employee per month.
+**Purpose:** Stores **optional** monthly variable earnings/deductions. This is now a **supplementary collection** - not required if only using daily attendance for payroll.
 
 ### Main Fields:
 
@@ -386,15 +475,20 @@ For monthly payslip with AnnualCTC = 1,200,000:
 
 ### Calculation Logic:
 
-When a payslip is generated:
-1. Fixed earnings are prorated based on days present: `(fixedEarning / totalWorkingDays) * daysPresent`
-2. Variable earnings from this record are added as-is
-3. Fixed deductions are prorated similarly
-4. Variable deductions from this record are added as-is
+**Note:** As of the latest refactor, payslip generation **automatically aggregates daily attendance records** from the `daily_attendance` collection. This collection is now primarily used for:
+
+1. **Variable earnings** that are month-specific (bonuses, commissions, reimbursements)
+2. **Variable deductions** that are month-specific (salary advances, loan EMIs)
+
+If this record exists for a month:
+- Variable earnings from this record are added to the payslip
+- Variable deductions from this record are added to the payslip
+
+**The core attendance data (working days, days present, LOP) is automatically calculated from `daily_attendance` records.**
 
 ---
 
-## 5. Payslip Model
+## 6. Payslip Model
 
 **Collection Name:** `payslips`
 
