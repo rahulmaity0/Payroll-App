@@ -14,8 +14,11 @@ const createAdminUser = async (): Promise<void> => {
 
   try {
     // --- !! CUSTOMIZE YOUR HR ADMIN DETAILS HERE !! ---
-    const adminEmail = 'tejasparab@gmail.com';
-    const adminPassword = '123456';
+    const adminEmail = process.env.HR_ADMIN_EMAIL || 'hr@example.com';
+    const adminPassword = process.env.HR_ADMIN_PASSWORD;
+    if (!adminPassword) {
+      throw new Error('Set HR_ADMIN_PASSWORD in .env before running this script.');
+    }
     const adminEmployeeId = 'HR002';
 
     // Check if user already exists
